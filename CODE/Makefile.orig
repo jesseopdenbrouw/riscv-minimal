@@ -1,0 +1,48 @@
+SREC2VHDL    = ./srec2vhdl
+
+all: riscv
+
+riscv: riscv.c startup.c startup.S
+	riscv32-unknown-elf-gcc -O0 -g -o riscv  riscv.c -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs startup.c startup.S
+	riscv32-unknown-elf-objcopy -O srec riscv riscv.srec
+	riscv32-unknown-elf-objcopy -O ihex riscv riscv.hex
+	srec_cat riscv.hex -Intel -Output riscv.vhd -VHDL
+
+struct: struct.cpp startup.c startup.S
+	riscv32-unknown-elf-g++ -O0 -g -o struct  struct.cpp -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs startup.c startup.S
+	riscv32-unknown-elf-objcopy -O srec struct struct.srec
+	riscv32-unknown-elf-objcopy -O ihex struct struct.hex
+	srec_cat riscv.hex -Intel -Output struct.vhd -VHDL
+
+mult:   mult.c startup.c startup.S
+	riscv32-unknown-elf-gcc -O0 -g -o mult mult.c -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs startup.c startup.S
+	riscv32-unknown-elf-objcopy -O srec mult mult.srec
+	riscv32-unknown-elf-objcopy -O ihex mult mult.hex
+	srec_cat mult.hex -Intel -Output mult.vhd -VHDL
+
+add64:  add64.c startup.c startup.S
+	riscv32-unknown-elf-gcc -O2 -g -o add64 add64.c -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs startup.c startup.S
+	riscv32-unknown-elf-objcopy -O srec add64 add64.srec
+	riscv32-unknown-elf-objcopy -O ihex add64 add64.hex
+	srec_cat add64.hex -Intel -Output add64.vhd -VHDL
+
+srec2vhdl: srec2vhdl.c
+	gcc -o srec2vhdl srec2vhdl.c -Wall
+
+clean:
+	rm -f riscv.hex riscv.vhd riscv.srec riscv read_srec struct.hex struct.vhd struct.srec add64.hex add64.vhd add64.srec add64 srec2vhdl mult.hex mult.srec mult.vhd testc.hex testc.srec testc.vhd test.hex test.srec test.vhd
+
+test: test.S
+	riscv32-unknown-elf-gcc -O2 -g -o test -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs test.S
+	riscv32-unknown-elf-objcopy -O srec test test.srec
+	$(SREC2VHDL) -f test.srec test.vhd
+
+testc: testc.c empty.S
+	riscv32-unknown-elf-gcc -O2 -g -o testc -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs testc.c empty.S
+	riscv32-unknown-elf-objcopy -O srec testc testc.srec
+	$(SREC2VHDL) -f testc.srec testc.vhd
+
+.PHONY:
+	#riscv32-unknown-elf-gcc -O2 -o riscv startup.S riscv.c -T riscv.ld --specs=nano.specs -march=rv32i -nostartfiles
+	#riscv32-unknown-elf-gcc -O0 -o riscv startup.S riscv.c -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs
+	#riscv32-unknown-elf-gcc -O0 -g -o riscv  riscv.c -T riscv.ld -march=rv32i -nostartfiles --specs=nano.specs startup.c startup.S -fomit-frame-pointer

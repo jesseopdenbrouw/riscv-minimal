@@ -1,0 +1,203 @@
+\documentclass[12pt]{article}
+
+\usepackage[inner=1.0in,outer=1.2in,top=1in,bottom=1.5in,footskip=0.4in]{geometry}
+
+\author{Jesse E.J. op den Brouw\thanks{\texttt{J.E.J.opdenBrouw@hhs.nl}}\\[2ex]The Hague University of Applied Sciences}
+\title{A Simple RISC-V processor in VHDL}
+\date{\today}
+
+\usepackage[charter]{mathdesign}
+\usepackage{nimbusmono}
+\usepackage{booktabs}
+
+%% Making captions nicer...
+\usepackage[font=footnotesize,format=plain,labelfont=bf,up,textfont=sl,up]{caption}
+\DeclareCaptionLabelSeparator{emdash}{\ \ ---\ \ }
+\usepackage[labelformat=simple,font=footnotesize,format=plain,labelfont=bf,textfont=sl]{subcaption}
+\captionsetup[figure]{format=hang,justification=centering,singlelinecheck=off,skip=2ex}
+\captionsetup[table]{format=hang,justification=centering,singlelinecheck=off,skip=2ex}
+\captionsetup[subfigure]{format=hang,justification=centering,singlelinecheck=off,skip=2ex}
+\captionsetup[subtable]{format=hang,justification=centering,singlelinecheck=off,skip=2ex}
+%% Put parens around the subfig name (a) (b) etc. Needs labelformat simple
+\renewcommand\thesubfigure{(\alph{subfigure})}
+\renewcommand\thesubtable{(\alph{subtable})}
+
+% Parskip et al.
+\usepackage{parskip}
+\makeatletter
+\setlength{\parfillskip}{00\p@ \@plus 1fil}
+\makeatother
+
+\usepackage{listings}
+\lstset{
+    basicstyle = \ttfamily
+}
+
+\begin{document}
+\maketitle
+
+\vfill
+\begin{abstract}
+\noindent
+The RISC-V Instruction Set Architecture (ISA) is an open source instruction set for a processor. This means that anybody can create a processor that uses this instruction set. There are already processors available such as E2-core from SiFive. More freeware cores are available on several platforms (e.g. on GitHub). This documents describes a basic RISC-V core in VHDL. The core can only execute the RV32I unprivileged instruction set. The processor incorporates a ROM, RAM and some simple I/O. It is targeted for implementation on an FPGA. It is tested on an Intel Cyclone V with a DE0-CV development board from Terasic. The GNU C-compiler for RISC-V is used for software development. Currently only simple C programs can be compiled and run. C++ is currently not supported.
+
+\noindent
+This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students. The processor executes each instruction in one clock cycle except for reads from RAM which need two clock cycles. The processor has a simple, non-pipelined instruction decoder. Exceptions are currently not implemented. This will be for future development.
+
+\end{abstract}
+\vfill
+
+\clearpage
+\section{Introduction}
+This document describes the buildup of a simple, single clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions have to be handled in software. The toolchain will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz.
+
+This RISC-V processor consists of the following building blocks:
+
+\begin{itemize}
+\item The registers contain intermediate data for calculations.
+\item The ROM contains the program instructions and constant (read-only) data.
+\item The RAM contains read-write data (mutable data).
+\item The I/O is an interface with the outside world.
+\item The ALU is responsible for almost all computations in the processor.
+\item The PC is used to point to the currently executing instruction.
+\item The Address Decoder and Data Router is an interface between the memory (ROM, RAM, I/O) and the ALU.
+\item The Instruction Decoder decodes the currently executing instruction and provides control signals to other building blocks.
+\end{itemize}
+
+\section{Registers}
+The processor consists of thirty-two 32-bit registers denoted by \texttt{x0} to \texttt{x31}. Internally, the registers use Big Endian format. Register \texttt{x0} (alias \texttt{zero}) is hardwired to all zeros. Writing this register has no effect. Reading this register returns all zero bits. Normally, the \texttt{x}-names are not used. Table~\ref{tab:registers} shows the names of the registers as they should be used.
+
+\begin{table}[!ht]
+\centering
+\caption{RISC-V registers and their purpose.}
+\label{tab:registers}
+\begin{tabular}{lllc}
+Register & Name & Purpose & Saver \\
+\midrule
+\texttt{x0}      & \texttt{zero}   & Hard-wired zero                   & $-$ \\
+\texttt{x1}      & \texttt{ra}     & Return address                    & Caller \\
+\texttt{x2}      & \texttt{sp}     & Stack pointer                     & Callee \\
+\texttt{x3}      & \texttt{gp}     & Global pointer                    & $-$ \\
+\texttt{x4}      & \texttt{tp}     & Thread pointer                    & $-$ \\
+\texttt{x5}      & \texttt{t0}     & Temporary/alternate link register & Caller \\
+\texttt{x6-x7}   & \texttt{t1-t2}  & Temporaries                       & Caller \\
+\texttt{x8}      & \texttt{s0/fp}  & Saved register/frame pointer      & Callee \\
+\texttt{x9}      & \texttt{s1}     & Saved register                    & Callee \\
+\texttt{x10-x11} & \texttt{a0-a1}  & Function arguments/return values  & Caller \\
+\texttt{x12-x17} & \texttt{a2-a7}  & Function arguments                & Caller \\
+\texttt{x18-x27} & \texttt{s2-s11} & Saved registers                   & Callee \\
+\texttt{x28-x31} & \texttt{t3-t6}  & Temporaries                       & Caller
+\end{tabular}
+\end{table}
+
+\section{ROM}
+\label{sec:rom}
+The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, halfword accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The ROM is instantiated in cells, which limits the size of the program. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
+
+Note: it is possible to put the ROM in the onboard RAM and supply a MIF file (Memory Initialization File), but then each read from the ROM would require 2 clock cycles. See Section~\ref{sec:ram}.
+
+\section{RAM}
+\label{sec:ram}
+The RAM consists of bytes and is byte, halfword and word addressable. Half word and word entries are in Little Endian format. The RAM itself is made up of word (i.e. 32-bit) entries and is instantiated with onboard RAM blocks. Due to this fact, halfword accesses are only permitted on 2-byte boundaries and word accesses are only permitted on 4-byte boundaries. The RAM returns undefined data if an access is not aligned. Writes will not take place if an access is unaligned. This simplifies the decoding circuitry. For the Cyclone V a maximum of 65536 words of RAM can be instantiated. Rearranging half word and word data accesses in Big Endian format is handled by the RAM decoding unit.
+
+Note: the Cyclone V has 3,153,920 bits of RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
+
+Writing the RAM (byte, half word of word) requires 1 clock cycle. Reading the RAM (byte, half word, word) requires 2 clock cycles because the RAM output is buffered by a register. This is automatically handled by the processor.
+
+\section{I/O}
+\label{sec/io}
+Currently, the I/O consists of one 32-bit data input and one 32-bit data output. More I/O (timers/counter etc.) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries, reads return undefined data whereas writes will not write data.
+
+\section{ALU}
+\label{sec:alu}
+The Arithmetic an Logic Unit (ALU) handles all computations on data. It can add, subtract, do logic operations such as AND, OR en XOR, can shift data left or right, and sign extend byte and halfword data. Some operations require two registers, some only use one register. Furthermore the ALU is also used to determine if a conditional branch should be taken. Note that the RISC-V programmer's model does not incorporate status flags as some other architectures do. This requires some extra instructions when adding or subtracting double word (64-bit) data. The ALU is also used to compute the return address from unconditional function calls (JAL and JALR instructions). The data is in Big Endian format.
+
+Note that the computation of jump target addresses is handled by the Program Counter (PC)
+
+\section{PC}
+\label{sec:pc}
+The Program Counter contains the address of the currently executed instruction. The address is always on a 4-byte boundary although function calls (JAL and JALR instructions) can be on non 4-byte boundaries (the toolchain will always create 4-bytes boundaries). The PC (or rather the VHDL description of the PC) handles the address calculations of jumps and branches taken.
+
+\section{Instruction Decoder}
+\label{sec:instructiondecoder}
+The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4-bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC and Address Decoder. It incorporates a simple two-state Finite State Machine (FSM). Almost all instructions are executed in one clock cycle. Only reads from RAM require two clock cycles. The FSM takes care of that. The instuction decoder is non-pipelined. That simplifies the design.
+
+\section{Address Decoder and Data Router}
+\label{sec:addressdecoderanddatarouter}
+The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is implementation-defined, it depends on the program. Unused ROM addresses return don't cares (in simulation) and in hardware the data returned is implementation-defined. Currently a maximum of 16384 bytes of ROM is supported. The RAM starts at address 0x20000000 and the length can be up to 262144 bytes, in powers of 2. The I/O starts at address 0xF0000000 and the length is implementation-defined.
+
+When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and halfword accesses) if needed. Please note that reading data from the RAM requires two clock cycles. Reading data from ROM and I/O requires one clock cycle.
+
+\section{Implemented instructions}
+All RV32I Unprivileged instructions are implemented with the exception of FENCE, ECALL and EBREAK instructions. These instructions act as a no-operation (NOP). This is because exceptions are not implemented.
+
+\section{Setting up the GNU C compiler}
+The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (for Linux) is straightforward:
+
+\begin{enumerate}
+\item You need a current GNU C-compiler installed.
+\item You need the texinfo package. On Ubuntu et al.\@ issue \lstinline|apt install texinfo|
+\item In your home directory, enter the command\\ \lstinline|git clone --recursive https://github.com/riscv/riscv-gnu-toolchain|
+\item Wait for the cloning to end (takes a long time, about 30 minutes on a Zbook G5 2020 with a 10 MB/s internet connection)
+\item Change with \lstinline|cd riscv-gnu-toolchain|
+\item Make build directory with \lstinline|mkdir build; cd build|
+\item Check the current configuration with \lstinline!../configure --help | grep abi!\\
+      It should say:
+\begin{lstlisting}[language=]
+--with-abi=lp64d    Sets the base RISC-V ABI, defaults to lp64d
+\end{lstlisting}
+The toolchain is currently configured for 64-bit RISC-V. That is not what we want.
+\item Enter:
+\begin{lstlisting}[language=]
+../configure --prefix=/opt/riscv32 --with-arch=rv32i --with-abi=ilp32
+\end{lstlisting}
+This will set the architecture to RV32I and the ABI to ipl32. This means that integers, long integers and pointers use 32-bit entries. The destination directory is \lstinline|/opt/riscv32|
+\item Now enter the make command as root: \lstinline|make|\\
+MAKE SURE TO ENTER THIS COMMAND AS root, because the toolchain is put in \lstinline|/opt/riscv32|. This takes a long time (about 45 minutes on a Zbook G5). At some points the compilation seems to hang, but it is just compiling complicated C-files. By the way, you will see a lot of warnings.
+\item Now that the toolchain is setup, we have to put the path into the \lstinline|$PATH| environment variable so enter: \lstinline|export PATH=/opt/riscv32/bin:$PATH|
+\item Check if the compiler is available: \lstinline|riscv32-unknown-elf-gcc -v|\\
+It should say something like:
+\begin{lstlisting}[language=]
+Using built-in specs.
+COLLECT_GCC=riscv32-unknown-elf-gcc
+COLLECT_LTO_WRAPPER=/opt/riscv32/libexec/gcc/riscv32-unknown-elf/
+11.1.0/lto-wrapper
+Target: riscv32-unknown-elf
+Configured with: /mnt/d/PROJECTS/RISCVDEV/riscv-gnu-toolchain/bui
+ld/../riscv-gcc/configure --target=riscv32-unknown-elf --prefix=/
+opt/riscv32 --disable-shared --disable-threads --enable-languages
+=c,c++ --with-system-zlib --enable-tls --with-newlib --with-sysro
+ot=/opt/riscv32/riscv32-unknown-elf --with-native-system-header-d
+ir=/include --disable-libmudflap --disable-libssp --disable-libqu
+admath --disable-libgomp --disable-nls --disable-tm-clone-registr
+y --src=../../riscv-gcc --disable-multilib --with-abi=ilp32 --wit
+h-arch=rv32i --with-tune=rocket 'CFLAGS_FOR_TARGET=-Os   -mcmodel
+=medlow' 'CXXFLAGS_FOR_TARGET=-Os   -mcmodel=medlow'
+Thread model: single
+Supported LTO compression algorithms: zlib
+gcc version 11.1.0 (GCC) 
+\end{lstlisting}
+\end{enumerate}
+
+\section{Cloning the RISC-V project}
+Now we have to clone the RISC-V project. It incorporated the full Quartus Prime Lite project with the processor written in VHDL. It also incorporates some simple C program examples and a taylor-made program to convert a RISC-V executable to a VHDL table suitable for the ROM. Create a working directory (and change to that directory) and issue the command:
+
+\begin{lstlisting}[language=]
+git clone --recursive https:/github.com/jesseopdenbrouw/riscv-minimal
+\end{lstlisting}
+
+In the created directory, you will see the following directories:
+
+\texttt{CODE} -- Sample software programs\\
+\texttt{DOCS} -- Documentation\\
+\texttt{HARDWARE} -- the VHDL description \\
+\texttt{OLD} -- yes, really old files for backup
+
+Change directory to \texttt{CODE}. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
+
+Next, start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
+
+Next, dive in one of the directories and copy the file with \texttt{.vhd} extension to the directory containing the VHDL description under the name \texttt{processor\_common\_rom.vhd}.
+
+The start Quartus and start the compilation. After a successful compilation, you can program the Cyclon V on a DE0-CV board.
+\end{document}
