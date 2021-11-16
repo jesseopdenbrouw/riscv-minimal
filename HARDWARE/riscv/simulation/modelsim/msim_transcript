@@ -1,0 +1,685 @@
+# //  Questa Intel Starter FPGA Edition-64
+# //  Version 2021.2 linux_x86_64 Apr 14 2021
+# //
+# //  Copyright 1991-2021 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# do riscv_run_msim_rtl_vhdl.do
+# if {[file exists rtl_work]} {
+# 	vdel -lib rtl_work -all
+# }
+# vlib rtl_work
+# vmap work rtl_work
+# Questa Intel Starter FPGA Edition-64 vmap 2021.2 Lib Mapping Utility 2021.04 Apr 14 2021
+# vmap work rtl_work 
+# Copying /opt/intelFPGA_lite/21.1/questa_fse/linux_x86_64/../modelsim.ini to modelsim.ini
+# Modifying modelsim.ini
+# 
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/processor_common.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:40 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/processor_common.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling package processor_common
+# End time: 18:18:40 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/ram_inst.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:40 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/ram_inst.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package altera_mf_components
+# -- Compiling entity ram_inst
+# -- Compiling architecture SYN of ram_inst
+# End time: 18:18:40 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/processor_common_rom.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:40 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/processor_common_rom.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling package processor_common_rom
+# End time: 18:18:40 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/regs.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:40 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/regs.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity regs
+# -- Compiling architecture rtl of regs
+# End time: 18:18:40 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/instruction_decoder.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:40 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/instruction_decoder.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity instruction_decoder
+# -- Compiling architecture rtl of instruction_decoder
+# End time: 18:18:40 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/alu.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:40 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/alu.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity alu
+# -- Compiling architecture rtl of alu
+# End time: 18:18:40 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/pc.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:40 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/pc.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity pc
+# -- Compiling architecture rtl of pc
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/address_decode.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/address_decode.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity address_decoder_and_data_router
+# -- Compiling architecture rtl of address_decoder_and_data_router
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/ram.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/ram.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package altera_mf_components
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity ram
+# -- Compiling architecture rtl of ram
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/io.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/io.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity io
+# -- Compiling architecture rtl of io
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/riscv.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/riscv.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity riscv
+# -- Compiling architecture struct of riscv
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work {/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/rom.vhd}
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work /mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/rom.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Loading package processor_common_rom
+# -- Compiling entity rom
+# -- Compiling architecture table of rom
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# do "/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/tb_riscv.do"
+#
+# This file is part of the RISC-V Minimal Project
+#
+# (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
+#
+# tb_riscv.do - Modelsim macro file
+# 
+# This software is for educational purposes only. 
+# This software is distributed in the hope that it
+# will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+# 
+# Transcript on
+# transcript on
+# 
+# Recreate work library
+# if {[file exists rtl_work]} {
+# 	vdel -lib rtl_work -all
+# }
+# vlib rtl_work
+# vmap work rtl_work
+# Questa Intel Starter FPGA Edition-64 vmap 2021.2 Lib Mapping Utility 2021.04 Apr 14 2021
+# vmap work rtl_work 
+# Modifying modelsim.ini
+# 
+# Find out if we're started through Quartus or by hand
+# (or by using an exec in the Tcl window in Quartus).
+# Quartus has the annoying property that it will start
+# Modelsim from a directory called "simulation/modelsim".
+# The design and the testbench are located in the project
+# root, so we've to compensate for that.
+# if [ string match "*simulation/modelsim" [pwd] ] { 
+# 	set prefix "../../"
+# 	puts "Running Modelsim from Quartus..."
+# } else {
+# 	set prefix ""
+# 	puts "Running Modelsim..."
+# }
+# 
+# Compile the VHDL description and testbench,
+# please note that the design and its testbench are located
+# in the project root, but the simulator start in directory
+# <project_root>/simulation/modelsim, so we have to compensate
+# for that.
+# vcom -93 -work work ${prefix}processor_common.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../processor_common.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling package processor_common
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}processor_common_rom.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../processor_common_rom.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling package processor_common_rom
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}alu.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../alu.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity alu
+# -- Compiling architecture rtl of alu
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}regs.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../regs.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity regs
+# -- Compiling architecture rtl of regs
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}rom.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../rom.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Loading package processor_common_rom
+# -- Compiling entity rom
+# -- Compiling architecture table of rom
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}pc.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../pc.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity pc
+# -- Compiling architecture rtl of pc
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}instruction_decoder.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:41 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../instruction_decoder.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity instruction_decoder
+# -- Compiling architecture rtl of instruction_decoder
+# End time: 18:18:41 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}address_decode.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:42 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../address_decode.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity address_decoder_and_data_router
+# -- Compiling architecture rtl of address_decoder_and_data_router
+# End time: 18:18:42 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}ram.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:42 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../ram.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package altera_mf_components
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity ram
+# -- Compiling architecture rtl of ram
+# End time: 18:18:42 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}ram_inst.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:42 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../ram_inst.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package altera_mf_components
+# -- Compiling entity ram_inst
+# -- Compiling architecture SYN of ram_inst
+# End time: 18:18:42 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}io.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:42 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../io.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity io
+# -- Compiling architecture rtl of io
+# End time: 18:18:42 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}riscv.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:42 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../riscv.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity riscv
+# -- Compiling architecture struct of riscv
+# End time: 18:18:42 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work work ${prefix}tb_riscv.vhd
+# Questa Intel Starter FPGA Edition-64 vcom 2021.2 Compiler 2021.04 Apr 14 2021
+# Start time: 18:18:42 on Nov 15,2021
+# vcom -reportprogress 300 -93 -work work ../../tb_riscv.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package processor_common
+# -- Compiling entity tb_riscv
+# -- Compiling architecture sim of tb_riscv
+# End time: 18:18:42 on Nov 15,2021, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# Start the simulator
+# vsim -t 1ns -L rtl_work -L work -voptargs="+acc" tb_riscv
+# vsim -t 1ns -L rtl_work -L work -voptargs=""+acc"" tb_riscv 
+# Start time: 18:18:42 on Nov 15,2021
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Note: (vopt-143) Recognized 1 FSM in architecture body "instruction_decoder(rtl)".
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading work.processor_common
+# Loading work.tb_riscv(sim)#1
+# Loading work.riscv(struct)#1
+# Loading work.regs(rtl)#1
+# Loading work.alu(rtl)#1
+# Loading work.pc(rtl)#1
+# Loading work.instruction_decoder(rtl)#1
+# Loading work.processor_common_rom
+# Loading work.rom(table)#1
+# Loading work.address_decoder_and_data_router(rtl)#1
+# Loading altera_mf.altera_mf_components
+# Loading work.ram(rtl)#1
+# Loading work.ram_inst(syn)#1
+# Loading ieee.std_logic_arith(body)
+# Loading ieee.std_logic_unsigned(body)
+# Loading altera_mf.altera_common_conversion(body)
+# Loading altera_mf.altera_device_families(body)
+# Loading altera_mf.altsyncram(translated)#1
+# Loading work.io(rtl)#1
+# 
+# Log all signals in the design, good if the number
+# of signals is small.
+# add log -r *
+# 
+# Add all toplevel signals
+# Add a number of signals of the simulated design
+# add wave -divider "Inputs"
+# add wave            -label clk clk
+# add wave            -label areset areset
+# add wave -radix hex -label datain datain
+# add wave -divider "Outputs"
+# add wave -radix hex -label dataout dataout
+# add wave -divider "Internals"
+# add wave            -label alu_op_int dut/alu_op_int
+# add wave            -label shift_int dut/shift_int
+# add wave            -label rd_int dut/rd_int
+# add wave            -label rd_enable_int dut/rd_enable_int
+# add wave            -label rs1_int dut/rs1_int
+# add wave            -label rs2_int dut/rs2_int
+#add wave            -label rs3_int dut/rs3_int
+#add wave            -label rs4_int dut/rs4_int
+# add wave            -label immediate_int dut/immediate_int
+# add wave            -label size_int dut/size_int
+# add wave            -label offset_int dut/offset_int;
+# add wave            -label pc_op_int dut/pc_op_int
+# add wave            -label pc_int dut/pc_int
+# add wave            -label memaccess_int dut/memaccess_int
+# add wave            -label result_int dut/result_int
+# add wave            -label rs1data_int dut/rs1data_int
+# add wave            -label rs2data_int dut/rs2data_int
+# add wave            -label memory_int dut/memory_int
+# add wave            -label address_int dut/address_int
+# add wave            -label instr_int dut/instr_int
+# add wave -divider "FSM"
+# add wave            -label state dut/instruction_decoder0/state
+# add wave -divider "Registers"
+# add wave            -label regs dut/regs0/regs_int
+# add wave -divider "RAM"
+# add wave            -label waitfordata dut/waitfordata_int
+#add wave -radix hex dut/ram0/*
+# add wave -divider "I/O"
+# add wave            -label io dut/io0/io
+# 
+# 
+# 
+# Open Structure, Signals (waveform) and List window
+# view structure
+# .main_pane.structure.interior.cs.body.struct
+#view list
+# view signals
+# .main_pane.objects.interior.cs.body.tree
+# 
+# Disable NUMERIC STD Warnings
+# This will speed up simulation considerably
+# and prevents writing to the transcript file
+# set NumericStdNoWarnings 1
+# 1
+# 
+# Run simulation for 900 ns
+# run 500 ns
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 5 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 5 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 5 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 5 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 5 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 5 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 15 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 15 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 15 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 15 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 15 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 15 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 25 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 25 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 25 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 25 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 25 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 25 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 35 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 35 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 35 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 35 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 35 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 35 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 45 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 45 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 45 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 45 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 45 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 45 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 55 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 55 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 55 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 55 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 55 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 55 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 75 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 75 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 75 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 75 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 75 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 75 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 85 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 85 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 85 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 85 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 85 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 85 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 95 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 95 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 95 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 95 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 95 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 95 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 105 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 105 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 105 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 105 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 105 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 105 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 115 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 115 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 115 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 115 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 115 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 115 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 185 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 185 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 185 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 185 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 185 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 185 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 255 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 255 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 255 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 255 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 255 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 255 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 325 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 325 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 325 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 325 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 325 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 325 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 395 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 395 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 395 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 395 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 395 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 395 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 465 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 465 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 465 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 465 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 465 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# ** Warning: CONV_INTEGER: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, and it has been converted to 0.
+#    Time: 465 ns  Iteration: 2  Instance: /tb_riscv/dut/ram0/ram_inst_inst/altsyncram_component
+# 
+# Fill up the waveform in the window
+# wave zoom full
+# 0 ns
+# 525 ns
+# 
+# stdin: <EOF>
+# End time: 18:19:24 on Nov 15,2021, Elapsed time: 0:00:42
+# Errors: 0, Warnings: 96

@@ -1,0 +1,566 @@
+m255
+K4
+z2
+!s99 nomlopt
+!s11e vcom 2021.2 2021.04, Apr 14 2021
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 d/mnt/d/PROJECTS/RISCVDEV/HARDWARE/riscv/simulation/modelsim
+T_opt
+Z1 !s110 1636996722
+VgN;W>51Y=>iO_m<J?zj^N1
+04 8 3 work tb_riscv sim 1
+=1-000ae431a4f1-61929672-87c8c-4678
+!s124 OEM10U11 
+o-quiet -auto_acc_if_foreign -work work -L rtl_work -L work +acc
+tCvgOpt 0
+n@_opt
+OL;O;2021.2;73
+Eaddress_decoder_and_data_router
+Z2 w1636901880
+Z3 DPx4 work 16 processor_common 0 22 TP7gP2]4ldk:?b@VWTaHc2
+Z4 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
+Z5 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z6 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
+!i122 7
+R0
+Z7 8../../address_decode.vhd
+Z8 F../../address_decode.vhd
+l0
+Z9 L21 1
+VJQO_1fmka[z=@b6=]mZ>30
+!s100 zN2:Z=aS5B<6DagzzJIXV2
+Z10 OL;C;2021.2;73
+31
+R1
+!i10b 1
+Z11 !s108 1636996722.000000
+Z12 !s90 -reportprogress|300|-93|-work|work|../../address_decode.vhd|
+Z13 !s107 ../../address_decode.vhd|
+!i113 0
+Z14 o-93 -work work
+Z15 tExplicit 1 CvgOpt 0
+Artl
+R3
+R4
+R5
+R6
+DEx4 work 31 address_decoder_and_data_router 0 22 JQO_1fmka[z=@b6=]mZ>30
+!i122 7
+l39
+L37 41
+Vo6^9fSA09>Fj?Sk>2?5:A3
+!s100 ]CK[lSkUa8eV6nOU91jAj3
+R10
+31
+R1
+!i10b 1
+R11
+R12
+R13
+!i113 0
+R14
+R15
+Ealu
+Z16 w1636900029
+R3
+R4
+R5
+R6
+!i122 2
+R0
+Z17 8../../alu.vhd
+Z18 F../../alu.vhd
+l0
+R9
+Vk^mZCMF<na0b`HeBOl<Nk1
+!s100 Y0X_fE[UFhTLER_5AnR8O3
+R10
+31
+Z19 !s110 1636996721
+!i10b 1
+Z20 !s108 1636996721.000000
+Z21 !s90 -reportprogress|300|-93|-work|work|../../alu.vhd|
+Z22 !s107 ../../alu.vhd|
+!i113 0
+R14
+R15
+Artl
+R3
+R4
+R5
+R6
+DEx4 work 3 alu 0 22 k^mZCMF<na0b`HeBOl<Nk1
+!i122 2
+l35
+L34 172
+V[i>K;JE33@c;`3D@adP@k2
+!s100 `i;5<UJg7QE1jD`g3?o6z2
+R10
+31
+R19
+!i10b 1
+R20
+R21
+R22
+!i113 0
+R14
+R15
+Einstruction_decoder
+R2
+R4
+R3
+R5
+R6
+!i122 6
+R0
+Z23 8../../instruction_decoder.vhd
+Z24 F../../instruction_decoder.vhd
+l0
+Z25 L20 1
+VMAZgbX[GFa=@_2[CZQoS20
+!s100 Tkng[;a:9g`Rk0ild6gW42
+R10
+31
+R19
+!i10b 1
+R20
+Z26 !s90 -reportprogress|300|-93|-work|work|../../instruction_decoder.vhd|
+Z27 !s107 ../../instruction_decoder.vhd|
+!i113 0
+R14
+R15
+Artl
+R4
+R3
+R5
+R6
+DEx4 work 19 instruction_decoder 0 22 MAZgbX[GFa=@_2[CZQoS20
+!i122 6
+l51
+L40 445
+V6PG^74:Fim=2Tod]oShj[3
+!s100 ZZ[i9hNezKFMETXI3@Sj_1
+R10
+31
+R19
+!i10b 1
+R20
+R26
+R27
+!i113 0
+R14
+R15
+Eio
+Z28 w1636901985
+R3
+R4
+R5
+R6
+!i122 10
+R0
+Z29 8../../io.vhd
+Z30 F../../io.vhd
+l0
+R9
+VWHa[^]NQOcEN:]R9?iYCS0
+!s100 =@9z:ChgNbWm=XL1cB`8a1
+R10
+31
+R1
+!i10b 1
+R11
+Z31 !s90 -reportprogress|300|-93|-work|work|../../io.vhd|
+Z32 !s107 ../../io.vhd|
+!i113 0
+R14
+R15
+Artl
+R3
+R4
+R5
+R6
+DEx4 work 2 io 0 22 WHa[^]NQOcEN:]R9?iYCS0
+!i122 10
+l38
+L35 40
+Vc_AM`;aMmaOT?70H1iDKa3
+!s100 IXnL1O9VVQ1[o`ATGJI=a2
+R10
+31
+R1
+!i10b 1
+R11
+R31
+R32
+!i113 0
+R14
+R15
+Epc
+Z33 w1636902011
+R3
+R4
+R5
+R6
+!i122 5
+R0
+Z34 8../../pc.vhd
+Z35 F../../pc.vhd
+l0
+R9
+V4aeZDP5F<dI]F@@FUUjBZ2
+!s100 n9QjeZ9Lze^U<0hKB0k`J1
+R10
+31
+R19
+!i10b 1
+R20
+Z36 !s90 -reportprogress|300|-93|-work|work|../../pc.vhd|
+Z37 !s107 ../../pc.vhd|
+!i113 0
+R14
+R15
+Artl
+R3
+R4
+R5
+R6
+DEx4 work 2 pc 0 22 4aeZDP5F<dI]F@@FUUjBZ2
+!i122 5
+l35
+L33 34
+VYfkMk6Ql=Wj;M99OhiWAZ0
+!s100 _;b2HL0zGlS:mFogAQ6=o0
+R10
+31
+R19
+!i10b 1
+R20
+R36
+R37
+!i113 0
+R14
+R15
+Pprocessor_common
+R4
+R5
+R6
+!i122 0
+R2
+R0
+8../../processor_common.vhd
+F../../processor_common.vhd
+l0
+L18 1
+VTP7gP2]4ldk:?b@VWTaHc2
+!s100 ^:MBzechbcoLeW;4giMR60
+R10
+31
+R19
+!i10b 1
+R20
+!s90 -reportprogress|300|-93|-work|work|../../processor_common.vhd|
+!s107 ../../processor_common.vhd|
+!i113 0
+R14
+R15
+Pprocessor_common_rom
+R4
+R3
+R5
+R6
+!i122 1
+w1636994910
+R0
+8../../processor_common_rom.vhd
+F../../processor_common_rom.vhd
+l0
+L10 1
+V4m6oRJRJWn842<Mc3?i750
+!s100 eT9<9liNIEZYXh53j2LiW2
+R10
+31
+R19
+!i10b 1
+R20
+!s90 -reportprogress|300|-93|-work|work|../../processor_common_rom.vhd|
+!s107 ../../processor_common_rom.vhd|
+!i113 0
+R14
+R15
+Eram
+R2
+R4
+R3
+Z38 DPx9 altera_mf 20 altera_mf_components 0 22 z`PE^;i7^=^2F=6UIQiSN2
+R5
+R6
+!i122 8
+R0
+Z39 8../../ram.vhd
+Z40 F../../ram.vhd
+l0
+L30 1
+V8FU>EG1ALgd3G?OGza[Yn3
+!s100 1>?^1]D^H16bf[WD_7UY93
+R10
+31
+R1
+!i10b 1
+R11
+Z41 !s90 -reportprogress|300|-93|-work|work|../../ram.vhd|
+Z42 !s107 ../../ram.vhd|
+!i113 0
+R14
+R15
+Artl
+R4
+R3
+R38
+R5
+R6
+DEx4 work 3 ram 0 22 8FU>EG1ALgd3G?OGza[Yn3
+!i122 8
+l62
+L42 119
+VmbzY3[1^_<V8?zZ]L1>>Y1
+!s100 QQWJHnUnY;[gG]=5h^@Kc1
+R10
+31
+R1
+!i10b 1
+R11
+R41
+R42
+!i113 0
+R14
+R15
+Eram_inst
+Z43 w1636111831
+R38
+R5
+R6
+!i122 9
+R0
+Z44 8../../ram_inst.vhd
+Z45 F../../ram_inst.vhd
+l0
+L43 1
+V@6WmDa4znVUCJB9zijEc12
+!s100 BHFTM9g0@Z[4TQ6LUJP8c2
+R10
+31
+R1
+!i10b 1
+R11
+Z46 !s90 -reportprogress|300|-93|-work|work|../../ram_inst.vhd|
+Z47 !s107 ../../ram_inst.vhd|
+!i113 0
+R14
+R15
+Asyn
+R38
+R5
+R6
+DEx4 work 8 ram_inst 0 22 @6WmDa4znVUCJB9zijEc12
+!i122 9
+l60
+L56 37
+VK;GoOin<I[_<L?3h1Y<[Y3
+!s100 =1jQZ8_n0aHa:AWiVGHEb2
+R10
+31
+R1
+!i10b 1
+R11
+R46
+R47
+!i113 0
+R14
+R15
+Eregs
+R2
+R3
+R4
+R5
+R6
+!i122 3
+R0
+Z48 8../../regs.vhd
+Z49 F../../regs.vhd
+l0
+R9
+V?gaME<`k5La:ikn?7Ih1n3
+!s100 jSW960Mbg]RVnRT89I`mB3
+R10
+31
+R19
+!i10b 1
+R20
+Z50 !s90 -reportprogress|300|-93|-work|work|../../regs.vhd|
+Z51 !s107 ../../regs.vhd|
+!i113 0
+R14
+R15
+Artl
+R3
+R4
+R5
+R6
+DEx4 work 4 regs 0 22 ?gaME<`k5La:ikn?7Ih1n3
+!i122 3
+l42
+L39 36
+V9cIQC`o=UMEJdM=hbRBTz0
+!s100 OdH?<4O^kM0FdgX8f3n1F0
+R10
+31
+R19
+!i10b 1
+R20
+R50
+R51
+!i113 0
+R14
+R15
+Eriscv
+R2
+R3
+R4
+R5
+R6
+!i122 11
+R0
+Z52 8../../riscv.vhd
+Z53 F../../riscv.vhd
+l0
+R25
+VV9Czf:>20QoSPlIHUNGfb1
+!s100 NZcGAMj2ilEQXnHFK9D?P2
+R10
+31
+R1
+!i10b 1
+R11
+Z54 !s90 -reportprogress|300|-93|-work|work|../../riscv.vhd|
+Z55 !s107 ../../riscv.vhd|
+!i113 0
+R14
+R15
+Astruct
+R3
+R4
+R5
+R6
+DEx4 work 5 riscv 0 22 V9Czf:>20QoSPlIHUNGfb1
+!i122 11
+l169
+L28 252
+VdOfadm_]z055>`<b:a=Dg1
+!s100 EIWJAZjU9ib>3@FTPFXY11
+R10
+31
+R1
+!i10b 1
+R11
+R54
+R55
+!i113 0
+R14
+R15
+Erom
+R2
+Z56 DPx4 work 20 processor_common_rom 0 22 4m6oRJRJWn842<Mc3?i750
+R3
+R4
+R5
+R6
+!i122 4
+R0
+Z57 8../../rom.vhd
+Z58 F../../rom.vhd
+l0
+L27 1
+VS9IkIO_6H=A@n10`jHVbJ1
+!s100 _7`63XQAkMgV1S`4=hW693
+R10
+31
+R19
+!i10b 1
+R20
+Z59 !s90 -reportprogress|300|-93|-work|work|../../rom.vhd|
+Z60 !s107 ../../rom.vhd|
+!i113 0
+R14
+R15
+Atable
+R56
+R3
+R4
+R5
+R6
+DEx4 work 3 rom 0 22 S9IkIO_6H=A@n10`jHVbJ1
+!i122 4
+l44
+L38 39
+V7>M`6M>;TQii]:5UDk:FT1
+!s100 5o?8AM4jAR[ZPRW1m@OZi1
+R10
+31
+R19
+!i10b 1
+R20
+R59
+R60
+!i113 0
+R14
+R15
+Etb_riscv
+Z61 w1636901874
+R3
+R4
+R5
+R6
+!i122 12
+R0
+Z62 8../../tb_riscv.vhd
+Z63 F../../tb_riscv.vhd
+l0
+R9
+V<Yomz=iE5BzGzo^X4QZ@03
+!s100 Re9n0QE9V:LSQgCJV^F223
+R10
+31
+R1
+!i10b 1
+R11
+Z64 !s90 -reportprogress|300|-93|-work|work|../../tb_riscv.vhd|
+Z65 !s107 ../../tb_riscv.vhd|
+!i113 0
+R14
+R15
+Asim
+R3
+R4
+R5
+R6
+DEx4 work 8 tb_riscv 0 22 <Yomz=iE5BzGzo^X4QZ@03
+!i122 12
+l39
+L24 42
+V1B8`7?b@WMf^e:gM`BFaD2
+!s100 OTK<I8R>QinkeA3ZSN;_P0
+R10
+31
+R1
+!i10b 1
+R11
+R64
+R65
+!i113 0
+R14
+R15
