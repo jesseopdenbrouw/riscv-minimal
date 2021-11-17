@@ -1,7 +1,8 @@
 # riscv-minimal
 A minimalistic RISC-V 32-bit processor targeted for an FPGA
 
-NOTE: this project is in its initial stage
+NOTE: This project is in its initial stage. Only a very limited
+      set of program currently run on the processor.
 
 The RISV-C processor uses the RV32I instruction set with the
 exception of the FENCE, ECALL and EBREAK instructions.
