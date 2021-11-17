@@ -11,6 +11,7 @@ all:
 	$(MAKE) -C testio all
 	$(MAKE) -C flash all
 	$(MAKE) -C flash.alt all
+	$(MAKE) -C shift all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -21,4 +22,5 @@ clean:
 	$(MAKE) -C testio clean
 	$(MAKE) -C flash clean
 	$(MAKE) -C flash.alt clean
+	$(MAKE) -C shift clean
 	rm -rf bin
