@@ -7,9 +7,6 @@ MEMORY
    IO (rw)    : ORIGIN = 0xf0000000, LENGTH = 16K
 }
 
-__stack_pointer$ = ORIGIN(RAM) + LENGTH(RAM);
-
-
 PHDRS
 {
   ROM PT_LOAD;
@@ -37,13 +34,18 @@ SECTIONS
    } >ROM :ROM
 
 
-  .rodata :
+  .srodata :
   {
+    _srodata = .;
     *(.rdata)
+    *(.rdata.*)
     *(.rodata)
     *(.rodata.*)
+    *(.srodata)
+    *(.srodata.*)
     *(.gnu.linkonce.r.*)
     . = ALIGN(4);
+    _erodata = .;
   } >ROM :ROM
 
 
@@ -82,7 +84,7 @@ SECTIONS
 
   /* . = ALIGN(4); */
 
-  .data : {
+  .sdata : {
     _sdata = .;
     *(.data)
     *(.data*)
@@ -110,10 +112,10 @@ SECTIONS
     /* __bss_end__ = _ebss; */
   } >RAM AT>RAM
 
-
   . = ALIGN(16);
   __global_pointer$ = . + 0x800;
 
+__stack_pointer$ = ORIGIN(RAM) + LENGTH(RAM);
 
   /* End of uninitialized data segment (used by syscalls.c for heap) */
   PROVIDE( end = . );
