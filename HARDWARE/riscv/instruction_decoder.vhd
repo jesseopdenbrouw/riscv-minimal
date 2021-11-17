@@ -161,6 +161,9 @@ begin
                             offset(11 downto 0) <= instr(31 downto 20);
                             if waitfordata = '1' then
                                 pc_op <= pc_hold;
+                                alu_op <= alu_nop;
+                                rd <= (others => '-');
+                                rd_enable <= '0';
                             end if;
                         -- LH
                         when "001" =>
@@ -174,6 +177,9 @@ begin
                             offset(11 downto 0) <= instr(31 downto 20);
                             if waitfordata = '1' then
                                 pc_op <= pc_hold;
+                                alu_op <= alu_nop;
+                                rd <= (others => '-');
+                                rd_enable <= '0';
                             end if;
                         -- LW
                         when "010" =>
@@ -187,6 +193,9 @@ begin
                             offset(11 downto 0) <= instr(31 downto 20);
                             if waitfordata = '1' then
                                 pc_op <= pc_hold;
+                                alu_op <= alu_nop;
+                                rd <= (others => '-');
+                                rd_enable <= '0';
                             end if;
                         -- LBU
                         when "100" =>
@@ -200,6 +209,9 @@ begin
                             offset(11 downto 0) <= instr(31 downto 20);
                             if waitfordata = '1' then
                                 pc_op <= pc_hold;
+                                alu_op <= alu_nop;
+                                rd <= (others => '-');
+                                rd_enable <= '0';
                             end if;
                         -- LHU
                         when "101" =>
@@ -213,6 +225,9 @@ begin
                             offset(11 downto 0) <= instr(31 downto 20);
                             if waitfordata = '1' then
                                 pc_op <= pc_hold;
+                                alu_op <= alu_nop;
+                                rd <= (others => '-');
+                                rd_enable <= '0';
                             end if;
                         when others =>
                             error <= '1';
