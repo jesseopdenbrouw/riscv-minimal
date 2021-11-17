@@ -5,7 +5,7 @@ SREC2VHDL = ../bin/srec2vhdl
 all: add64
 
 add64: add64.c
-	$(CC) -O2 -g -o add64 add64.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/startup.c ../crt/startup.S
+	$(CC) -O0 -g -o add64 add64.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/startup.c ../crt/startup.S
 	$(OBJCOPY) -O srec add64 add64.srec
 	$(SREC2VHDL) -f add64.srec add64.vhd
 clean:
