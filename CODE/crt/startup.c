@@ -38,8 +38,9 @@ void _Initialize_System$(void)
 #ifndef __cplusplus
 	register
 #endif    
-	uint32_t *pStart = &_sbss, *pEnd = &_ebss;
-	uint32_t *pdRom = &_start_of_rom_to_copy;
+	volatile uint32_t *pStart = &_sbss;
+	volatile uint32_t *pEnd = &_ebss;
+	volatile uint32_t *pdRom = &_start_of_rom_to_copy;
 
 	/* Initialize the bss with 0 */
 	while (pStart < pEnd) {
@@ -48,7 +49,8 @@ void _Initialize_System$(void)
 	}
 
 	/* Copy the ROM-placed RAM init data to the RAM */
-	pStart = &_sdata; pEnd = &_edata;
+	pStart = &_sdata;
+       	pEnd = &_edata;
 	while (pStart < pEnd) {
 		*pStart = *pdRom;
 		pStart++;
