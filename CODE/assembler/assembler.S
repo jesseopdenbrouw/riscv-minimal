@@ -26,13 +26,14 @@ _start:
 
         la  t1, _start_ram
 
-        lh  t0, 0(zero)
-        sh  t0, 0(t1)
-        lh  t0, 4(zero)
-        sh  t0, 4(t1)
+        lw  t0, 0(zero)
+        sw  t0, 0(t1)
+        lw  t0, 4(zero)
+        sw  t0, 4(t1)
 
-        lh  t2, 0(t1)
-        lh  t3, 4(t1)
+        lw  t2, 0(t1)
+	nop
+        lw  t3, 4(t1)
 
 halt:   j halt
 
