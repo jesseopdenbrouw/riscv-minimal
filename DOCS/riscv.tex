@@ -266,6 +266,9 @@ This will copy the VHDL file to the RISC-V processor ROM file.
 
 \end{itemize}
 
+\section{Current problem}
+The linker script \texttt{riscv.ld} is not working properly. Currently it is not possible to use static/global initialized data, only uninitialized static/global data is possible. The data \emph{is} stored in the executable (and hence in the VHDL file), but we cannot access it with linker global symbols.
+
 \section{Author's note}
 I managed to create this basic RISC-V processor within one week, including compiling the GNU C compiler and the created C program examples. Of course, this is not the fastest core available, but it gives a good example on designing a RISC-V processor yourself. Next in line is to make the standard C library work. In the mean time, files will change, so be sure to grab the latest GitHub repository clone.
 \end{document}
