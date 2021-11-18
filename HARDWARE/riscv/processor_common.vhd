@@ -57,13 +57,14 @@ package processor_common is
                          alu_beq, alu_bne, alu_blt, alu_bge, alu_bltu, alu_bgeu
                         );
     -- The RAM
-    -- The RAM in instantiated using onboard RAM blocks
-    -- so we don't write the RAM code ourselves
-    -- NOTE: the RAM is word (32 bits) size, Big Endian
-    --       so we have to recode to support Little Endian
+    -- NOTE: the RAM is 4x byte (8 bits) size, supporting
+    --       32-bit Big Endian storage,
+    --       so we have to recode to support Little Endian.
     -- NOTE: ram_size_bits must be <= 16
     constant ram_size_bits : integer := 12;
     constant ram_size : integer := 2**ram_size_bits;
+    -- The type of the RAM block
+    type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
                         
     -- The ROM
     -- NOTE: the ROM is byte (8 bits) size.
