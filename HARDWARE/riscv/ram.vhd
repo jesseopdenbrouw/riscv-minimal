@@ -63,7 +63,7 @@ begin
  
     -- Instantiate the RAM
     -- The RAM is 32 bits, Big Endian.
-    ram_inst_inst: ram_inst
+    ram_inst0: ram_inst
     port map(clock => clk, address => address_int, byteena => byteena_int, data => datain_int, wren => wren_int, q => dataout_int);
      
     -- Input & output recoding
