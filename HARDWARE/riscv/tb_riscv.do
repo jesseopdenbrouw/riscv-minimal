@@ -97,6 +97,8 @@ add wave            -label regs dut/regs0/regs_int
 add wave -divider "RAM"
 add wave            -label waitfordata dut/waitfordata_int
 #add wave -radix hex dut/ram0/*
+add wave            -label ram dut/ram0/ram_inst0/ram_int
+
 add wave -divider "I/O"
 add wave            -label io dut/io0/io
 
@@ -113,7 +115,7 @@ view signals
 set NumericStdNoWarnings 1
 
 # Run simulation for 900 ns
-run 500 ns
+run 100 us
 
 # Fill up the waveform in the window
 wave zoom full
