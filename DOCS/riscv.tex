@@ -157,22 +157,37 @@ All RV32I Unprivileged instructions are implemented with the exception of FENCE,
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has about 18000 cells available. Depending on the program and used resources, the compiled RISC-V processor uses about 2000 cells (about 12\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}.\\ For downloading the program file, the onboard USBBlaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has about 18000 cells available. It has 3080 KB of onboard RAM bits available which are partially used for RAM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000 cells (about 12\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}.\\ For downloading the program file, the onboard USBBlaster is used.
+
+\section{Simulation}
+The design can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
 
 \section{Setting up the GNU C compiler}
 The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (for Linux) is straightforward:
 
 \begin{enumerate}
 \item You need a current GNU C-compiler installed.
-\item You need the texinfo package. On Ubuntu et al.\@ issue \lstinline|apt install texinfo|
+\item You need the texinfo package. On Ubuntu et al.\@ issue
+\begin{lstlisting}[language=]
+apt install texinfo
+\end{lstlisting}
 \item In your home directory, enter the command
 \begin{lstlisting}[language=]
 git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
 \end{lstlisting}
 \item Wait for the cloning to end (takes a long time, about 30 minutes on a Zbook G5 2020 with a 10 MB/s internet connection)
-\item Change with \lstinline|cd riscv-gnu-toolchain|
-\item Make build directory with \lstinline|mkdir build; cd build|
-\item Check the current configuration with \lstinline!../configure --help | grep abi!\\
+\item Change to the directory with
+\begin{lstlisting}[language=]
+cd riscv-gnu-toolchain
+\end{lstlisting}
+\item Make the \texttt{build} directory with:
+\begin{lstlisting}[language=]
+mkdir build; cd build
+\end{lstlisting}
+\item Check the current configuration with
+\begin{lstlisting}[language=]
+../configure --help | grep abi
+\end{lstlisting}
       It should say:
 \begin{lstlisting}[language=]
 --with-abi=lp64d    Sets the base RISC-V ABI, defaults to lp64d
@@ -185,8 +200,14 @@ The toolchain is currently configured for 64-bit RISC-V. That is not what we wan
 This will set the architecture to RV32I and the ABI to ipl32. This means that integers, long integers and pointers use 32-bit entries. The destination directory is \lstinline|/opt/riscv32|
 \item Now enter the make command as root: \lstinline|make|\\
 MAKE SURE TO ENTER THIS COMMAND AS root, because the toolchain is put in \lstinline|/opt/riscv32|. This takes a long time (about 45 minutes on a Zbook G5). At some points the compilation seems to hang, but it is just compiling complicated C-files. By the way, you will see a lot of warnings.
-\item Now that the toolchain is setup, we have to put the path into the \lstinline|$PATH| environment variable so enter: \lstinline|export PATH=/opt/riscv32/bin:$PATH|
-\item Check if the compiler is available: \lstinline|riscv32-unknown-elf-gcc -v|\\
+\item Now that the toolchain is setup, we have to put the path into the \lstinline|$PATH| environment variable so enter
+\begin{lstlisting}[language=]
+export PATH=/opt/riscv32/bin:$PATH
+\end{lstlisting}
+\item Check if the compiler is available:
+\begin{lstlisting}[language=]
+riscv32-unknown-elf-gcc -v
+\end{lstlisting}
 It should say something like:
 \begin{lstlisting}[language=]
 Using built-in specs.
@@ -251,7 +272,7 @@ This will create a VHDL file with the ROM encoded. Note: the taylor-made \texttt
 cp flash.vhd ../../HARDWARE/riscv/processor_common_rom.vhd
 \end{lstlisting}
 This will copy the VHDL file to the RISC-V processor ROM file.
-\item Now start the compilation of the VHDL code in Quartus Prime Lite and program the compiled file. This file has the extension \lstinline|.sof|. See Figures~\ref{quartus1} and~\ref{quartus2}.
+\item Now start the compilation of the VHDL code in Quartus Prime Lite and program the compiled file. This file has the extension \lstinline|.sof|. See Figures~\ref{quartus1} to~\ref{programmer}.
 
 \begin{figure}[!ht]
 \centering
@@ -267,10 +288,17 @@ This will copy the VHDL file to the RISC-V processor ROM file.
 \label{quartus2}
 \end{figure}
 
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.85\textwidth]{programmer}
+\caption{Image of the programmer.}
+\label{programmer}
+\end{figure}
+
 \end{itemize}
 
 \section{Current problem}
-The linker script \texttt{riscv.ld} is not working properly. Currently it is not possible to use static/global initialized data, only uninitialized static/global data is possible. The data \emph{is} stored in the executable (and hence in the VHDL file), but we cannot access it with linker global symbols.
+The linker script \texttt{riscv.ld} is not working properly. Currently it is not possible to use static/global initialized data, or uninitialized static/global data that should be set to all zero. The data \emph{is} stored in the executable (and hence in the VHDL file), but we cannot access it with linker global symbols. A workaround this problem is to explicitly set the data at startup (i.e. in \texttt{main}).
 
 \section{Author's note}
 I managed to create this basic RISC-V processor within one week, including compiling the GNU C compiler and the created C program examples. Of course, this is not the fastest core available, but it gives a good example on designing a RISC-V processor yourself. Next in line is to make the standard C library work. In the mean time, files will change, so be sure to grab the latest GitHub repository clone.
