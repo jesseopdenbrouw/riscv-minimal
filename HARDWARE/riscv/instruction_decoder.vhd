@@ -316,7 +316,7 @@ begin
                         immediate <= (others => instr(31));
                         immediate(11 downto 0) <= instr(31 downto 20);
                     -- SLLI
-                    elsif func3 = "101" and func7 = "0000000" then
+                    elsif func3 = "001" and func7 = "0000000" then
                         alu_op <= alu_slli;
                         rd <= rd_i;
                         rd_enable <= '1';
