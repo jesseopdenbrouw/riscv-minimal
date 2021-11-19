@@ -12,6 +12,7 @@ all:
 	$(MAKE) -C flash all
 	$(MAKE) -C flash.alt all
 	$(MAKE) -C shift all
+	$(MAKE) -C string all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -23,4 +24,5 @@ clean:
 	$(MAKE) -C flash clean
 	$(MAKE) -C flash.alt clean
 	$(MAKE) -C shift clean
+	$(MAKE) -C string clean
 	rm -rf bin
