@@ -6,7 +6,7 @@ volatile uint32_t x;
 
 int main(void) {
 
-	volatile uint32_t *output = (uint32_t *) GPIO_DATAOUT;
+	volatile uint32_t *output = (uint32_t *) GPIO_DATAOUT_ADDR;
 	volatile uint32_t counter;
 
 	x = x + 1;
