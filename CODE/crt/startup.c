@@ -35,9 +35,9 @@ __attribute__((naked))
 void _Initialize_System$(void)
 {
 
-#ifndef __cplusplus
-	register
-#endif    
+//#ifndef __cplusplus
+//	register
+//#endif    
 	volatile uint32_t *pStart = &_sbss;
 	volatile uint32_t *pEnd = &_ebss;
 	volatile uint32_t *pdRom = &_start_of_rom_to_copy;
