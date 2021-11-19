@@ -36,12 +36,8 @@ component regs is
         enable : in std_logic;
         sel1out : in reg_type;
         sel2out : in reg_type;
-        sel3out : in reg_type;
-        sel4out : in reg_type;
         rs1out : out data_type;
-        rs2out : out data_type;
-        rs3out : out data_type;
-        rs4out : out data_type
+        rs2out : out data_type
        );
 end component regs;
 component alu is
@@ -155,8 +151,6 @@ signal memaccess_int : memaccess_type;
 signal result_int : data_type;
 signal rs1data_int : data_type;
 signal rs2data_int : data_type;
-signal rs3data_int : data_type;
-signal rs4data_int : data_type;
 signal memory_int : data_type;
 signal instr_int : data_type;
 signal romdata_int : data_type;
@@ -179,12 +173,8 @@ begin
               enable => rd_enable_int,
               sel1out => rs1_int,
               sel2out => rs2_int,
-              sel3out => (others => '-'),
-              sel4out => (others => '-'),
               rs1out => rs1data_int,
-              rs2out => rs2data_int,
-              rs3out => open,
-              rs4out => open
+              rs2out => rs2data_int
     );
 
     alu0 : alu
