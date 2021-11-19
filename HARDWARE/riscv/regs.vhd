@@ -27,12 +27,8 @@ entity regs is
         enable : in std_logic;
         sel1out : in reg_type;
         sel2out : in reg_type;
-        sel3out : in reg_type;
-        sel4out : in reg_type;
         rs1out : out data_type;
-        rs2out : out data_type;
-        rs3out : out data_type;
-        rs4out : out data_type
+        rs2out : out data_type
        );
 end entity regs;
 
@@ -41,18 +37,14 @@ type regs_array_type is array (0 to 31) of std_logic_vector(31 downto 0);
 signal regs_int : regs_array_type;
 begin
     
-    process (clk, areset, selrd, sel1out, sel2out, sel3out, sel4out, regs_int) is
+    process (clk, areset, selrd, sel1out, sel2out, regs_int) is
     variable selrd_int : integer;
     variable selaout_int : integer;
     variable selbout_int : integer;
-    variable selcout_int : integer;
-    variable seldout_int : integer;
     begin
         selrd_int := to_integer(unsigned(selrd));
         selaout_int := to_integer(unsigned(sel1out));
         selbout_int := to_integer(unsigned(sel2out));
-        selcout_int := to_integer(unsigned(sel3out));
-        seldout_int := to_integer(unsigned(sel4out));
         
         if areset = '1' then
             regs_int <= (others => (others => '0'));
@@ -67,8 +59,6 @@ begin
         
         rs1out <= regs_int(selaout_int);
         rs2out <= regs_int(selbout_int);
-        rs3out <= regs_int(selcout_int);
-        rs4out <= regs_int(seldout_int);
     end process;
 
 end architecture rtl;
