@@ -37,6 +37,11 @@ _start:
 
 halt:   j halt
 
+       rdcycleH s0
+       rdcycle  s1
+
+       mul x3,x2,x1
+
 .option pop
 
   .size  _start, .-_start

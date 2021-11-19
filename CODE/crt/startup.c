@@ -23,7 +23,7 @@ int main(void);
 extern "C" {
 #endif
 void __libc_init_array(void);
-void _Initialize_System$(void);
+void _start(void);
 #ifdef __cplusplus
 }
 #endif
@@ -32,8 +32,14 @@ void _Initialize_System$(void);
 /* and doesn't need a stack frame of pushed registers */
 __attribute__((section(".text.start_up_code_c")))
 __attribute__((naked))
-void _Initialize_System$(void)
+void _start(void)
 {
+
+	__asm__ volatile  ("la    gp, __global_pointer$;"
+                      "la    sp, __stack_pointer$;"
+                      :  /* output: none */
+                      : /* input: none */
+                      : /* clobbers: none */);
 
 //#ifndef __cplusplus
 //	register

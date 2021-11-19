@@ -1,0 +1,59 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Registers}{3}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}ROM}{3}{section.3}\protected@file@percent }
+\newlabel{sec:rom}{{3}{3}{ROM}{section.3}{}}
+\newlabel{RF1}{4}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The complete RISC-V MCU.\relax }}{4}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:blockdiagram}{{1}{4}{The complete RISC-V MCU.\relax }{figure.caption.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces RISC-V registers and their purpose.\relax }}{5}{table.caption.3}\protected@file@percent }
+\newlabel{tab:registers}{{1}{5}{RISC-V registers and their purpose.\relax }{table.caption.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}RAM}{5}{section.4}\protected@file@percent }
+\newlabel{sec:ram}{{4}{5}{RAM}{section.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}I/O}{6}{section.5}\protected@file@percent }
+\newlabel{sec/io}{{5}{6}{I/O}{section.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}ALU}{6}{section.6}\protected@file@percent }
+\newlabel{sec:alu}{{6}{6}{ALU}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}PC}{6}{section.7}\protected@file@percent }
+\newlabel{sec:pc}{{7}{6}{PC}{section.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Instruction Decoder}{6}{section.8}\protected@file@percent }
+\newlabel{sec:instructiondecoder}{{8}{6}{Instruction Decoder}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Address Decoder and Data Router}{7}{section.9}\protected@file@percent }
+\newlabel{sec:addressdecoderanddatarouter}{{9}{7}{Address Decoder and Data Router}{section.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Stack pointer}{7}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {11}Implemented instructions}{7}{section.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {12}The FPGA}{7}{section.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {13}Simulation}{8}{section.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {14}Setting up the GNU C compiler}{8}{section.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {15}Cloning the RISC-V project}{9}{section.15}\protected@file@percent }
+\newlabel{sec:cloning}{{15}{9}{Cloning the RISC-V project}{section.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {16}Register subset}{10}{section.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {17}Compiling a C program by hand}{11}{section.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {18}Current problem}{11}{section.18}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Image of the Quartus project (1).\relax }}{12}{figure.caption.4}\protected@file@percent }
+\newlabel{quartus1}{{2}{12}{Image of the Quartus project (1).\relax }{figure.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Image of the Quartus project (2).\relax }}{12}{figure.caption.5}\protected@file@percent }
+\newlabel{quartus2}{{3}{12}{Image of the Quartus project (2).\relax }{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {19}Future plans}{12}{section.19}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Image of the programmer.\relax }}{13}{figure.caption.6}\protected@file@percent }
+\newlabel{programmer}{{4}{13}{Image of the programmer.\relax }{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {20}Author's note}{13}{section.20}\protected@file@percent }
+\gdef \@abspage@last{13}

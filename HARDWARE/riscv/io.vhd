@@ -51,18 +51,19 @@ begin
             io(0) <= datainfromoutside;
             -- Only write to I/O when write is enabled AND size is word
             -- Only write to the outputs, not the inputs
-            if wren = '1' and size = size_word then
+            -- Only write if on 4-byte boundary
+            if wren = '1' and size = size_word and address(1 downto 0) = "00" then
                 if address_int = 1 then
                     io(1) <= datain;
                 end if;
             end if;
         end if;
     end process;
-    
+ 
     -- Data out to ALU
-    process (io, size, address_int) is
+    process (io, size, address, address_int) is
     begin
-        if size = size_word then
+        if size = size_word and address(1 downto 0) = "00" then
             dataout <= io(address_int);
         else
             dataout <= (others => 'X');

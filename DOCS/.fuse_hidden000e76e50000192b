@@ -84,11 +84,11 @@ This RISC-V processor consists of the following building blocks:
 \item The Instruction Decoder decodes the currently executing instruction and provides control signals to other building blocks.
 \end{itemize}
 
-A block diagram is shown in Figure~\ref{fig:blockdiagram}.
+
 
 \begin{sidewaysfigure}[!p]
 \centering
-\begin{tikzpicture}[thick,font=\sffamily\footnotesize,>=latex,scale=.75,framed,background rectangle/.style={fill=none}]
+\begin{tikzpicture}[thick,font=\sffamily\footnotesize,>=latex,scale=.8,framed,background rectangle/.style={fill=none}]
 % Demux and regs
 \draw (0,0) rectangle (1,-4) node[midway,rotate=90] {rd};
 \draw (1,0) rectangle (3,-4) node[midway,align=center] {REGS\\(32x32)};
@@ -104,14 +104,11 @@ A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 \draw[fill=black] (7,-3) circle (2pt);
 
 % ALU
-\draw (6,-5) -- ++(7,0) node[midway,yshift=-0.8cm,font=\normalsize\sffamily] {ALU} -- ++(-1,-2) -- ++(-5,0) -- cycle;
+\draw[] (6,-5) -- ++(7,0) node[midway,yshift=-0.8cm,font=\normalsize\sffamily] {ALU} -- ++(-1,-2) -- ++(-5,0) -- cycle;
 \draw[->] (7,-3) -- (7,-5);
 \draw[->] (8,-1) -- (8,-5);
 \draw[->] (5.5,-6) node[left] {alu\_op} -- (6.5,-6);
 \draw[->] (9.5,-7.0) -- (9.5,-8.5) -- ++(-10.5,0) -- ++(0,6.5) -- ++(1,0);
-\draw[->] (11,-4.0) node[above] {pc} -- ++(0,-1);
-\draw[->] (10,-4.0) node[above] {offset} -- ++(0,-1);
-\draw[->] (9,-2.0) node[above,xshift=3mm] {immediate} -- ++(0,-3);
 
 % Address decode and data route
 \draw (16,-0) rectangle ++(2,-17) node[midway,align=center] {Address\\Decode\\\&\\Data\\Router};
@@ -136,10 +133,10 @@ A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 \draw[->] (12,-15.0) -- ++(1,0) node[right] {offset};
 \draw[->] (12,-15.5) -- ++(1,0) node[right] {pc\_op};
 \draw[->] (12,-16.0) -- ++(1,0) node[right] {memacces};
-%\draw[->,red] (12,-16.5) -- ++(1,0) node[right] {error};
+\draw[->,red] (12,-16.5) -- ++(1,0) node[right] {error};
 \draw[->] (8,-12) node[left] {instruction} -- ++(1,0);
 \draw[->] (8,-13) node[left] {waitfordata} -- ++(1,0);
-%\draw[->,red] (8,-15) node[left] {intreq} -- ++(1,0);
+\draw[->,red] (8,-15) node[left] {intreq} -- ++(1,0);
 
 % ROM
 \draw (22,-1) rectangle ++(2,-3) node[midway,align=center,yshift=0.4cm] {ROM\\(Dual Port)};
@@ -160,11 +157,9 @@ A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 \draw[->] (18,-8) -- ++(1.5,0) -- ++(2.5,0);
 \draw[->] (19.5,-8) -- ++(0,-5.0) -- ++(2.5,0);
 \draw[fill=black] (19.5,-8) circle (2pt);
-
 % RAM
-\draw (22,-6) rectangle ++(2,-3) node[midway,align=center] {RAM\\(onboard)};
+\draw (22,-6) rectangle ++(2,-3) node[midway,yshift=0.5cm] {RAM};
 \draw[->] (23,-10) node[below] {wrram} -- ++(0,1);
-
 % I/O
 \draw (22,-11.5) rectangle ++(2,-3) node[midway] {I/O};
 \draw[->] (23,-15.5) node[below] {wrio} -- ++(0,1);
@@ -190,15 +185,8 @@ A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 \draw[fill=black] (1.5,-8.5) circle (2pt);
 
 \draw[->] (0,-14.6667) -- ++(1,0);
-\draw[fill=black] (0,-14.6667) circle (2pt);
-
-\draw[->] (-0.5,-11.333) node[above] {offset} -- ++(0,-1) -- ++(1.5,0);
-\draw[->] (-0.5,-12.333) -- ++(0,-2) -- ++(1.5,0);
-\draw[fill=black] (-0.5,-12.333) circle (2pt);
-\draw[->] (-0.5,-14.333) -- ++(0,-1) -- ++(1.5,0);
-\draw[fill=black] (-0.5,-14.333) circle (2pt);
-
-\draw[->] (-0.5,-17.6667) node[below] {rs1\_data} -- ++(0,2) -- ++(1.5,0);
+\draw[fill=black] (0,-14.6667) circle (2pt)
+\draw[->] (0,-15.6667) -- ++(1,0);
 \end{tikzpicture}
 \caption{The complete RISC-V MCU.}
 \label{fig:blockdiagram}
