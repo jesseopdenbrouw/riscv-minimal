@@ -45,9 +45,9 @@ begin
     -- Generate a symmetric clock signal, 100 MHz
     process is
     begin
-        clk <= '0';
-        wait for 5 ns;
         clk <= '1';
+        wait for 5 ns;
+        clk <= '0';
         wait for 5 ns;
     end process;
     
