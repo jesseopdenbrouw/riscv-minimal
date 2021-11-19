@@ -10,6 +10,14 @@
  * S4, S5 and S6 are skipped.
  * The checksum is not checked.
  *
+ * By default, srec2vhdl creates only the table entries
+ *
+ * Options:
+ *      -f         Creates a full table
+ *      -i <arg>   Indents the tables entries by <arg>
+ *      -v         Verbose output
+ *      -q         Quiet output, only errors are reported
+ *
  * */
 
 #include <stdio.h>
@@ -93,6 +101,18 @@ int main(int argc, char *argv[]) {
 	indent = 0;
 	indentarg = 0;
 
+	/* Check for 0 extra arguments */
+	if (argc == 1) {
+		printf("srec2vhdl -- an S-record to VHDL table converter\n");
+		printf("Usage: srec2vhdl [-vqf -i <arg>] inputfile [outputfile]\n");
+		printf("   -f        Full table output\n");
+		printf("   -i <arg>  Indent by <arg> spaces\n");
+		printf("   -v        Verbose\n");
+		printf("   -q        Quiet. Only errors are reported\n");
+		printf("If outputfile is omitted, stdout is used\n");
+		exit(EXIT_SUCCESS);
+	}
+
 	/* Parse options */
 	while ((opt = getopt(argc, argv, "vqfi:")) != -1) {
 	        switch (opt) {
@@ -139,7 +159,11 @@ int main(int argc, char *argv[]) {
 		}
 		fout = stdout;
 	} else {
-		//printf("p = %p\n", argv[optind+1]);
+		if (strcmp(argv[optind], argv[optind+1]) == 0) {
+			fprintf(stderr, "Input filename and output filename cannot be the same\n");
+			fclose(fp);
+			exit(EXIT_FAILURE);
+		}
 		fout = fopen(argv[optind+1], "w");
 		if (fout == NULL) {
 			fclose(fp);
@@ -182,19 +206,19 @@ int main(int argc, char *argv[]) {
 				  val = val-3;
 				  address = hex4(buffer+4);
 				  if (indent && doindent) {
-					  for (i = 0; i <indentarg; i++) {
+					  for (i = 0; i < indentarg; i++) {
 						  fprintf(fout, " ");
 					  }
 					  doindent = 1;
 				  }
-				  for (i = 0; i< val; i++) {
+				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+8+i*2);
 					fprintf(fout, "%4lu => x\"%02lx\", ", address, byte);
 					address++;
 					if (address % 4 == 0) {
 						fprintf(fout, "\n");
 				  		if (indent) {
-							for (int i = 0; i <indentarg; i++) {
+							for (int i = 0; i < indentarg; i++) {
 								fprintf(fout, " ");
 							}
 						}
@@ -210,19 +234,19 @@ int main(int argc, char *argv[]) {
 				  val = val-4;
 				  address = hex6(buffer+4);
 				  if (indent && doindent) {
-					  for (i = 0; i <indentarg; i++) {
+					  for (i = 0; i < indentarg; i++) {
 						  fprintf(fout, " ");
 					  }
 					  doindent = 1;
 				  }
-				  for (i = 0; i< val; i++) {
+				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+10+i*2);
 					fprintf(fout, "%4lu => x\"%02lx\", ", address, byte);
 					address++;
 					if (address % 4 == 0) {
 						fprintf(fout, "\n");
 				  		if (indent) {
-							for (int i = 0; i <indentarg; i++) {
+							for (int i = 0; i < indentarg; i++) {
 								fprintf(fout, " ");
 							}
 						}
@@ -238,19 +262,19 @@ int main(int argc, char *argv[]) {
 				  val = val-5;
 				  address = hex8(buffer+4);
 				  if (indent && doindent) {
-					  for (i = 0; i <indentarg; i++) {
+					  for (i = 0; i < indentarg; i++) {
 						  fprintf(fout, " ");
 					  }
 					  doindent = 1;
 				  }
-				  for (i = 0; i< val; i++) {
+				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+12+i*2);
 					fprintf(fout, "%4lu => x\"%02lx\", ", address, byte);
 					address++;
 					if (address % 4 == 0) {
 						fprintf(fout, "\n");
 				  		if (indent) {
-							for (int i = 0; i <indentarg; i++) {
+							for (int i = 0; i < indentarg; i++) {
 								fprintf(fout, " ");
 							}
 						}
