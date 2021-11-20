@@ -1,2 +1,4 @@
 riscv-alt/*
+riscv-test/*
 rom_mif/*
+rom_mif2/*

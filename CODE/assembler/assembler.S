@@ -35,12 +35,13 @@ _start:
 	nop
         lw  t3, 4(t1)
 
+
+	li t1,0xffffffff
+	li t2,0xffffffff
+	mul t3,t2,t1
+	mulhu t4,t2,t1
+
 halt:   j halt
-
-       rdcycleH s0
-       rdcycle  s1
-
-       mul x3,x2,x1
 
 .option pop
 
