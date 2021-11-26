@@ -57,7 +57,7 @@
 The RISC-V Instruction Set Architecture (ISA) is an open source instruction set for a processor. This means that anybody can create a processor that uses this instruction set. There are already processors available such as E2-core from SiFive. More freeware cores are available on several platforms (e.g. on GitHub). This documents describes a basic RISC-V core in VHDL. The core can only execute the RV32I unprivileged instruction set. The processor incorporates a ROM, RAM and some simple I/O. It is targeted for implementation on an FPGA. It is tested on an Intel Cyclone V with a DE0-CV development board from Terasic. The GNU C-compiler for RISC-V is used for software development. Currently only simple C programs can be compiled and run. C++ is currently not supported.
 
 \noindent
-This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students. The processor executes each instruction in one clock cycle except for reads from RAM which need two clock cycles. The processor has a simple, non-pipelined instruction decoder. Exceptions are currently not implemented. This will be for future development.
+This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students. The standard processor executes each instruction in one clock cycle because the ROM is realized with cells, except for reads from RAM which need two clock cycles. The alternative processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM, except for ROM and RAM reads which need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. Exceptions are currently not implemented. This will be for future development.
 
 \noindent
 This is work in progress. Things will certainly change in the future.
@@ -69,7 +69,7 @@ This is work in progress. Things will certainly change in the future.
 
 \clearpage
 \section{Introduction}
-This document describes the buildup of a simple, single clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions have to be handled in software. The toolchain will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz.
+This document describes the buildup of a simple, single/dual clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions have to be handled in software. The toolchain will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz.
 
 This RISC-V processor consists of the following building blocks:
 
@@ -80,7 +80,7 @@ This RISC-V processor consists of the following building blocks:
 \item The I/O is an interface with the outside world.
 \item The ALU is responsible for almost all computations in the processor.
 \item The PC is used to point to the currently executing instruction.
-\item The Address Decoder and Data Router is an interface between the memory (ROM, RAM, I/O) and the ALU.
+\item The Address Decoder and Data Router is an interface between the memory (ROM, RAM, I/O) and the ALU and registers.
 \item The Instruction Decoder decodes the currently executing instruction and provides control signals to other building blocks.
 \end{itemize}
 
@@ -147,7 +147,7 @@ A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 \draw (22,-1) rectangle ++(2,-3) node[midway,align=center,yshift=0.4cm] {ROM\\(Dual Port)};
 \draw[<-] (24,-2.5) -- ++(1,0) node[right] {PC};
 \draw[->] (24,-3.0) -- ++(1,0) node[right] {instruction};
-\draw[->] (18,-2) -- ++(4,0) node[midway,above] {address};
+\draw[->] (18,-2) -- ++(4,0) node[midway,above] {address+offset};
 
 % Address lines to RAM and I/O
 \draw[->] (21,-2) -- ++(0,-5) -- ++(1,0);
@@ -236,9 +236,9 @@ Register & Name & Purpose & Saver \\
 
 \section{ROM}
 \label{sec:rom}
-The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, halfword accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The ROM is instantiated in cells, which limits the size of the program. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
+The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, halfword accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The standard processor instantiates the ROM in cells, which limits the size of the program. The alternative processor instantiates the ROM in onboard RAM, so bigger programs are possible. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
 
-Note: it is possible to put the ROM in the onboard RAM and supply a MIF file (Memory Initialization File), but then each read from the ROM would require an extra clock cycle. See Section~\ref{sec:ram}.
+Note: the alternative processor uses onboard RAM to simulate ROM. Because of this, each read from RAM (instruction and data) requires two clock cycles. See Section~\ref{sec:ram}.
 
 \section{RAM}
 \label{sec:ram}
@@ -260,20 +260,26 @@ Note that the computation of jump target addresses is handled by the Program Cou
 
 \section{PC}
 \label{sec:pc}
-The Program Counter contains the address of the currently executed instruction. The address is always on a 4-byte boundary although function calls (JAL and JALR instructions) can be on non 4-byte boundaries (the toolchain will always create 4-bytes boundaries). The PC (or rather the VHDL description of the PC) handles the address calculations of jumps and branches taken.
+The Program Counter contains the address of the currently executed instruction. The address is always on a 4-byte boundary although function calls and conditional jump (JAL, JALR en B$xx$ instructions) can be on non 4-byte boundaries (the toolchain will always create 4-bytes boundaries). The PC (or rather the VHDL description of the PC) handles the address calculations of jumps and branches taken.
 
 \section{Instruction Decoder}
 \label{sec:instructiondecoder}
-The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4-bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder and the register file. It incorporates a simple two-state Finite State Machine (FSM). Almost all instructions are executed in one clock cycle. Only reads from RAM require two clock cycles. The FSM takes care of that. The instruction decoder is non-pipelined. That simplifies the design but slows down the maximum clock speed.
+The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4-bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder and the register file.
+
+In the standard processor, a simple two-state Finite State Machine (FSM) is used. Almost all instructions are executed in one clock cycle. Only reads from RAM require two clock cycles. The FSM takes care of that.
+
+In the alternative processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and an extra clock cycle is needed when reading RAM or ROM. The FSM takes care of that.
+
+The instruction decoder is non-pipelined. That simplifies the design but slows down the computational speed.
 
 \section{Address Decoder and Data Router}
 \label{sec:addressdecoderanddatarouter}
-The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is implementation-defined, it depends on the program. Unused ROM addresses return don't cares (in simulation) and in hardware the data returned is implementation-defined. Currently a maximum of 16384 bytes of ROM is supported. The RAM starts at address 0x20000000 and the length can be up to 262144 bytes, in powers of 2. The I/O starts at address 0xF0000000 and the length is implementation-defined.
+The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a 32-bit linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is implementation-defined, it depends on the program. Unused ROM addresses return don't cares (in simulation) and in hardware the data returned is implementation-defined. Currently a maximum of 16384 bytes of ROM is supported. The RAM starts at address 0x20000000 and the length can be up to 262144 bytes, in powers of 2. The I/O starts at address 0xF0000000 and the length is implementation-defined.
 
-When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and halfword accesses) if needed. Please note that reading data from the RAM requires two clock cycles. Reading data from ROM and I/O requires one clock cycle.
+When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and halfword accesses) if needed. Please note that reading data from the RAM and ROM requires an extra clock cycle. Reading data from I/O requires one clock cycle.
 
 \section{Stack pointer}
-The stack pointer is fully implemented although the ISA does not provided pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address on startup. The ISA postulates that the stack is aligned on 16-byte boundaries.
+The stack pointer is fully implemented although the ISA does not provided pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address on startup (which is 0x20004000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
 
 
 \section{Implemented instructions}
@@ -281,16 +287,16 @@ All RV32I Unprivileged instructions are implemented with the exception of FENCE,
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has about 18000 cells available. It has 3080 KB of onboard RAM bits available which are partially used for RAM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000 cells (about 12\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}.\\ For downloading the program file, the onboard USBBlaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has about 18000 cells available. It has 3080 KB of onboard RAM bits available which are partially used for RAM and ROM (in the alternative processor). Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USBBlaster is used.
 
 \section{Simulation}
-The design can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
+The designs can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
 
 \section{Setting up the GNU C compiler}
 The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (for Linux) is straightforward:
 
 \begin{enumerate}
-\item You need a current GNU C-compiler installed.
+\item You need a current GNU C-compiler installed or your Linux box.
 \item You need the texinfo package. On Ubuntu et al.\@ issue
 \begin{lstlisting}[language=]
 apt install texinfo
@@ -364,7 +370,7 @@ Change directory to \texttt{CODE}. Now enter the command \texttt{make}. It will 
 
 Next, start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
 
-To test one of the programs, dive in one of the directories and copy the file with \texttt{.vhd} extension to the directory containing the VHDL description under the name \texttt{processor\_common\_rom.vhd}.
+To test one of the programs, change directory to one of the directories and copy the file with \texttt{.vhd} extension to the directory containing the VHDL description under the name \texttt{processor\_common\_rom.vhd}.
 Now start Quartus and start the compilation. After a successful compilation, you can program the Cyclone V on a DE0-CV board.
 
 \section{Register subset}
@@ -412,7 +418,7 @@ riscv32-unknown-elf-objcopy -O srec flash flash.srec
 This will create an S-record file in Motorola hex-format.
 \item Next issue the command:
 \begin{lstlisting}[language=]
-../bin/srec2vhdl -f flash.srec flash.vhd
+../bin/srec2vhdl -wf flash.srec flash.vhd
 \end{lstlisting}
 This will create a VHDL file with the ROM encoded. Note: the taylor-made \texttt{srec2vhdl} has to be compiled before. See Section~\ref{sec:cloning}.
 \item Next issue the command:
@@ -453,7 +459,7 @@ Some future plans:
 
 \begin{itemize}
 \item Implement exceptions and interrupts in general. This will bring the possibility to add more I/O, such as timers.
-\item Implement ROM in onboard RAM with the use of a MIF file. This will lower the cell count, increase the overall speed, but each ROM read requires two clock cycles.
+%\item Implement ROM in onboard RAM. This will lower the cell count, increase the overall speed, but each ROM read requires two clock cycles.
 \item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers but division has to be handled with a multi-cycle FSM.
 \item Implement more General Purpose I/O (pins), with data direction registers. On the Cyclone V this is an issue, since the tri-state buffers must be in the top level of the design. This makes it hard to implement this processor as part of greater design.
 \end{itemize}
