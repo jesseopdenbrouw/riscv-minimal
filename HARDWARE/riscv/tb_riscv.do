@@ -66,9 +66,9 @@ add log -r *
 add wave -divider "Inputs"
 add wave            -label clk clk
 add wave            -label areset areset
-add wave -radix hex -label datain datain
+add wave -radix hex -label pina pina
 add wave -divider "Outputs"
-add wave -radix hex -label dataout dataout
+add wave -radix hex -label pouta pouta
 add wave -divider "Internals"
 add wave            -label alu_op_int dut/alu_op_int
 add wave            -label shift_int dut/shift_int
@@ -76,8 +76,6 @@ add wave            -label rd_int dut/rd_int
 add wave            -label rd_enable_int dut/rd_enable_int
 add wave            -label rs1_int dut/rs1_int
 add wave            -label rs2_int dut/rs2_int
-#add wave            -label rs3_int dut/rs3_int
-#add wave            -label rs4_int dut/rs4_int
 add wave            -label immediate_int dut/immediate_int
 add wave            -label size_int dut/size_int
 add wave            -label offset_int dut/offset_int;

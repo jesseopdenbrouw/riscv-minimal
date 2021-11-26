@@ -26,21 +26,21 @@ architecture sim of tb_riscv is
 component riscv is
     port ( clk : in std_logic;
            areset : in std_logic;
-           datain : in data_type;
-           dataout : out data_type
+           pina : in data_type;
+           pouta : out data_type
          );
 end component riscv;
 
 signal clk : std_logic;
 signal areset : std_logic;
-signal datain : data_type;
-signal dataout : data_type;
+signal pina : data_type;
+signal pouta : data_type;
 
 begin
 
     -- Instantiate the processor
     dut : riscv
-    port map (clk => clk, areset => areset, datain => datain, dataout => dataout);
+    port map (clk => clk, areset => areset, pina => pina, pouta => pouta);
     
     -- Generate a symmetric clock signal, 100 MHz
     process is
@@ -56,7 +56,7 @@ begin
     begin
         -- Reset is active low
         areset <= '0';
-        datain <= x"ffffffff";
+        pina <= x"ffffffff";
         wait for 12 ns;
         areset <= '1';
         wait;
