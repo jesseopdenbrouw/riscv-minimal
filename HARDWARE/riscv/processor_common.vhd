@@ -67,19 +67,22 @@ package processor_common is
     type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
                         
     -- The ROM
-    -- NOTE: the ROM is byte (8 bits) size.
+    -- NOTE: the ROM is word (32 bits) size.
     -- NOTE: data is in Little Endian format (as by the toolchain)
     --       for halfword and word entities
-    constant rom_size_bits : integer := 10;
-    constant rom_size : integer := 2**rom_size_bits;
-    type rom_type is array(0 to rom_size-1) of std_logic_vector(7 downto 0);
+    --       Set rom_size_bits as if it were bytes
+    constant rom_size_bits : integer := 14;
+    constant rom_size : integer := 2**(rom_size_bits-2);
+    type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
     -- The contents of the ROM is loaded by rom_contents.vhd
     
     -- The I/O
     -- NOTE: the I/O is word (32 bits) size, Big Endian
     --       there is no need to recode the data
-    constant io_size_bits : integer := 1;
-    constant io_size : integer := 2**io_size_bits;
+    --       The I/O can only handle word size access
+    --       Set io_size_bits as if it were bytes
+    constant io_size_bits : integer := 3;
+    constant io_size : integer := 2**(io_size_bits-2);
     type io_type is array (0 to io_size-1) of data_type;
     
     -- The highest nibble (4 bits) of the ROM, RAM and I/O
