@@ -24,12 +24,15 @@ _start:
 #         addi t0,t0,1
 #         bltu t0,t2,loop
 
+
         la  t1, _start_ram
+
 
         lw  t0, 0(zero)
         sw  t0, 0(t1)
         lw  t0, 4(zero)
         sw  t0, 4(t1)
+
 
         lw  t2, 0(t1)
 	nop
