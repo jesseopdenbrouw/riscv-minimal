@@ -10,6 +10,7 @@
 -- will be useful, but WITHOUT ANY WARRANTY; without even the
 -- implied warranty of MERCHANTABILITY or FITNESS FOR A
 -- PARTICULAR PURPOSE.
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -20,8 +21,8 @@ use work.processor_common.all;
 entity riscv is
     port ( clk : in std_logic;
            areset : in std_logic;
-           datain : in data_type;
-           dataout : out data_type
+           pina : in data_type;
+           pouta : out data_type
          );
 end entity riscv;
 
@@ -262,8 +263,8 @@ begin
               datain => rs2data_int,
               dataout => iodata_int,
               -- connection with outside world
-              datainfromoutside => datain,
-              dataouttooutside => dataout
+              datainfromoutside => pina,
+              dataouttooutside => pouta
              );              
     
 end architecture struct;
