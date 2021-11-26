@@ -7,6 +7,10 @@ volatile long long int r = 4;
 
 long int ary[] = { 2, 5 ,7, 8 , 9};
 
+short int k = 4;
+
+char j = 'A';
+
 int main(void) {
 
 	//register long long int a = 14, b = 7;
