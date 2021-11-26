@@ -4,6 +4,8 @@ all:
 	if [ ! -d bin ]; then mkdir bin; fi
 	$(MAKE) -C srec2vhdl all
 	cp srec2vhdl/srec2vhdl bin
+	$(MAKE) -C srec2mif all
+	cp srec2mif/srec2mif bin
 	$(MAKE) -C add64 all
 	$(MAKE) -C ctest all
 	$(MAKE) -C mult all
@@ -16,6 +18,7 @@ all:
 
 clean:
 	$(MAKE) -C srec2vhdl clean
+	$(MAKE) -C srec2mif clean
 	$(MAKE) -C add64 clean
 	$(MAKE) -C ctest clean
 	$(MAKE) -C mult clean

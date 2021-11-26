@@ -7,6 +7,6 @@ all: testio
 testio: testio.c io.h
 	$(CC) -O2 -g -o testio testio.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/minimal.S
 	$(OBJCOPY) -O srec testio testio.srec
-	$(SREC2VHDL) -f testio.srec testio.vhd
+	$(SREC2VHDL) -wf testio.srec testio.vhd
 clean:
 	rm -f testio testio.srec testio.vhd
