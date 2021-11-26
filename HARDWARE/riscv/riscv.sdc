@@ -1,29 +1,15 @@
-## Generated SDC file "microprocessor.sdc"
+#
+# This file is part of the RISC-V Minimal Project
+#
+# (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
+#
+# tb_riscv.do - Modelsim macro file
 
-## Copyright (C) 1991-2011 Altera Corporation
-## Your use of Altera Corporation's design tools, logic functions 
-## and other software and tools, and its AMPP partner logic 
-## functions, and any output files from any of the foregoing 
-## (including device programming or simulation files), and any 
-## associated documentation or information are expressly subject 
-## to the terms and conditions of the Altera Program License 
-## Subscription Agreement, Altera MegaCore Function License 
-## Agreement, or other applicable license agreement, including, 
-## without limitation, that your use is for the sole purpose of 
-## programming logic devices manufactured by Altera and sold by 
-## Altera or its authorized distributors.  Please refer to the 
-## applicable agreement for further details.
-
-
-## VENDOR  "Altera"
-## PROGRAM "Quartus II"
-## VERSION "Version 11.1 Build 216 11/23/2011 Service Pack 1 SJ Web Edition"
-
-## DATE    "Tue May 22 17:40:13 2012"
-
-##
-## DEVICE  "EP3C16F484C6"
-##
+# This software is for educational purposes only. 
+# This software is distributed in the hope that it
+# will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
 
 
 #**************************************************************
