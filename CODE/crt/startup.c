@@ -35,8 +35,13 @@ __attribute__((naked))
 void _start(void)
 {
 
-	__asm__ volatile  ("la    gp, __global_pointer$;"
-                      "la    sp, __stack_pointer$;"
+	/* These assembler instructions set up the Global Pointer
+	 * and the Stack Pointer. After that, the rest is C code */
+        __asm__ volatile  (".option push;"
+			   ".option norelax;"
+	                   "la    gp, __global_pointer$;"
+			   "la    sp, __stack_pointer$;"
+			   ".option pop"
                       :  /* output: none */
                       : /* input: none */
                       : /* clobbers: none */);
