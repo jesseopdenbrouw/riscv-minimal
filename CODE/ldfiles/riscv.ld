@@ -115,7 +115,7 @@ SECTIONS
   . = ALIGN(16);
   __global_pointer$ = . + 0x800;
 
-__stack_pointer$ = ORIGIN(RAM) + LENGTH(RAM);
+  __stack_pointer$ = ORIGIN(RAM) + LENGTH(RAM);
 
   /* End of uninitialized data segment (used by syscalls.c for heap) */
   PROVIDE( end = . );
