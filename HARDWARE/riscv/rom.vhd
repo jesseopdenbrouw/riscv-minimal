@@ -44,8 +44,8 @@ constant x : data_type := (others => '-');
 begin
 
     -- Calculate internal addresses for ROM
-    address1_int <= to_integer(unsigned(address1(rom_size_bits-1 downto 0)));
-    address2_int <= to_integer(unsigned(address2(rom_size_bits-1 downto 0)));
+    address1_int <= to_integer(unsigned(address1(rom_size_bits-3 downto 2)));
+    address2_int <= to_integer(unsigned(address2(rom_size_bits-3 downto 2)));
     
     -- ROM contents is in 32-bit only (4 * 8 bit quantities)
     process(address1_int, address1, address2_int, address2, size2) is
@@ -53,7 +53,7 @@ begin
         error <= '0';
         -- By 4 for instructions
         if address1(1 downto 0) = "00" then
-            data1 <= rom(address1_int+3) & rom(address1_int+2) & rom(address1_int+1) & rom(address1_int+0);
+            data1 <= rom(address1_int)(7 downto 0) & rom(address1_int)(15 downto 8) & rom(address1_int)(23 downto 16) & rom(address1_int)(31 downto 24);
             --data1 <= rom(address1_int+0) & rom(address1_int+1) & rom(address1_int+2) & rom(address1_int+3);
         else
             data1 <= x;
@@ -62,11 +62,19 @@ begin
      
         -- By natural size
         if size2 = size_word and address2(1 downto 0) = "00" then
-            data2 <= rom(address2_int+3) & rom(address2_int+2) & rom(address2_int+1) & rom(address2_int+0);
-        elsif size2 = size_halfword and address2(0) = '0' then
-            data2 <= x(31 downto 16) & rom(address2_int+1) & rom(address2_int+0);
+            data2 <= rom(address2_int)(7 downto 0) & rom(address2_int)(15 downto 8) & rom(address2_int)(23 downto 16) & rom(address2_int)(31 downto 24);
+        elsif size2 = size_halfword and address2(1 downto 0) = "00" then
+            data2 <= x(31 downto 16) & rom(address2_int)(23 downto 16) & rom(address2_int)(31 downto 24);
+        elsif size2 = size_halfword and address2(1 downto 0) = "10" then
+            data2 <= x(31 downto 16) & rom(address2_int)(7 downto 0) & rom(address2_int)(15 downto 8);
         elsif size2 = size_byte then
-            data2 <= x(31 downto 8) & rom(address2_int+0);
+            case address2(1 downto 0) is
+                when "00" => data2 <= x(31 downto 8) & rom(address2_int)(31 downto 24);
+                when "01" => data2 <= x(31 downto 8) & rom(address2_int)(23 downto 16);
+                when "10" => data2 <= x(31 downto 8) & rom(address2_int)(15 downto 8);
+                when "11" => data2 <= x(31 downto 8) & rom(address2_int)(7 downto 0);
+                when others => data2 <= x; error <= '1';
+            end case;
         else
             data2 <= x;
             error <= '1';
