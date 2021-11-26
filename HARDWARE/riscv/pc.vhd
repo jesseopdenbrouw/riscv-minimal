@@ -49,7 +49,6 @@ begin
                 when pc_loadoffset =>
                     pc_int <= pc_int + unsigned(offset);
                 when pc_loadoffsetregister =>
-                    --pc_int <= pc_int + unsigned(offset) + unsigned(rs);
                     pc_int <= unsigned(offset) + unsigned(rs);
                 when pc_branch =>
                     if branch = '1' then
