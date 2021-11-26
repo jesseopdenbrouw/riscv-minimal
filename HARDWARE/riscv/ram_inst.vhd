@@ -1,3 +1,16 @@
+--
+-- This file is part of the RISC-V Minimal Project
+--
+-- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
+--
+-- ram.vhd - RAM interface between the core and the RAM block
+
+-- This hardware description is for educational purposes only. 
+-- This hardware description is distributed in the hope that it
+-- will be useful, but WITHOUT ANY WARRANTY; without even the
+-- implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE.
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -8,12 +21,12 @@ use work.processor_common.all;
 entity ram_inst is
 	port
 	(
-		address		: in std_logic_vector (15 downto 0);
-		byteena		: in std_logic_vector (3 downto 0) :=  (others => '1');
-		clock		: in std_logic  := '1';
-		data		: in std_logic_vector (31 downto 0);
-		wren		: in std_logic ;
-		q		: out std_logic_vector (31 downto 0)
+		address: in std_logic_vector (15 downto 0);
+		byteena: in std_logic_vector (3 downto 0) :=  (others => '1');
+		clock  : in std_logic  := '1';
+		data   : in std_logic_vector (31 downto 0);
+		wren   : in std_logic ;
+		q      : out std_logic_vector (31 downto 0)
 	);
 END ram_inst;
 
