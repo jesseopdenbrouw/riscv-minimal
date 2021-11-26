@@ -27,7 +27,17 @@
 #include <unistd.h>
 
 /* 1000 should be enough */
-#define LENGTH 1000
+#define LEN_BUFFER (1000)
+
+/* This should really be enough */
+#define LEN_CODE (1000000)
+
+#define BYTE (1)
+#define HALFWORD (2)
+#define WORD (4)
+
+/* Make next global, otherwise it can be on the stack */
+unsigned char code[LEN_CODE] = { 0 };
 
 /* Convert 2 ASCII characters to 1 byte */
 unsigned long int hex2(char buffer[]) {
@@ -82,18 +92,19 @@ unsigned long int hex8(char buffer[]) {
 int main(int argc, char *argv[]) {
 
 	FILE *fp, *fout;
-	char buffer[LENGTH];
+	char buffer[LEN_BUFFER];
 	int line = 0;
 	unsigned long int val;
 	unsigned long int address;
 	unsigned long int byte;
 	int i;
-	int doindent = 1;
+	//int doindent = 1;
 
 	/* Options */
 	int indent, opt;
 	int verbose, full;
 	int indentarg;
+	int size = BYTE;
 
 	/* Set defaults on options */
 	full = 0;
@@ -109,12 +120,15 @@ int main(int argc, char *argv[]) {
 		printf("   -i <arg>  Indent by <arg> spaces\n");
 		printf("   -v        Verbose\n");
 		printf("   -q        Quiet. Only errors are reported\n");
+		printf("   -b        Byte output (default)\n");
+		printf("   -h        Halfword output\n");
+		printf("   -w        Word output\n");
 		printf("If outputfile is omitted, stdout is used\n");
 		exit(EXIT_SUCCESS);
 	}
 
 	/* Parse options */
-	while ((opt = getopt(argc, argv, "vqfi:")) != -1) {
+	while ((opt = getopt(argc, argv, "bhwvqfi:")) != -1) {
 	        switch (opt) {
        		case 'f':
 	            full = 1;
@@ -127,6 +141,15 @@ int main(int argc, char *argv[]) {
 	            break;
 	        case 'v':
 	            verbose = 1;
+	            break;
+	        case 'b':
+	            size = BYTE;
+	            break;
+	        case 'h':
+	            size = HALFWORD;
+	            break;
+	        case 'w':
+	            size = WORD;
 	            break;
 	        case 'q':
 	            verbose = 0;
@@ -183,7 +206,7 @@ int main(int argc, char *argv[]) {
 		fprintf(fout, "    constant rom_contents : rom_type := (\n");
 	}
 
-	while (fgets(buffer, LENGTH, fp) != NULL) {
+	while (fgets(buffer, LEN_BUFFER, fp) != NULL) {
 		line++;
 		if (buffer[0] != 'S') {
 			fprintf(stderr, "Not an S-record in line %d!\n", line);
@@ -205,85 +228,28 @@ int main(int argc, char *argv[]) {
 			case '1': val = hex2(buffer+2);
 				  val = val-3;
 				  address = hex4(buffer+4);
-				  if (indent && doindent) {
-					  for (i = 0; i < indentarg; i++) {
-						  fprintf(fout, " ");
-					  }
-					  doindent = 1;
-				  }
 				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+8+i*2);
-					fprintf(fout, "%4lu => x\"%02lx\", ", address, byte);
+					code[address] = byte;
 					address++;
-					if (address % 4 == 0) {
-						fprintf(fout, "\n");
-				  		if (indent) {
-							for (int i = 0; i < indentarg; i++) {
-								fprintf(fout, " ");
-							}
-						}
-					}
-				  }
-				  if (address % 4 != 0) {
-					  fprintf(fout, "\n");
-				  } else {
-					  doindent = 0;
 				  }
 				  break;
 			case '2': val = hex2(buffer+2);
 				  val = val-4;
 				  address = hex6(buffer+4);
-				  if (indent && doindent) {
-					  for (i = 0; i < indentarg; i++) {
-						  fprintf(fout, " ");
-					  }
-					  doindent = 1;
-				  }
 				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+10+i*2);
-					fprintf(fout, "%4lu => x\"%02lx\", ", address, byte);
+					code[address] = byte;
 					address++;
-					if (address % 4 == 0) {
-						fprintf(fout, "\n");
-				  		if (indent) {
-							for (int i = 0; i < indentarg; i++) {
-								fprintf(fout, " ");
-							}
-						}
-					}
-				  }
-				  if (address % 4 != 0) {
-					  fprintf(fout, "\n");
-				  } else {
-					  doindent = 0;
 				  }
 				  break;
 			case '3': val = hex2(buffer+2);
 				  val = val-5;
 				  address = hex8(buffer+4);
-				  if (indent && doindent) {
-					  for (i = 0; i < indentarg; i++) {
-						  fprintf(fout, " ");
-					  }
-					  doindent = 1;
-				  }
 				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+12+i*2);
-					fprintf(fout, "%4lu => x\"%02lx\", ", address, byte);
+					code[address] = byte;
 					address++;
-					if (address % 4 == 0) {
-						fprintf(fout, "\n");
-				  		if (indent) {
-							for (int i = 0; i < indentarg; i++) {
-								fprintf(fout, " ");
-							}
-						}
-					}
-				  }
-				  if (address % 4 != 0) {
-					  fprintf(fout, "\n");
-				  } else {
-					  doindent = 0;
 				  }
 				  break;
 			case '4': if (verbose) {
@@ -318,8 +284,30 @@ int main(int argc, char *argv[]) {
 
 	}
 
+	if (address > LEN_CODE) {
+		fprintf(stderr, "Warning: internal buffer too small, not exporting all data!\n");
+		address = LEN_CODE;
+	}
+
+	for (i = 0; i < address; i = i + size) {
+		if (indent) {
+			for (int i = 0; i < indentarg; i++) {
+				fprintf(fout, " ");
+			}
+		}
+		if (size == BYTE) {
+			fprintf(fout, "%4d => x\"%02x\",\n", i/size, code[i]);
+		} else if (size == HALFWORD) {
+			fprintf(fout, "%4d => x\"%02x%02x\",\n", i/size, code[i], code[i+1]);
+		} else if (size == WORD) {
+			fprintf(fout, "%4d => x\"%02x%02x%02x%02x\",\n", i/size, code[i], code[i+1], code[i+2], code[i+3]);
+		} else {
+			fprintf(stderr, "BUG:: size unknown\n");
+		}
+	}
+
 	if (full) {
-		if (doindent) {
+		if (indent) {
 			for (int i = 0; i < indentarg; i++) {
 				fprintf(fout, " ");
 			}
