@@ -74,7 +74,7 @@ begin
     begin
         -- Need only the upper bits for address, the lower two bits select word, halfword or byte
         address_int <= (others => '0');
-        address_int(ram_size_bits-1 downto 0) <=address(ram_size_bits+1 downto 2);
+        address_int(ram_size_bits-1 downto 0) <= address(ram_size_bits+1 downto 2);
         
         -- Clear error, load write enable en set byte enable off
         error <= '0';
