@@ -86,6 +86,8 @@ This RISC-V processor consists of the following building blocks:
 
 A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 
+There are two versions available. The standard version uses Logic Cells to implement the ROM. This will limit the program size but each ROM access (instruction and data) only requires one clock cycle. The alternative version uses preprogrammed onboard RAM blocks to implement the ROM. Larger programs are possible but each ROM access (program and data) requires two clock cycles.
+ 
 \begin{sidewaysfigure}[!p]
 \centering
 \begin{tikzpicture}[thick,font=\sffamily\footnotesize,>=latex,scale=.75,framed,background rectangle/.style={fill=none}]
@@ -209,7 +211,7 @@ A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 
 
 \section{Registers}
-The processor consists of thirty-two 32-bit registers denoted by \texttt{x0} to \texttt{x31}. Internally, the registers use Big Endian format. Register \texttt{x0} (alias \texttt{zero}) is hardwired to all zeros. Writing this register has no effect. Reading this register returns all zero bits. Normally, the \texttt{x}-names are not used. Table~\ref{tab:registers} shows the names of the registers as they should be used.
+The processor consists of thirty-two 32-bit registers denoted by \texttt{x0} to \texttt{x31}. Internally, the registers use Big Endian format. Register \texttt{x0} (alias \texttt{zero}) is hardwired to all zeros. Writing this register has no effect. Reading this register returns all zero bits. Normally, the \texttt{x}-names are not used but may be handy when simulation the designs. Table~\ref{tab:registers} shows the names of the registers as they should be used.
 
 \begin{table}[!ht]
 \centering
@@ -238,7 +240,7 @@ Register & Name & Purpose & Saver \\
 \label{sec:rom}
 The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, halfword accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The standard processor instantiates the ROM in cells, which limits the size of the program. The alternative processor instantiates the ROM in onboard RAM, so bigger programs are possible. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
 
-Note: the alternative processor uses onboard RAM to simulate ROM. Because of this, each read from RAM (instruction and data) requires two clock cycles. See Section~\ref{sec:ram}.
+Note: the alternative processor uses onboard RAM to simulate ROM. Because of this, each read from ROM (instruction and data) requires two clock cycles. See Section~\ref{sec:ram}.
 
 \section{RAM}
 \label{sec:ram}
@@ -268,7 +270,7 @@ The instruction decoder decodes the instruction supplied by the ROM as pointed b
 
 In the standard processor, a simple two-state Finite State Machine (FSM) is used. Almost all instructions are executed in one clock cycle. Only reads from RAM require two clock cycles. The FSM takes care of that.
 
-In the alternative processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and an extra clock cycle is needed when reading RAM or ROM. The FSM takes care of that.
+In the alternative processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. The FSM takes care of that.
 
 The instruction decoder is non-pipelined. That simplifies the design but slows down the computational speed.
 
@@ -451,9 +453,56 @@ This will copy the VHDL file to the RISC-V processor ROM file.
 
 \end{itemize}
 
+\section{VHDL files}
+Both descriptions are composed of the following files:
+
+\begin{itemize}
+\item \lstinline|processor_common.vhd| -- Common types and constants.
+\item \lstinline|processor_common_rom.vhd| -- Description of the ROM contents.
+\item \lstinline|address_decode.vhd| -- The address decoder and data router to the memory (ROM, RAM, I/O).
+\item \lstinline|alu.vhd| -- Description of the ALU.
+\item \lstinline|pc.vhd| -- Description of the Program Counter.
+\item \lstinline|instruction_decoder.vhd| -- The instruction decoder.
+\item \lstinline|regs.vhd| -- Description of the register file.
+\item \lstinline|rom.vhd| -- Description of the ROM.
+\item \lstinline|ram.vhd| -- Description of the RAM interface between the address 
+\item \lstinline|ram_inst.vhd| -- Description of the onboard RAM.
+decoder and data router and the onboard RAM.
+\item \lstinline|io.vhd| -- Description of the I/O
+\item \lstinline|riscv.vhd| -- Top-level description of the processor.
+\item \lstinline|riscv.sdc| -- Constraints file. Sets the target clock frequency.
+\item \lstinline|tb_riscv.vhd| -- VHDL testbench to simulate the design.
+\item \lstinline|tb_riscv.do| -- QuestaSim/Modelsim command script.
+\end{itemize}
+
+The alternative version as one more file:
+
+\begin{itemize}
+\item \lstinline|rom_inst.vhd| -- Description of the ROM. The ROM contents will be placed in onboard, initialized RAM blocks. The file \lstinline|rom.vhd| is then a frontend between the address decoder and data router and the onboard ROM.
+\end{itemize}
+\section{srec2vhdl}
+This is a homebrew utility to convert a Motorola S-record file into a VHDL file suitable for inclusion of the processor. The program is called with:
+
+\begin{lstlisting}[language=c]
+srec2vhdl [-fbwhqv] [-i <arg>] inputfile [outputfile]
+\end{lstlisting}
+
+\texttt{inputfile} is the S-record file, created by the \texttt{objdump} program. \texttt{outputfile} is the VHDL outputfile. When omitted, \texttt{stdout} is used. There are a number of options:
+
+\begin{itemize}
+\item \texttt{-f} makes a full output that directly can be used. If not used, only the ROM table contents itself is produced.
+\item \texttt{-w} ROM contents is in words (32 bits).
+\item \texttt{-h} ROM contents is in halfwords (16 bits).
+\item \texttt{-b} ROM contents is in bytes (8 bits).
+\item \texttt{-v} Verbose output
+\item \texttt{-q} Quiet output, only error messages are displayed.
+\item \texttt{-i <arg>} indents each line with \texttt{<arg>} spaces.
+\end{itemize}
+
 \section{Current problem}
 The linker script \texttt{riscv.ld} is not working properly. Currently it is not possible to use static/global initialized data, or uninitialized static/global data that should be set to all zero. The data \emph{is} stored in the executable (and hence in the VHDL file), but we cannot access it with linker global symbols. A workaround this problem is to explicitly set the data at startup (i.e. in \texttt{main}).
 
+The standard library is not fully supported. System calls (e.g. \lstinline|_read| and \lstinline|_write|) are not supported.
 \section{Future plans}
 Some future plans:
 
@@ -462,6 +511,7 @@ Some future plans:
 %\item Implement ROM in onboard RAM. This will lower the cell count, increase the overall speed, but each ROM read requires two clock cycles.
 \item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers but division has to be handled with a multi-cycle FSM.
 \item Implement more General Purpose I/O (pins), with data direction registers. On the Cyclone V this is an issue, since the tri-state buffers must be in the top level of the design. This makes it hard to implement this processor as part of greater design.
+\item Implement more functions of the standard library. Now only a few functions work.
 \end{itemize}
 
 \section{Author's note}
