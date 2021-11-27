@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 int main(void) {
@@ -12,10 +13,10 @@ int main(void) {
 	volatile int x = strlen(str);
 
 	/* Copy the string */
-//	strcpy(to, str);
+	strcpy(to, str);
 
 	/* Get string compare */
-//	x = strcmp("Hello", str);
+	x = strcmp("Hello", str);
 
 	return x;
 }
