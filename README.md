@@ -23,5 +23,9 @@ I/O: only a simple 32-bit input and 32-bit output is available.
 ROM starts at 0x00000000, RAM starts at 0x20000000, I/O starts
 at 0xF0000000.
 
+There are two versions: one version that uses Logic Cell to
+implement the ROM and one version that uses onboard RAM to
+implement the ROM.
+
 Work in progress. Things might change. Use with care.
 
