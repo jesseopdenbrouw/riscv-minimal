@@ -34,7 +34,7 @@ SECTIONS
    } >ROM :ROM
 
 
-  .srodata :
+  .rodata :
   {
     _srodata = .;
     *(.rdata)
@@ -82,8 +82,6 @@ SECTIONS
   _start_of_rom_to_copy = .;
   PROVIDE(_start_of_rom_to_copy = .);
 
-  /* . = ALIGN(4); */
-
   .sdata : {
     _sdata = .;
     *(.data)
@@ -92,15 +90,11 @@ SECTIONS
     _edata = .;
   } >RAM AT>ROM
 
-  /* Calculate the lenght of the initialized RAM */
-  /*_ram_length = . - ORIGIN(RAM); */
-
   . = ALIGN(4);
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss section */
     _sbss = .;         /* define a global symbol at bss start */
-    /* __bss_start__ = _sbss; */
     *(.sbss)
     *(.sbss*)
     *(.bss)
@@ -109,7 +103,6 @@ SECTIONS
 
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
-    /* __bss_end__ = _ebss; */
   } >RAM AT>RAM
 
   . = ALIGN(16);
