@@ -93,11 +93,16 @@ add wave -divider "FSM"
 add wave            -label state dut/instruction_decoder0/state
 add wave -divider "Registers"
 add wave            -label regs dut/regs0/regs_int
+add wave -divider "ROM"
+add wave            -label rom dut/rom0/rom_inst0/rom
+#add wave            -label data2 dut/rom0/data2
+#add wave            -label address_a dut/rom0/rom_inst0/address_a
+#add wave            -label address_b dut/rom0/rom_inst0/address_b
 add wave -divider "RAM"
 add wave            -label waitfordata dut/waitfordata_int
-#add wave -radix hex dut/ram0/*
 add wave            -label ram dut/ram0/ram_inst0/ram_int
-
+add wave -radix uns -label address_int /dut/ram0/ram_inst0/address_int
+add wave            -label byteena_int /dut/ram0/byteena_int
 add wave -divider "I/O"
 add wave            -label io dut/io0/io
 
