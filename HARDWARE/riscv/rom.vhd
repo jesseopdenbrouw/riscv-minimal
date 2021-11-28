@@ -36,19 +36,19 @@ entity rom is
 end entity rom;
  
 architecture table of rom is
-constant rom : rom_type := rom_contents;
-signal address1_int : integer;
-signal address2_int : integer;
+signal rom : rom_type := rom_contents;
+signal address1_int : integer range 0 to rom_size-1;
+signal address2_int : integer range 0 to rom_size-1;
 -- Constant x set to - (don't care) for optimzation
 constant x : data_type := (others => '-');
 begin
 
     -- Calculate internal addresses for ROM
-    address1_int <= to_integer(unsigned(address1(rom_size_bits-3 downto 2)));
-    address2_int <= to_integer(unsigned(address2(rom_size_bits-3 downto 2)));
+    address1_int <= to_integer(unsigned(address1(rom_size_bits-1 downto 2)));
+    address2_int <= to_integer(unsigned(address2(rom_size_bits-1 downto 2)));
     
     -- ROM contents is in 32-bit only (4 * 8 bit quantities)
-    process(address1_int, address1, address2_int, address2, size2) is
+    process(address1_int, address1, address2_int, address2, size2, rom) is
     begin
         error <= '0';
         -- By 4 for instructions
