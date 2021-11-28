@@ -7,6 +7,9 @@ MEMORY
    IO (rw)    : ORIGIN = 0xf0000000, LENGTH = 16K
 }
 
+__stack_pointer$ = ORIGIN(RAM) + LENGTH(RAM);
+__stack_size = 0x400;
+
 PHDRS
 {
   ROM PT_LOAD;
@@ -34,6 +37,8 @@ SECTIONS
    } >ROM :ROM
 
 
+   __herewereare1 = .;
+
   .rodata :
   {
     _srodata = .;
@@ -48,6 +53,8 @@ SECTIONS
     _erodata = .;
   } >ROM :ROM
 
+
+   __herewereare2 = .;
 
   .preinit_array     :
   {
@@ -82,13 +89,21 @@ SECTIONS
   _start_of_rom_to_copy = .;
   PROVIDE(_start_of_rom_to_copy = .);
 
+
   .sdata : {
+    __global_pointer$ = . + 0x800;
     _sdata = .;
+    __herewereare3 = .;
     *(.data)
     *(.data*)
+    *(sdata)
+    *(sdata.*)
+    . = ALIGN(4);
+  } >RAM AT>ROM
     . = ALIGN(4);
     _edata = .;
-  } >RAM AT>ROM
+
+   __herewerearer4 = .;
 
   . = ALIGN(4);
   .bss :
@@ -105,10 +120,9 @@ SECTIONS
     _ebss = .;         /* define a global symbol at bss end */
   } >RAM AT>RAM
 
-  . = ALIGN(16);
-  __global_pointer$ = . + 0x800;
+   __herewerearer5 = .;
 
-  __stack_pointer$ = ORIGIN(RAM) + LENGTH(RAM);
+
 
   /* End of uninitialized data segment (used by syscalls.c for heap) */
   PROVIDE( end = . );
