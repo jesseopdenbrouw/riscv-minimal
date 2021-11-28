@@ -10,8 +10,8 @@ _start:
 .option norelax
 
 
-#	la gp, __global_pointer$
-#        la sp, __stack_pointer$ 
+	la gp, __global_pointer$
+        la sp, __stack_pointer$ 
 #
 #loop:   addi t0,t0,1     # Increment t0
 #        slti t2,t0,10    # Set t2 to 1 is t0 < 10
@@ -25,24 +25,25 @@ _start:
 #         bltu t0,t2,loop
 
 
-        la  t1, _start_ram
+        la  x1, _start
+	lw  x3, 4(x1);
+#	sw  s0, 0(t1)
+
+#        lw  t0, 0(zero)
+#       sw  t0, 0(t1)
+#        lw  t0, 4(zero)
+#        sw  t0, 4(t1)
 
 
-        lw  t0, 0(zero)
-        sw  t0, 0(t1)
-        lw  t0, 4(zero)
-        sw  t0, 4(t1)
+#        lw  t2, 0(t1)
+#	nop
+#        lw  t3, 4(t1)
 
 
-        lw  t2, 0(t1)
-	nop
-        lw  t3, 4(t1)
-
-
-	li t1,0xffffffff
-	li t2,0xffffffff
-	mul t3,t2,t1
-	mulhu t4,t2,t1
+#	li t1,0xffffffff
+#	li t2,0xffffffff
+#	mul t3,t2,t1
+#	mulhu t4,t2,t1
 
 halt:   j halt
 
