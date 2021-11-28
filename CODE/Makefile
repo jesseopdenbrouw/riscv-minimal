@@ -15,6 +15,8 @@ all:
 	$(MAKE) -C flash.alt all
 	$(MAKE) -C shift all
 	$(MAKE) -C string all
+	$(MAKE) -C syscalls all
+	$(MAKE) -C float all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -28,4 +30,6 @@ clean:
 	$(MAKE) -C flash.alt clean
 	$(MAKE) -C shift clean
 	$(MAKE) -C string clean
+	$(MAKE) -C syscalls clean
+	$(MAKE) -C float clean
 	rm -rf bin
