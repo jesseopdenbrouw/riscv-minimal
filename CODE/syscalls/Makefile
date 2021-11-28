@@ -1,6 +1,7 @@
 CC = riscv32-unknown-elf-gcc
 OBJCOPY = riscv32-unknown-elf-objcopy
 SREC2VHDL = ../bin/srec2vhdl
+AR = riscv32-unknown-elf-ar
 
 all: test
 
