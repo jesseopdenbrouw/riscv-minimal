@@ -60,9 +60,10 @@ package processor_common is
     -- NOTE: the RAM is 4x byte (8 bits) size, supporting
     --       32-bit Big Endian storage,
     --       so we have to recode to support Little Endian.
+    --       Set ram_size_bits as if it were bytes
     -- NOTE: ram_size_bits must be <= 16
-    constant ram_size_bits : integer := 12;
-    constant ram_size : integer := 2**ram_size_bits;
+    constant ram_size_bits : integer := 14;
+    constant ram_size : integer := 2**(ram_size_bits-2);
     -- The type of the RAM block
     type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
                         
@@ -71,6 +72,7 @@ package processor_common is
     -- NOTE: data is in Little Endian format (as by the toolchain)
     --       for halfword and word entities
     --       Set rom_size_bits as if it were bytes
+    -- NOTE: rom_size_bits must be <= 16
     constant rom_size_bits : integer := 14;
     constant rom_size : integer := 2**(rom_size_bits-2);
     type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
