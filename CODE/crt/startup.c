@@ -13,6 +13,7 @@
 extern uint32_t _sbss, _ebss;
 extern uint32_t _sdata, _edata;
 extern uint32_t _start_of_rom_to_copy;
+extern uint32_t _srodata, _erodata;
 
 /* Declare the `main' function */
 int main(void);
@@ -67,6 +68,17 @@ void _start(void)
 		pStart++;
 		pdRom++;
 	}
+
+	// What
+	volatile uint32_t *start_to_copy = &_edata;
+	pStart = &_srodata;
+	pEnd = &_erodata;
+	while (pStart < pEnd) {
+		*start_to_copy = *pStart;
+	       pStart++;
+	       *start_to_copy++;
+	}	       
+
 
         /* Initialize the C library */
 //#ifndef __cplusplus
