@@ -54,7 +54,7 @@
 \vfill
 \begin{abstract}
 \noindent
-The RISC-V Instruction Set Architecture (ISA) is an open source instruction set for a processor. This means that anybody can create a processor that uses this instruction set. There are already processors available such as E2-core from SiFive. More freeware cores are available on several platforms (e.g. on GitHub). This documents describes a basic RISC-V core in VHDL. The core can only execute the RV32I unprivileged instruction set. The processor incorporates a ROM, RAM and some simple I/O. It is targeted for implementation on an FPGA. It is tested on an Intel Cyclone V with a DE0-CV development board from Terasic. The GNU C-compiler for RISC-V is used for software development. Currently only simple C programs can be compiled and run. C++ is currently not supported.
+The RISC-V Instruction Set Architecture (ISA) is an open source instruction set for a processor. This means that anybody can create a processor that uses this instruction set. There are already processors available such as E2-core from SiFive. More freeware cores are available on several platforms (e.g. on GitHub). This documents describes a basic 32-bit RISC-V core in VHDL. The core can only execute the RV32I unprivileged instruction set. The processor incorporates a ROM, RAM and some simple I/O. It is targeted for implementation on an FPGA. It is tested on an Intel Cyclone V with a DE0-CV development board from Terasic. The GNU C-compiler for RISC-V is used for software development. Currently only simple C programs can be compiled and run. C++ is currently not supported.
 
 \noindent
 This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students. The standard processor executes each instruction in one clock cycle because the ROM is realized with cells, except for reads from RAM which need two clock cycles. The alternative processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM, except for ROM and RAM reads which need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. Exceptions are currently not implemented. This will be for future development.
@@ -422,7 +422,7 @@ This will create an S-record file in Motorola hex-format.
 \begin{lstlisting}[language=]
 ../bin/srec2vhdl -wf flash.srec flash.vhd
 \end{lstlisting}
-This will create a VHDL file with the ROM encoded. Note: the taylor-made \texttt{srec2vhdl} has to be compiled before. See Section~\ref{sec:cloning}.
+This will create a VHDL file with the ROM encoded as 32-bit Little Endian quantities. Note: the taylor-made \texttt{srec2vhdl} has to be compiled before. See Section~\ref{sec:cloning}.
 \item Next issue the command:
 \begin{lstlisting}[language=]
 cp flash.vhd ../../HARDWARE/riscv/processor_common_rom.vhd
