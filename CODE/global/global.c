@@ -1,24 +1,33 @@
 #include <errno.h>
 
-//int x = 0;
-//int y = 0;
-
 int ary[20] = { 2, 4, 5, 6, 9};
 
 int x = 0xffff;
 
-int y;
+int y, w;
+
+const volatile int c = 10;
 
 int main(void) {
 
-	errno = -1;
 
 	char buf[20];
 
-	_read(0, buf, 1);
+	static int jaja = -2;
 
-//	x = x + 2;
-//	y = y + 3;
+	errno = -1;
+
+	x = x + 1;
+
+	y = 0x12345678;
+
+	w = 0x90abcdef;
+
+	x = c;
+
+	errno = 0;
+
+	jaja++;
 
 	return 0;
 }
