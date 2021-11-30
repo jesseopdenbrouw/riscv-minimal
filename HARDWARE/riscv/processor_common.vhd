@@ -76,7 +76,7 @@ package processor_common is
     constant rom_size_bits : integer := 14;
     constant rom_size : integer := 2**(rom_size_bits-2);
     type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
-    -- The contents of the ROM is loaded by rom_contents.vhd
+    -- The contents of the ROM is loaded by processor_common_rom.vhd
     
     -- The I/O
     -- NOTE: the I/O is word (32 bits) size, Big Endian
