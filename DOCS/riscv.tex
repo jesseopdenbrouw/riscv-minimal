@@ -211,7 +211,7 @@ There are two versions available. The standard version uses Logic Cells to imple
 
 
 \section{Registers}
-The processor consists of thirty-two 32-bit registers denoted by \texttt{x0} to \texttt{x31}. Internally, the registers use Big Endian format. Register \texttt{x0} (alias \texttt{zero}) is hardwired to all zeros. Writing this register has no effect. Reading this register returns all zero bits. Normally, the \texttt{x}-names are not used but may be handy when simulation the designs. Table~\ref{tab:registers} shows the names of the registers as they should be used.
+The processor consists of thirty-two 32-bit registers denoted by \texttt{x0} to \texttt{x31}. Internally, the registers use Big Endian format. Register \texttt{x0} (alias \texttt{zero}) is hardwired to all zeros. Writing this register has no effect. Reading this register returns all zero bits. Normally, the \texttt{x}-names are not used but may be handy when simulating the designs. Table~\ref{tab:registers} shows the names of the registers as they should be used.
 
 \begin{table}[!ht]
 \centering
@@ -289,12 +289,12 @@ All RV32I Unprivileged instructions are implemented with the exception of FENCE,
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has about 18000 cells available. It has 3080 KB of onboard RAM bits available which are partially used for RAM and ROM (in the alternative processor). Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USBBlaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has 18480 cells available. It has 3080 Kb of onboard RAM bits available which are partially used for RAM and ROM (in the alternative processor). Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
 
 \section{Simulation}
 The designs can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
 
-\section{Setting up the GNU C compiler}
+\section{Setting up the GNU C compiler for RISC-V}
 The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (for Linux) is straightforward:
 
 \begin{enumerate}
@@ -368,7 +368,7 @@ In the created directory, you will see the following directories:
 \texttt{HARDWARE} -- the VHDL description \\
 \texttt{OLD} -- yes, really old files for backup
 
-Change directory to \texttt{CODE}. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
+Change directory to \texttt{CODE}. Make sure the RISC-V C compiler is in your path environment variable. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
 
 Next, start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
 
@@ -396,7 +396,7 @@ Make sure to use \texttt{-march=rv32e} and \texttt{-mabi=ilp32e}.
 
 
 \section{Compiling a C program by hand}
-Note: only very, very simple C programs can be compiled for the processor at this time. We tested some simple looping (with \texttt{for}) and reading/writing the I/O. We did not test the use of the C library at this time.
+Note: only very simple C programs can be compiled for the processor at this time. We tested some simple looping (with \texttt{for}) and reading/writing the I/O. We did test the use of the C library (malloc et al, floats and double calculation, some trigonometry  functions from the mathematical library), but more tests are needed.
 
 Compiling a program requires the following steps:
 
@@ -466,8 +466,7 @@ Both descriptions are composed of the following files:
 \item \lstinline|regs.vhd| -- Description of the register file.
 \item \lstinline|rom.vhd| -- Description of the ROM.
 \item \lstinline|ram.vhd| -- Description of the RAM interface between the address 
-\item \lstinline|ram_inst.vhd| -- Description of the onboard RAM.
-decoder and data router and the onboard RAM.
+\item \lstinline|ram_inst.vhd| -- Description of the onboard RAM. Quartus detects this and creates the RAM in onboard RAM blocks.
 \item \lstinline|io.vhd| -- Description of the I/O
 \item \lstinline|riscv.vhd| -- Top-level description of the processor.
 \item \lstinline|riscv.sdc| -- Constraints file. Sets the target clock frequency.
@@ -499,16 +498,43 @@ srec2vhdl [-fbwhqv] [-i <arg>] inputfile [outputfile]
 \item \texttt{-i <arg>} indents each line with \texttt{<arg>} spaces.
 \end{itemize}
 
-\section{Current problem}
-The linker script \texttt{riscv.ld} is not working properly. Currently it is not possible to use static/global initialized data, or uninitialized static/global data that should be set to all zero. The data \emph{is} stored in the executable (and hence in the VHDL file), but we cannot access it with linker global symbols. A workaround this problem is to explicitly set the data at startup (i.e. in \texttt{main}).
+\section{Software programs}
+In de \texttt{CODE} directory, there are a number of software programs available:
 
-The standard library is not fully supported. System calls (e.g. \lstinline|_read| and \lstinline|_write|) are not supported.
+\begin{itemize}
+\item \texttt{ldfiles} -- contains the linker scripts.
+\item \texttt{crt} -- contains the startup files.
+\item \texttt{bin} -- contains the binary of \texttt{srec2vhdl}.
+\item \texttt{add64} -- simple 64-bit addition.
+\item \texttt{assembler} -- a simple assembler program.
+\item \texttt{ctest} -- scratch C-program test.
+\item \texttt{double} -- some floating point double computations (seems to work).
+\item \texttt{flash} -- flash the DE0-CV board leds (works on the board)
+\item \texttt{float} -- some floating point float computations (seems to work).
+\item \texttt{global} -- test for globals with initialization (does not work yet).
+\item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
+\item \texttt{mult} -- integer multiplication (works).
+\item \texttt{shift} -- shifts (works)
+\item \texttt{string} -- some string functions (seems to work).
+\item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
+\item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
+\item \texttt{trig} -- some float trigonometry functions (seems to work).
+\end{itemize} 
+
+Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection.
+
+Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary.
+
+\section{Current problem}
+The linker script \texttt{riscv.ld} is not working properly. Currently it is not possible to use static/global initialized data, or uninitialized static/global data that should be set to all zero. The data \emph{is} stored in the executable (and hence in the VHDL ROM file), but we cannot access it with linker global symbols. A workaround this problem is to explicitly set the data at startup (i.e. in \texttt{main}).
+
+The standard C library is not fully testes. Some system calls are supported but they are subs, except for \texttt{sbrk} (that works), so they do return an error or do nothing.
+
 \section{Future plans}
 Some future plans:
 
 \begin{itemize}
-\item Implement exceptions and interrupts in general. This will bring the possibility to add more I/O, such as timers.
-%\item Implement ROM in onboard RAM. This will lower the cell count, increase the overall speed, but each ROM read requires two clock cycles.
+\item Implement exceptions and interrupts in general. This will bring the possibility to add more I/O, such as timers. This needs implementation of the ``Zicsr'' standard.
 \item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers but division has to be handled with a multi-cycle FSM.
 \item Implement more General Purpose I/O (pins), with data direction registers. On the Cyclone V this is an issue, since the tri-state buffers must be in the top level of the design. This makes it hard to implement this processor as part of greater design.
 \item Implement more functions of the standard library. Now only a few functions work.
