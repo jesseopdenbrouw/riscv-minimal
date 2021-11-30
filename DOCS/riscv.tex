@@ -37,7 +37,7 @@
 \lstset{
     basicstyle = \ttfamily,
     breaklines = true,
-    showspaces=true,
+    showspaces=false,
     prebreak = \raisebox{-0.5ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
     postbreak = \raisebox{-0.5ex}[0ex][0ex]{\ensuremath{\hookrightarrow}},
 }
@@ -213,6 +213,8 @@ There are two versions available. The standard version uses Logic Cells to imple
 \section{Registers}
 The processor consists of thirty-two 32-bit registers denoted by \texttt{x0} to \texttt{x31}. Internally, the registers use Big Endian format. Register \texttt{x0} (alias \texttt{zero}) is hardwired to all zeros. Writing this register has no effect. Reading this register returns all zero bits. Normally, the \texttt{x}-names are not used but may be handy when simulating the designs. Table~\ref{tab:registers} shows the names of the registers as they should be used.
 
+A register can be written to, and two register can be selected for data and base address.
+
 \begin{table}[!ht]
 \centering
 \caption{RISC-V registers and their purpose.}
@@ -256,7 +258,7 @@ Currently, the I/O consists of one 32-bit data input and one 32-bit data output.
 
 \section{ALU}
 \label{sec:alu}
-The Arithmetic an Logic Unit (ALU) handles all computations on data. It can add, subtract, do logic operations such as AND, OR en XOR, can shift data left or right, and sign extend byte and halfword data. Some operations require two registers, some only use one register. Furthermore the ALU is also used to determine if a conditional branch should be taken. Note that the RISC-V programmer's model does not incorporate status flags as some other architectures do. This requires some extra instructions when adding or subtracting double word (64-bit) data. The ALU is also used to compute the return address from unconditional function calls (JAL and JALR instructions). The data is in Big Endian format.
+The Arithmetic and Logic Unit (ALU) handles all computations on data. It can add, subtract, do logic operations such as AND, OR en XOR, can shift data left or right, and sign extend byte and halfword data. Some operations require two registers, some only use one register. Furthermore the ALU is also used to determine if a conditional branch should be taken. Note that the RISC-V programmer's model does not incorporate status flags as some other architectures do. This requires some extra instructions when adding or subtracting double word (64-bit) data. The ALU is also used to compute the return address from unconditional function calls (JAL and JALR instructions). The data is in Big Endian format.
 
 Note that the computation of jump target addresses is handled by the Program Counter (PC)
 
@@ -276,20 +278,19 @@ The instruction decoder is non-pipelined. That simplifies the design but slows d
 
 \section{Address Decoder and Data Router}
 \label{sec:addressdecoderanddatarouter}
-The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a 32-bit linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is implementation-defined, it depends on the program. Unused ROM addresses return don't cares (in simulation) and in hardware the data returned is implementation-defined. Currently a maximum of 16384 bytes of ROM is supported. The RAM starts at address 0x20000000 and the length can be up to 262144 bytes, in powers of 2. The I/O starts at address 0xF0000000 and the length is implementation-defined.
+The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a 32-bit linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is 16 kB. Unused ROM addresses return don't cares (in simulation) and in hardware the data returned is implementation-defined. The RAM starts at address 0x20000000 and the length can be up to 262,144 bytes, in powers of 2. Default is 16 kB. The I/O starts at address 0xF0000000 and the length is 16 kB by default.
 
 When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and halfword accesses) if needed. Please note that reading data from the RAM and ROM requires an extra clock cycle. Reading data from I/O requires one clock cycle.
 
 \section{Stack pointer}
-The stack pointer is fully implemented although the ISA does not provided pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address on startup (which is 0x20004000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
-
+The stack pointer is fully implemented although the ISA does not provided pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address + 1 on startup (which is 0x20004000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
 
 \section{Implemented instructions}
 All RV32I Unprivileged instructions are implemented with the exception of FENCE, ECALL and EBREAK instructions. These instructions act as a no-operation (NOP). This is because exceptions are not implemented.
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has 18480 cells available. It has 3080 Kb of onboard RAM bits available which are partially used for RAM and ROM (in the alternative processor). Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has 18480 cells available. It has 3080 kb of onboard RAM bits available which are partially used for RAM and ROM (in the alternative processor). Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
 
 \section{Simulation}
 The designs can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
@@ -511,7 +512,7 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{double} -- some floating point double computations (seems to work).
 \item \texttt{flash} -- flash the DE0-CV board leds (works on the board)
 \item \texttt{float} -- some floating point float computations (seems to work).
-\item \texttt{global} -- test for globals with initialization (does not work yet).
+\item \texttt{global} -- test for globals and local statics with initialization (seems to works).
 \item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
 \item \texttt{mult} -- integer multiplication (works).
 \item \texttt{shift} -- shifts (works)
@@ -519,16 +520,78 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
 \item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
 \item \texttt{trig} -- some float trigonometry functions (seems to work).
+\item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O.
 \end{itemize} 
 
 Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection.
 
 Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary.
 
-\section{Current problem}
-The linker script \texttt{riscv.ld} is not working properly. Currently it is not possible to use static/global initialized data, or uninitialized static/global data that should be set to all zero. The data \emph{is} stored in the executable (and hence in the VHDL ROM file), but we cannot access it with linker global symbols. A workaround this problem is to explicitly set the data at startup (i.e. in \texttt{main}).
+\section{Address ranges and memory sizes}
+By default, the ROM starts at address 0x00000000 and and has a size of 16 kB (4 k words). The Program Counter starts at address 0x00000000. The RAM starts at address 0x20000000 and has a size of 16 kB (4 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20004000. The I/O starts at address 0xf0000000 and has a size of 16 kB (4 k words).
 
-The standard C library is not fully testes. Some system calls are supported but they are subs, except for \texttt{sbrk} (that works), so they do return an error or do nothing.
+The ROM may be moved to another start location. The Program Counter is started at the correct address. The placement of the ROM is in 256 MB intervals, which are the 4 most significant bits of a 32-bit address. The same holds for the RAM and the I/O. To move the ROM, open the VHDL file \lstinline|processor_common.vhd| and go down to the end of the file. There you will see the following lines:
+
+\begin{lstlisting}[language=VHDL]
+-- The highest nibble (4 bits) of the ROM, RAM and I/O
+-- This will set the memories at 256 MB intervals
+constant rom_high_nibble : std_logic_vector(3 downto 0) := x"0";
+constant ram_high_nibble : std_logic_vector(3 downto 0) := x"2";
+constant io_high_nibble : std_logic_vector(3 downto 0) := x"F";
+\end{lstlisting}
+
+Change the start locations of the memories by changing the constants. Make sure the memories do not overlap. To change the sizes of the memory, look for the lines as shown below:
+
+\begin{lstlisting}[language=VHDL]
+-- The RAM
+-- NOTE: the RAM is 4x byte (8 bits) size, supporting
+--       32-bit Big Endian storage,
+--       so we have to recode to support Little Endian.
+--       Set ram_size_bits as if it were bytes
+-- NOTE: ram_size_bits must be <= 16
+constant ram_size_bits : integer := 14;
+constant ram_size : integer := 2**(ram_size_bits-2);
+-- The type of the RAM block, there are 4 blocks instantiated
+type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
+                    
+-- The ROM
+-- NOTE: the ROM is word (32 bits) size.
+-- NOTE: data is in Little Endian format (as by the toolchain)
+--       for halfword and word entities
+--       Set rom_size_bits as if it were bytes
+-- NOTE: rom_size_bits must be <= 16
+constant rom_size_bits : integer := 14;
+constant rom_size : integer := 2**(rom_size_bits-2);
+type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
+-- The contents of the ROM is loaded by processor_common_rom.vhd
+
+-- The I/O
+-- NOTE: the I/O is word (32 bits) size, Big Endian
+--       there is no need to recode the data
+--       The I/O can only handle word size access
+--       Set io_size_bits as if it were bytes
+constant io_size_bits : integer := 3;
+constant io_size : integer := 2**(io_size_bits-2);
+type io_type is array (0 to io_size-1) of data_type;
+\end{lstlisting}
+
+Set the memories in address bit lengths. So, \texttt{16} means $2^{16} = 65,536$ bytes (524,288 bits). This can be done for ROM and RAM. The standard processor uses Logic Cells to implement the ROM, so only small values are applicable. The alternative processor uses onboard RAM so higher values are possible. Please note that in this case both ROM and RAM bits may not exceed 3,153,920 bits.
+
+Next, open de linker script in \lstinline|<...>/ldfiles/riscv.ld|.
+
+Find the lines as showed below:
+
+\begin{lstlisting}[language=]
+MEMORY
+{
+   ROM (rx)   : ORIGIN = 0x00000000, LENGTH = 16K
+   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 16K
+   IO (rw)    : ORIGIN = 0xf0000000, LENGTH = 16K
+}
+\end{lstlisting}
+
+Change the start addresses at the top op the file and changes the sizes if needed.
+Then recompile your programs.
 
 \section{Future plans}
 Some future plans:
