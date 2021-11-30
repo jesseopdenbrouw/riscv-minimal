@@ -7,7 +7,6 @@ all:
 	$(MAKE) -C srec2mif all
 	cp srec2mif/srec2mif bin
 	$(MAKE) -C add64 all
-	$(MAKE) -C ctest all
 	$(MAKE) -C mult all
 	$(MAKE) -C assembler all
 	$(MAKE) -C testio all
@@ -19,12 +18,13 @@ all:
 	$(MAKE) -C double all
 	$(MAKE) -C malloc all
 	$(MAKE) -C trig all
+	$(MAKE) -C ioadd all
+	$(MAKE) -C global all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
 	$(MAKE) -C srec2mif clean
 	$(MAKE) -C add64 clean
-	$(MAKE) -C ctest clean
 	$(MAKE) -C mult clean
 	$(MAKE) -C assembler clean
 	$(MAKE) -C testio clean
@@ -36,4 +36,6 @@ clean:
 	$(MAKE) -C double clean
 	$(MAKE) -C malloc clean
 	$(MAKE) -C trig clean
+	$(MAKE) -C ioadd clean
+	$(MAKE) -C global clean
 	rm -rf bin
