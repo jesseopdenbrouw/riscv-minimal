@@ -12,11 +12,13 @@ all:
 	$(MAKE) -C assembler all
 	$(MAKE) -C testio all
 	$(MAKE) -C flash all
-	$(MAKE) -C flash.alt all
 	$(MAKE) -C shift all
 	$(MAKE) -C string all
 	$(MAKE) -C syscalls all
 	$(MAKE) -C float all
+	$(MAKE) -C double all
+	$(MAKE) -C malloc all
+	$(MAKE) -C trig all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -27,9 +29,11 @@ clean:
 	$(MAKE) -C assembler clean
 	$(MAKE) -C testio clean
 	$(MAKE) -C flash clean
-	$(MAKE) -C flash.alt clean
 	$(MAKE) -C shift clean
 	$(MAKE) -C string clean
 	$(MAKE) -C syscalls clean
 	$(MAKE) -C float clean
+	$(MAKE) -C double clean
+	$(MAKE) -C malloc clean
+	$(MAKE) -C trig clean
 	rm -rf bin
