@@ -31,6 +31,8 @@ void _start(void);
 
 /* The startup code must be placed at the begin of the ROM */
 /* and doesn't need a stack frame of pushed registers */
+/* The linker will place this function at the beginning */
+/* of the code (text) */
 __attribute__((section(".text.start_up_code_c")))
 __attribute__((naked))
 void _start(void)
@@ -69,6 +71,7 @@ void _start(void)
 		pdRom++;
 	}
 
+/*
 	// What
 	volatile uint32_t *start_to_copy = &_edata;
 	pStart = &_srodata;
@@ -76,9 +79,9 @@ void _start(void)
 	while (pStart < pEnd) {
 		*start_to_copy = *pStart;
 	       pStart++;
-	       *start_to_copy++;
+	       start_to_copy++;
 	}	       
-
+*/
 
         /* Initialize the C library */
 //#ifndef __cplusplus
