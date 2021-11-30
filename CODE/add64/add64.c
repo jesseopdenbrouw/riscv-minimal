@@ -1,6 +1,6 @@
 int main(void) {
 
-	register long long int r, a = 14, b = 7;
+	volatile long long int r, a = 0x7fffffffffffffff, b = 7;
 
 	r = a + b;
 
