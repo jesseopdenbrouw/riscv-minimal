@@ -37,8 +37,6 @@ SECTIONS
    } >ROM :ROM
 
 
-   __herewereare1 = .;
-
   .rodata :
   {
     _srodata = .;
@@ -53,8 +51,6 @@ SECTIONS
     _erodata = .;
   } >ROM :ROM
 
-
-   __herewereare2 = .;
 
   .preinit_array     :
   {
@@ -103,8 +99,6 @@ SECTIONS
     . = ALIGN(4);
     _edata = .;
 
-   __herewerearer4 = .;
-
   . = ALIGN(4);
   .bss :
   {
@@ -120,11 +114,8 @@ SECTIONS
     _ebss = .;         /* define a global symbol at bss end */
   } >RAM AT>RAM
 
-   __herewerearer5 = .;
 
-
-
-  /* End of uninitialized data segment (used by syscalls.c for heap) */
+  /* End of uninitialized data segment (used by syssbrk.c for heap) */
   PROVIDE( end = . );
   _end = ALIGN(8);
 
