@@ -7,9 +7,9 @@ int main(void) {
 	volatile uint32_t counter;
 
 	while (1) {
-		GPIO_POUTA = 0xffffffff;
+		GPIOA_POUT = 0xffffffff;
 		for (counter = 0; counter < 5000000; counter ++);
-		GPIO_POUTA = ~GPIO_POUTA;
+		GPIOA_POUT = ~GPIOA_POUT;
 		for (counter = 0; counter < 5000000; counter ++);
 	}
 }
