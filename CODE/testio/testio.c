@@ -5,6 +5,6 @@
 int main(void) {
 
 	while (1) {
-		GPIO_POUTA = GPIO_PINA;
+		GPIOA_POUT = GPIOA_PIN;
 	}
 }
