@@ -50,6 +50,9 @@ begin
         -- ROM @ 0xxxxxxx, 256M space, read only
         if address(31 downto 28) = rom_high_nibble then
             dataout <= romdatain;
+            if memaccess = memaccess_read then
+                waitfordata <= '1';
+            end if;
         -- I/O @ Fxxxxxxx, 256M space
         elsif address(31 downto 28) = io_high_nibble then
             if memaccess = memaccess_write then
