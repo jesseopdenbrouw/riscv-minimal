@@ -19,6 +19,11 @@ __attribute__((weak)) int __io_getchar(void) {
 	return 0;
 }
 
+/* Empty environment */
+
+char *__env[1] = { 0 };
+char **environ = __env;
+
 int _read(int fd, char *buf, int n) {
 
 	for (int i = 0; i < n; i++) {
