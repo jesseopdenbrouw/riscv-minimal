@@ -17,7 +17,7 @@ Simulation is possible with QuestaSim Intel Starter Edition.
 You need a (free) license for that.
 
 ROM: a ROM of 64 kB is available (may be extended).
-RAM: 64 kB using onboard RAM block availablei (may be extended).
+RAM: a RAM of 32 kB using onboard RAM block available (may be extended).
 I/O: a simple 32-bit input and 32-bit output is available, as
 is a simple 8-bit UART.
 
