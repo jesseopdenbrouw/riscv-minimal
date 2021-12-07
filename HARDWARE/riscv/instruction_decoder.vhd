@@ -46,7 +46,7 @@ alias rd_i : reg_type is instr(11 downto 7);
 alias rs1_i : reg_type is instr(19 downto 15);
 alias rs2_i : reg_type is instr(24 downto 20);
 alias shamt : shift_type is instr(24 downto 20);
-type state_type is (state_unknown, state_fetch, state_wait);
+type state_type is (state_unknown, state_fetch, state_execute, state_wait);
 signal state : state_type;
 begin
 
@@ -57,8 +57,12 @@ begin
         elsif rising_edge(clk) then
             case state is
                 when state_fetch =>
+                    state <= state_execute;
+                when state_execute =>
                     if waitfordata = '1' then
                         state <= state_wait;
+                    else
+                        state <= state_fetch;
                     end if;
                 when state_wait =>
                     state <= state_fetch;
@@ -86,6 +90,8 @@ begin
         
         case state is
         when state_fetch =>
+            pc_op <= pc_hold;
+        when state_execute =>
             -- Parse opcodes
             case opcode is
                 -- LUI
