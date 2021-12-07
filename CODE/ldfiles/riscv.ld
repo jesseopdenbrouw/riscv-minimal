@@ -2,8 +2,8 @@ ENTRY( _start )
 
 MEMORY
 {
-   ROM (rx)   : ORIGIN = 0x00000000, LENGTH = 16K
-   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 16K
+   ROM (rx)   : ORIGIN = 0x00000000, LENGTH = 64K
+   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 32K
    IO (rw)    : ORIGIN = 0xf0000000, LENGTH = 16K
 }
 
@@ -89,7 +89,6 @@ SECTIONS
   .sdata : {
     __global_pointer$ = . + 0x800;
     _sdata = .;
-    __herewereare3 = .;
     *(.data)
     *(.data*)
     *(sdata)
