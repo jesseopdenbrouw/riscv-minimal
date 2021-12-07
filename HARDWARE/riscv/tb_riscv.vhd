@@ -27,7 +27,9 @@ component riscv is
     port ( clk : in std_logic;
            areset : in std_logic;
            pina : in data_type;
-           pouta : out data_type
+           pouta : out data_type;
+           TxD : out std_logic;
+           RxD : in std_logic
          );
 end component riscv;
 
@@ -35,31 +37,50 @@ signal clk : std_logic;
 signal areset : std_logic;
 signal pina : data_type;
 signal pouta : data_type;
+signal TxD, RxD : std_logic;
 
 begin
 
     -- Instantiate the processor
     dut : riscv
-    port map (clk => clk, areset => areset, pina => pina, pouta => pouta);
+    port map (clk => clk, areset => areset, pina => pina, pouta => pouta, TxD => TxD, RxD => RxD);
     
-    -- Generate a symmetric clock signal, 100 MHz
+    -- Generate a symmetric clock signal, 50 MHz
     process is
     begin
         clk <= '1';
-        wait for 5 ns;
+        wait for 10 ns;
         clk <= '0';
-        wait for 5 ns;
+        wait for 10 ns;
     end process;
     
-    -- Only here to supply a reset and datain
+    -- Only here to supply a reset, datain and RxD
     process is
+    constant chartosend : std_logic_vector(7 downto 0) := "01000001";
     begin
         -- Reset is active low
         areset <= '0';
+        -- RxD input is idle high
+        RxD <= '1';
         pina <= x"ffffffff";
-        wait for 12 ns;
+        wait for 25 ns;
         areset <= '1';
+        wait for 1000 us;
+        
+        -- Send start bit
+        RxD <= '0';
+        wait for 104 us;
+        -- Send character
+        for i in 0 to 7 loop
+            RxD <= chartosend(i);
+            wait for 104 us;
+        end loop;
+        -- Send stop bit
+        RxD <= '1';
+        wait for 104 us;
+        
         wait;
+        
     end process;
     
 end architecture sim;
