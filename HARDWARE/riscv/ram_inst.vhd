@@ -11,6 +11,12 @@
 -- implied warranty of MERCHANTABILITY or FITNESS FOR A
 -- PARTICULAR PURPOSE.
 
+-- The word size data is presented in Big Endian order,
+-- but is written as four Little Endian 8-bit quantities.
+-- The halfword size data is presented in Big Endian order,
+-- but is written as two Little Endian 8-bit quantities,
+-- There is no order for bytes (a.k.a. 8-bit quantities).
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
