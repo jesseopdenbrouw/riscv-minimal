@@ -19,39 +19,40 @@ library work;
 use work.processor_common.all;
 
 entity riscv is
-    port ( clk : in std_logic;
-           areset : in std_logic;
-           pina : in data_type;
-           pouta : out data_type
+    port (clk : in std_logic;
+          areset : in std_logic;
+          -- I/O
+          pina : in data_type;
+          pouta : out data_type;
+          TxD : out std_logic;
+          RxD : in std_logic
          );
 end entity riscv;
 
 architecture struct of riscv is
 
 component regs is
-    port (
-        clk : in std_logic;
-        areset : in std_logic;
-        datain : in data_type;
-        selrd  : in reg_type;
-        enable : in std_logic;
-        sel1out : in reg_type;
-        sel2out : in reg_type;
-        rs1out : out data_type;
-        rs2out : out data_type
-       );
+    port (clk : in std_logic;
+          areset : in std_logic;
+          datain : in data_type;
+          selrd  : in reg_type;
+          enable : in std_logic;
+          sel1out : in reg_type;
+          sel2out : in reg_type;
+          rs1out : out data_type;
+          rs2out : out data_type
+         );
 end component regs;
 component alu is
-    port (
-        alu_op : in alu_op_type;
-        dataa : in data_type;
-        datab : in data_type;
-        immediate : in data_type;
-        shift: in shift_type;
-        pc : in data_type;
-        memory : in data_type;
-        result : out data_type
-       );
+    port (alu_op : in alu_op_type;
+          dataa : in data_type;
+          datab : in data_type;
+          immediate : in data_type;
+          shift: in shift_type;
+          pc : in data_type;
+          memory : in data_type;
+          result : out data_type
+         );
 end component alu;
 component instruction_decoder is
     port (clk : in std_logic;
@@ -73,25 +74,24 @@ component instruction_decoder is
          );
 end component instruction_decoder;
 component rom is
-    port (
-        address1 : in data_type;
-        address2 : in data_type;
-        size2 : size_type;
-        data1 : out data_type;
-        data2: out data_type;
-        error : out std_logic
-    );
+    port (clk : in std_logic;
+          address1 : in data_type;
+          address2 : in data_type;
+          size2 : size_type;
+          data1 : out data_type;
+          data2: out data_type;
+          error : out std_logic
+         );
 end component rom;
 component pc is
-    port (
-        clk : in std_logic;
-        areset : in std_logic;
-        pc_op : in pc_op_type;
-        rs : in data_type;
-        offset : in data_type;
-        branch : in std_logic;
-        address : out data_type
-       );
+    port (clk : in std_logic;
+          areset : in std_logic;
+          pc_op : in pc_op_type;
+          rs : in data_type;
+          offset : in data_type;
+          branch : in std_logic;
+          address : out data_type
+         );
 end component pc;
 component address_decoder_and_data_router is
     port (rs : in data_type;
@@ -109,8 +109,7 @@ component address_decoder_and_data_router is
    );
 end component address_decoder_and_data_router;
 component ram is
-    port (
-          clk : in std_logic;
+    port (clk : in std_logic;
           address : in data_type;
           datain : in data_type;
           size : in size_type;
@@ -128,12 +127,14 @@ component io is
           datain : in data_type;
           dataout : out data_type;
           -- connection with outside world
-          datainfromoutside : in data_type;
-          dataouttooutside : out data_type
+          pina : in data_type;
+          pouta : out data_type;
+          TxD : out std_logic;
+          RxD : in std_logic
          );
 end component io;
 
-
+-- Internal connection signals
 signal areset_int : std_logic;
 signal alu_op_int : alu_op_type;
 signal shift_int : shift_type;
@@ -166,6 +167,7 @@ begin
     -- Input push button is active low
     areset_int <= not areset;
     
+    -- The registers
     regs0 : regs
     port map (clk => clk,
               areset => areset_int,
@@ -178,6 +180,7 @@ begin
               rs2out => rs2data_int
     );
 
+    -- The ALU
     alu0 : alu
     port map (alu_op => alu_op_int,
               dataa => rs1data_int,
@@ -188,7 +191,8 @@ begin
               memory => memory_int,
               result => result_int
              );
-             
+
+    -- The Progam Counter
     pc0 : pc
     port map (clk => clk,
               areset => areset_int,
@@ -199,6 +203,7 @@ begin
               address => pc_int
     );
 
+    -- The Instuction Decoder
     instruction_decoder0 : instruction_decoder
     port map (clk => clk,
               areset => areset_int,
@@ -217,16 +222,19 @@ begin
               memaccess => memaccess_int,
               error => open
              );
-             
+
+    -- The ROM
     rom0 : rom
-    port map (address1 => pc_int,
+    port map (clk => clk,
+              address1 => pc_int,
               address2 => address_int,
               size2 => size_int,
               data1 => instr_int,
               data2 => romdata_int,
               error => open
     );
-    
+
+    -- The Address Decoder and Data Router
     addecroute0 : address_decoder_and_data_router
     port map (rs => rs1data_int,
               offset => offset_int,
@@ -242,6 +250,7 @@ begin
               addresserror => open
     );
 
+    -- The RAM
     ram0 : ram
     port map (
               clk => clk,
@@ -253,9 +262,9 @@ begin
               error => open
     );
    
+   -- The I/O
     io0 : io
-    port map (
-              clk => clk,
+    port map (clk => clk,
               areset => areset_int,
               address => address_int,
               size => size_int,
@@ -263,8 +272,10 @@ begin
               datain => rs2data_int,
               dataout => iodata_int,
               -- connection with outside world
-              datainfromoutside => pina,
-              dataouttooutside => pouta
+              pina => pina,
+              pouta => pouta,
+              TxD => TxD,
+              RxD => RxD
              );              
     
 end architecture struct;
