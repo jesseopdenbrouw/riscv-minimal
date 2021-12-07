@@ -26,7 +26,7 @@ int main(void) {
 
 	pint = (int *) malloc(100);
 
-	for (int i = 0; i < 99; i++) {
+	for (int i = 0; i < 25; i++) {
 		pint[i] = -1;
 	}
 
