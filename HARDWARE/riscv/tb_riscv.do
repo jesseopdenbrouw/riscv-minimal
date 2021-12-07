@@ -44,10 +44,11 @@ vcom -93 -work work ${prefix}processor_common.vhd
 vcom -93 -work work ${prefix}processor_common_rom.vhd
 vcom -93 -work work ${prefix}alu.vhd
 vcom -93 -work work ${prefix}regs.vhd
-vcom -93 -work work ${prefix}rom.vhd
 vcom -93 -work work ${prefix}pc.vhd
 vcom -93 -work work ${prefix}instruction_decoder.vhd
 vcom -93 -work work ${prefix}address_decode.vhd
+vcom -93 -work work ${prefix}rom.vhd
+vcom -93 -work work ${prefix}rom_inst.vhd
 vcom -93 -work work ${prefix}ram.vhd
 vcom -93 -work work ${prefix}ram_inst.vhd
 vcom -93 -work work ${prefix}io.vhd
@@ -93,16 +94,29 @@ add wave            -label state dut/instruction_decoder0/state
 add wave -divider "Registers"
 add wave            -label regs dut/regs0/regs_int
 add wave -divider "ROM"
-add wave            -label rom dut/rom0/rom
+add wave            -label rom dut/rom0/rom_inst0/rom
+#add wave            -label data2 dut/rom0/data2
+#add wave            -label address_a dut/rom0/rom_inst0/address_a
+#add wave            -label address_b dut/rom0/rom_inst0/address_b
 add wave -divider "RAM"
 add wave            -label waitfordata dut/waitfordata_int
 add wave            -label ram dut/ram0/ram_inst0/ram_int
 #add wave -radix uns -label address_int /dut/ram0/ram_inst0/address_int
 #add wave            -label byteena_int /dut/ram0/byteena_int
-#add wave            -label ramll /dut/ram0/ram_inst0/ramll
 add wave -divider "I/O"
 add wave            -label io dut/io0/io
-
+add wave -divider "USART"
+add wave -radix hex -label txbuffer dut/io0/txbuffer
+add wave            -label txstart dut/io0/txstart
+add wave            -label txstate dut/io0/txstate
+add wave -radix uns -label txbittimer /dut/io0/txbittimer
+add wave -radix uns -label txshiftcounter /dut/io0/txshiftcounter
+add wave            -label TxD TxD
+add wave -radix hex -label rxbuffer dut/io0/rxbuffer
+add wave            -label rxstate dut/io0/rxstate
+add wave -radix uns -label rxbittimer /dut/io0/rxbittimer
+add wave -radix uns -label rxshiftcounter /dut/io0/rxshiftcounter
+add wave            -label RxD RxD
 
 
 # Open Structure, Signals (waveform) and List window
