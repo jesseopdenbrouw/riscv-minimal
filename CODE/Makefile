@@ -20,6 +20,8 @@ all:
 	$(MAKE) -C trig all
 	$(MAKE) -C ioadd all
 	$(MAKE) -C global all
+	$(MAKE) -C sprintf all
+	$(MAKE) -C usart all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -38,4 +40,6 @@ clean:
 	$(MAKE) -C trig clean
 	$(MAKE) -C ioadd clean
 	$(MAKE) -C global clean
+	$(MAKE) -C sprintf clean
+	$(MAKE) -C usart clean
 	rm -rf bin
