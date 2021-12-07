@@ -16,20 +16,18 @@ of the DE0-CV board by Terasic and Quartus Prime Lite 21.1.
 Simulation is possible with QuestaSim Intel Starter Edition.
 You need a (free) license for that.
 
-ROM: only a small ROM is available (16 KB).
-RAM: up to 256K bytes using onboard RAM block available.
-I/O: only a simple 32-bit input and 32-bit output is available.
+ROM: a ROM of 64 kB is available (may be extended).
+RAM: 64 kB using onboard RAM block availablei (may be extended).
+I/O: a simple 32-bit input and 32-bit output is available, as
+is a simple 8-bit UART.
 
 ROM starts at 0x00000000, RAM starts at 0x20000000, I/O starts
 at 0xF0000000.
 
-There are two versions: one version that uses Logic Cell to
-implement the ROM and one version that uses onboard RAM to
-implement the ROM.
-
 We tested some simple C programs. It seems that integer, float
 and double calculations work correctly, as is the sbrk system
-call for use with malloc(). I/O functions (printf, scanf et al)
+call for use with malloc(). sprint is tested (also for floating
+point) and seems to work. I/O functions (printf, scanf et al)
 are not tested.
 
 Work in progress. Things might change. Use with care.
