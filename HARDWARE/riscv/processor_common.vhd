@@ -56,34 +56,37 @@ package processor_common is
                          alu_jal, alu_jalr,
                          alu_beq, alu_bne, alu_blt, alu_bge, alu_bltu, alu_bgeu
                         );
-    -- The RAM
-    -- NOTE: the RAM is 4x byte (8 bits) size, supporting
-    --       32-bit Big Endian storage,
-    --       so we have to recode to support Little Endian.
-    --       Set ram_size_bits as if it were bytes
-    -- NOTE: ram_size_bits must be <= 16
-    constant ram_size_bits : integer := 14;
-    constant ram_size : integer := 2**(ram_size_bits-2);
-    -- The type of the RAM block, there are 4 blocks instantiated
-    type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
-                        
     -- The ROM
     -- NOTE: the ROM is word (32 bits) size.
     -- NOTE: data is in Little Endian format (as by the toolchain)
     --       for halfword and word entities
     --       Set rom_size_bits as if it were bytes
     -- NOTE: rom_size_bits must be <= 16
-    constant rom_size_bits : integer := 14;
+    --       default is 64 kB data
+    constant rom_size_bits : integer := 16;
     constant rom_size : integer := 2**(rom_size_bits-2);
     type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
-    -- The contents of the ROM is loaded by processor_common_rom.vhd
+    -- The contents of the ROM is loaded by rom_contents.vhd
     
+    -- The RAM
+    -- NOTE: the RAM is 4x byte (8 bits) size, supporting
+    --       32-bit Big Endian storage,
+    --       so we have to recode to support Little Endian.
+    --       Set ram_size_bits as if it were bytes
+    -- NOTE: ram_size_bits must be <= 16
+    -- Default is 32 kB data
+    constant ram_size_bits : integer := 15;
+    constant ram_size : integer := 2**(ram_size_bits-2);
+    -- The type of the RAM block
+    type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
+                        
     -- The I/O
     -- NOTE: the I/O is word (32 bits) size, Big Endian
     --       there is no need to recode the data
     --       The I/O can only handle word size access
     --       Set io_size_bits as if it were bytes
-    constant io_size_bits : integer := 3;
+    -- Default 64 B data
+    constant io_size_bits : integer := 6;
     constant io_size : integer := 2**(io_size_bits-2);
     type io_type is array (0 to io_size-1) of data_type;
     
