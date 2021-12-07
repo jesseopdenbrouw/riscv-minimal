@@ -1,11 +1,10 @@
 \documentclass[12pt]{article}
 
-\usepackage[a4paper,inner=1.0in,outer=1.2in,top=1in,bottom=1.5in,footskip=0.4in]{geometry}
-
 \author{Jesse E.J. op den Brouw\thanks{\texttt{J.E.J.opdenBrouw@hhs.nl}}\\[2ex]The Hague University of Applied Sciences}
 \title{A Minimal RISC-V processor in VHDL}
 \date{\today\\[2ex]\normalsize\url{https://github.com/jesseopdenbrouw/riscv-minimal}}
 
+\usepackage[a4paper,inner=1.0in,outer=1.2in,top=1in,bottom=1.5in,footskip=0.4in,showframe]{geometry}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage[charter]{mathdesign}
@@ -13,11 +12,11 @@
 \usepackage{booktabs}
 \usepackage{mathtools}
 \usepackage{rotating}
+\usepackage{register}
 
 
 %% Making captions nicer...
-\usepackage[font=footnotesize,format=plain,labelfont=bf,up,textfont=sl,up]{caption}
-\DeclareCaptionLabelSeparator{emdash}{\ \ ---\ \ }
+\usepackage[font=footnotesize,format=plain,labelfont=bf,textfont=sl]{caption}
 \usepackage[labelformat=simple,font=footnotesize,format=plain,labelfont=bf,textfont=sl]{subcaption}
 \captionsetup[figure]{format=hang,justification=centering,singlelinecheck=off,skip=2ex}
 \captionsetup[table]{format=hang,justification=centering,singlelinecheck=off,skip=2ex}
@@ -54,10 +53,10 @@
 \vfill
 \begin{abstract}
 \noindent
-The RISC-V Instruction Set Architecture (ISA) is an open source instruction set for a processor. This means that anybody can create a processor that uses this instruction set. There are already processors available such as E2-core from SiFive. More freeware cores are available on several platforms (e.g. on GitHub). This documents describes a basic 32-bit RISC-V core in VHDL. The core can only execute the RV32I unprivileged instruction set. The processor incorporates a ROM, RAM and some simple I/O. It is targeted for implementation on an FPGA. It is tested on an Intel Cyclone V with a DE0-CV development board from Terasic. The GNU C-compiler for RISC-V is used for software development. Currently only simple C programs can be compiled and run. C++ is currently not supported.
+The RISC-V Instruction Set Architecture (ISA) is an open source instruction set for a processor. This means that anybody can create a processor that uses this instruction set. There are already processors available such as E2-core from SiFive. More freeware cores are available on several platforms (e.g. on GitHub). This documents describes a basic 32-bit RISC-V core in VHDL. The core can only execute the RV32I unprivileged instruction set. The processor incorporates a ROM, RAM and some simple I/O. It is targeted for implementation on an FPGA. It is tested on an Intel Cyclone V with a DE0-CV development board from Terasic with the use of Quartus Prime Lite 21.1 and QuestaSim Intel Starter Edition 2021.2. The GNU C-compiler for RISC-V is used for software development. Currently only simple C programs can be compiled and run. C++ is currently not supported.
 
 \noindent
-This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students. The standard processor executes each instruction in one clock cycle because the ROM is realized with cells, except for reads from RAM which need two clock cycles. The alternative processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM, except for ROM and RAM reads which need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. Exceptions are currently not implemented. This will be for future development.
+This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students. The processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM. ROM and RAM reads need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. Exceptions are currently not implemented. This will be for future development.
 
 \noindent
 This is work in progress. Things will certainly change in the future.
@@ -69,8 +68,9 @@ This is work in progress. Things will certainly change in the future.
 
 \clearpage
 \section{Introduction}
-This document describes the buildup of a simple, single/dual clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions have to be handled in software. The toolchain will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz.
+This document describes the buildup of a simple, dual/triple clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions will be handled in software. The C-compiler will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz.
 
+\section{The processor in VHDL}
 This RISC-V processor consists of the following building blocks:
 
 \begin{itemize}
@@ -86,7 +86,7 @@ This RISC-V processor consists of the following building blocks:
 
 A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 
-There are two versions available. The standard version uses Logic Cells to implement the ROM. This will limit the program size but each ROM access (instruction and data) only requires one clock cycle. The alternative version uses preprogrammed onboard RAM blocks to implement the ROM. Larger programs are possible but each ROM access (program and data) requires two clock cycles.
+The processor uses preprogrammed onboard RAM blocks to implement the ROM. Register/register and register/immediate instructions require two clock cycles, register/memory instructions require two clock cycles for a write operations and register/memory instructions require three clock cycles for read operations.
  
 \begin{sidewaysfigure}[!p]
 \centering
@@ -100,9 +100,9 @@ There are two versions available. The standard version uses Logic Cells to imple
 \draw[->] (3.0,0.5) node[left] {rs2} -- ++(0.5,0) -- ++(0,-0.5);
 \draw (3,-2) rectangle (4,-4) node[midway,rotate=90] {rs1};
 \draw[->] (3,-4.5) node[left] {rs1} -- ++(0.5,0) -- ++(0,0.5);
-\draw (4,-3) -- (7,-3) node[midway,above] {32x32};
+\draw (4,-3) -- (7,-3) node[midway,above] {rs1\_data};
 \draw[->] (7,-3) -- (16,-3) node[above left] {address}; 
-\draw (4,-1) -- (8,-1) node[midway,above] {32x32};
+\draw (4,-1) -- (8,-1) node[midway,above] {rs2\_data};
 \draw[->] (8,-1) -- (16,-1) node[above left] {data}; 
 \draw[fill=black] (8,-1) circle (2pt);
 \draw[fill=black] (7,-3) circle (2pt);
@@ -166,13 +166,17 @@ There are two versions available. The standard version uses Logic Cells to imple
 \draw[fill=black] (19.5,-8) circle (2pt);
 
 % RAM
-\draw (22,-6) rectangle ++(2,-3) node[midway,align=center] {RAM\\(onboard)};
+\draw (22,-6) rectangle ++(2,-3) node[midway,align=center] {RAM\\(control)};
 \draw[->] (23,-10) node[below] {wrram} -- ++(0,1);
+\draw (24,-6.5) -- ++(0.5,0) -- ++(0,-3) -- ++(-1,0) -- ++(0,0.5);
+\node at (25,-8) [rotate=90] {onbard RAM};
 
 % I/O
 \draw (22,-11.5) rectangle ++(2,-3) node[midway] {I/O};
 \draw[->] (23,-15.5) node[below] {wrio} -- ++(0,1);
 \draw[<->] (24,-12.5) -- ++(1,0) node[right] {I/O lines};
+\draw[->] (24,-13) -- ++(1,0) node[right] {TxD};
+\draw[<-] (24,-13.5) -- ++(1,0) node[right] {RxD};
 %\draw[->] (24,-13.5) -- ++(1,0) node[right] {interrupts};
 
 % PC
@@ -210,7 +214,7 @@ There are two versions available. The standard version uses Logic Cells to imple
 
 
 
-\section{Registers}
+\subsection{Registers}
 The processor consists of thirty-two 32-bit registers denoted by \texttt{x0} to \texttt{x31}. Internally, the registers use Big Endian format. Register \texttt{x0} (alias \texttt{zero}) is hardwired to all zeros. Writing this register has no effect. Reading this register returns all zero bits. Normally, the \texttt{x}-names are not used but may be handy when simulating the designs. Table~\ref{tab:registers} shows the names of the registers as they should be used.
 
 A register can be written to, and two register can be selected for data and base address.
@@ -238,65 +242,87 @@ Register & Name & Purpose & Saver \\
 \end{tabular}
 \end{table}
 
-\section{ROM}
+\subsection{ROM}
 \label{sec:rom}
-The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, halfword accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The standard processor instantiates the ROM in cells, which limits the size of the program. The alternative processor instantiates the ROM in onboard RAM, so bigger programs are possible. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
+The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, halfword accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The processor instantiates the ROM in onboard RAM. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
 
-Note: the alternative processor uses onboard RAM to simulate ROM. Because of this, each read from ROM (instruction and data) requires two clock cycles. See Section~\ref{sec:ram}.
+Note: because the ROM is instantiated using onboard RAM, each read (instruction and data) requires an extra clock cycle.
 
-\section{RAM}
+\subsection{RAM}
 \label{sec:ram}
 The RAM consists of bytes and is byte, halfword and word addressable. Half word and word entries are in Little Endian format. The RAM itself is made up of word (i.e. 32-bit) entries and is instantiated with onboard RAM blocks. Due to this fact, halfword accesses are only permitted on 2-byte boundaries and word accesses are only permitted on 4-byte boundaries. The RAM returns undefined data if an access is not aligned. Writes will not take place if an access is unaligned. This simplifies the decoding circuitry. For the Cyclone V a maximum of 65536 words of RAM can be instantiated. Rearranging half word and word data accesses in Big Endian format is handled by the RAM decoding unit.
 
 Note: the Cyclone V has 3,153,920 bits of RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
 
-Writing the RAM (byte, half word of word) requires 1 clock cycle. Reading the RAM (byte, half word, word) requires 2 clock cycles because the RAM output is buffered by a register. This is automatically handled by the processor.
+Writing the RAM (byte, half word of word) requires two clock cycle. Reading the RAM (byte, half word, word) requires three clock cycles because the RAM output is buffered by a register. This is automatically handled by the processor.
 
-\section{I/O}
+\subsection{I/O}
 \label{sec/io}
-Currently, the I/O consists of one 32-bit data input and one 32-bit data output. More I/O (timers/counter etc.) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries, reads return undefined data whereas writes will not write data.
+Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple UART. More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data.
 
-\section{ALU}
+The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only (8N1).
+
+\subsection{ALU}
 \label{sec:alu}
 The Arithmetic and Logic Unit (ALU) handles all computations on data. It can add, subtract, do logic operations such as AND, OR en XOR, can shift data left or right, and sign extend byte and halfword data. Some operations require two registers, some only use one register. Furthermore the ALU is also used to determine if a conditional branch should be taken. Note that the RISC-V programmer's model does not incorporate status flags as some other architectures do. This requires some extra instructions when adding or subtracting double word (64-bit) data. The ALU is also used to compute the return address from unconditional function calls (JAL and JALR instructions). The data is in Big Endian format.
 
 Note that the computation of jump target addresses is handled by the Program Counter (PC)
 
-\section{PC}
+\subsection{PC}
 \label{sec:pc}
-The Program Counter contains the address of the currently executed instruction. The address is always on a 4-byte boundary although function calls and conditional jump (JAL, JALR en B$xx$ instructions) can be on non 4-byte boundaries (the toolchain will always create 4-bytes boundaries). The PC (or rather the VHDL description of the PC) handles the address calculations of jumps and branches taken.
+The Program Counter contains the address of the currently executed instruction. The address is always on a 4-byte boundary although function calls and conditional jump (JAL, JALR en B$xx$ instructions) can be on non 4-byte boundaries (the C compiler will always create 4-bytes boundaries). The PC (or rather the VHDL description of the PC) handles the address calculations of jumps and branches taken.
 
-\section{Instruction Decoder}
+\subsection{Instruction Decoder}
 \label{sec:instructiondecoder}
 The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4-bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder and the register file.
 
-In the standard processor, a simple two-state Finite State Machine (FSM) is used. Almost all instructions are executed in one clock cycle. Only reads from RAM require two clock cycles. The FSM takes care of that.
-
-In the alternative processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. The FSM takes care of that.
+In the processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. The FSM takes care of that.
 
 The instruction decoder is non-pipelined. That simplifies the design but slows down the computational speed.
 
-\section{Address Decoder and Data Router}
+\subsection{Address Decoder and Data Router}
 \label{sec:addressdecoderanddatarouter}
-The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a 32-bit linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is 16 kB. Unused ROM addresses return don't cares (in simulation) and in hardware the data returned is implementation-defined. The RAM starts at address 0x20000000 and the length can be up to 262,144 bytes, in powers of 2. Default is 16 kB. The I/O starts at address 0xF0000000 and the length is 16 kB by default.
+The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a 32-bit linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is 64 kB. Unused ROM addresses return 0x0000000. The RAM starts at address 0x20000000 and length is 32 kB. The I/O starts at address 0xF0000000 and the length is 16 kB by default.
 
-When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and halfword accesses) if needed. Please note that reading data from the RAM and ROM requires an extra clock cycle. Reading data from I/O requires one clock cycle.
+When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and halfword accesses) if needed. Please note that reading data from the RAM and ROM requires an extra clock cycle. Reading data from I/O requires no extra clock cycle.
 
-\section{Stack pointer}
-The stack pointer is fully implemented although the ISA does not provided pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address + 1 on startup (which is 0x20004000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
+\subsection{Stack pointer}
+The stack pointer is fully implemented although the ISA does not provide pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address + 1 on startup (which is 0x20008000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
 
-\section{Implemented instructions}
+\subsection{Implemented instructions}
 All RV32I Unprivileged instructions are implemented with the exception of FENCE, ECALL and EBREAK instructions. These instructions act as a no-operation (NOP). This is because exceptions are not implemented.
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has 18480 cells available. It has 3080 kb of onboard RAM bits available which are partially used for RAM and ROM (in the alternative processor). Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has 18480 cells available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
 
 \section{Simulation}
 The designs can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
 
-\section{Setting up the GNU C compiler for RISC-V}
-The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (for Linux) is straightforward:
+\section{Cloning the RISC-V project}
+\label{sec:cloning}
+Now we have to clone the RISC-V project. It incorporates the full Quartus Prime Lite project with the processor written in VHDL. It also incorporates some simple C program examples and a taylor-made program to convert a RISC-V executable to a VHDL table suitable for the ROM. Create a working directory (and change to that directory) and issue the command:
+
+\begin{lstlisting}[language=]
+git clone https:/github.com/jesseopdenbrouw/riscv-minimal
+\end{lstlisting}
+
+In the created directory, you will see the following directories:
+
+\texttt{CODE} -- Sample software programs, linker script and startup files\\
+\texttt{DOCS} -- Documentation\\
+\texttt{HARDWARE} -- the VHDL description \\
+\texttt{OLD} -- yes, really old files for backup
+
+Change directory to \texttt{CODE}. Make sure the RISC-V C compiler is in your path environment variable. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
+
+Next, start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
+
+To test one of the programs, change directory to one of the directories and copy the file with \texttt{.vhd} extension to the directory containing the VHDL description under the name \texttt{processor\_common\_rom.vhd}.
+Now start Quartus and start the compilation. After a successful compilation, you can program the Cyclone V on a DE0-CV board.
+
+\section{Setting up the GNU C compiler for \textit{this} RISC-V}
+The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (from Linux) is straightforward:
 
 \begin{enumerate}
 \item You need a current GNU C-compiler installed or your Linux box.
@@ -354,29 +380,7 @@ gcc version 11.1.0 (GCC)
 \end{lstlisting}
 \end{enumerate}
 
-\section{Cloning the RISC-V project}
-\label{sec:cloning}
-Now we have to clone the RISC-V project. It incorporates the full Quartus Prime Lite project with the processor written in VHDL. It also incorporates some simple C program examples and a taylor-made program to convert a RISC-V executable to a VHDL table suitable for the ROM. Create a working directory (and change to that directory) and issue the command:
-
-\begin{lstlisting}[language=]
-git clone https:/github.com/jesseopdenbrouw/riscv-minimal
-\end{lstlisting}
-
-In the created directory, you will see the following directories:
-
-\texttt{CODE} -- Sample software programs\\
-\texttt{DOCS} -- Documentation\\
-\texttt{HARDWARE} -- the VHDL description \\
-\texttt{OLD} -- yes, really old files for backup
-
-Change directory to \texttt{CODE}. Make sure the RISC-V C compiler is in your path environment variable. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
-
-Next, start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
-
-To test one of the programs, change directory to one of the directories and copy the file with \texttt{.vhd} extension to the directory containing the VHDL description under the name \texttt{processor\_common\_rom.vhd}.
-Now start Quartus and start the compilation. After a successful compilation, you can program the Cyclone V on a DE0-CV board.
-
-\section{Register subset}
+\subsection{Register subset}
 It is possible to compile the toolchain to only use register \texttt{x0} to \texttt{x15}. This is called the RISC-V E extension. As a positive side effect, the register file can be cut down from 32 registers to 16 registers. This will lower the cell count and possible speed up the device. A negative side effect is that the pressure on register allocation is higher, possibly increasing instruction count when saving registers on the stack.
 
 To configure the GNU C compiler for the E extension issue the command:
@@ -390,7 +394,7 @@ and build the compiler.
 Now compile a C program with:
 
 \begin{lstlisting}[language=]
-riscv32-unknown-elf-gcc -O0 -g -o string string.c -Wall -T ../ldfiles/riscv.ld -march=rv32e -mabi=ilp32e -nostartfiles --specs=nano.specs ../crt/startup.c
+riscv32-unknown-elf-gcc -O0 -g -o flash flash.c -Wall -T ../ldfiles/riscv.ld -march=rv32e -mabi=ilp32e -nostartfiles --specs=nano.specs ../crt/startup.c
 \end{lstlisting}
 
 Make sure to use \texttt{-march=rv32e} and \texttt{-mabi=ilp32e}.
@@ -412,7 +416,7 @@ We supply our own linker file (\lstinline|-T ../ldfiles/riscv.ld|) and we supply
 \begin{itemize}
 \item \texttt{empty.S} -- Empty startup file only providing the entry symbol. Can be used with assembler programs.
 \item \texttt{minimal.S} -- Loads the global pointer and stack pointer and calls \texttt{main}. On return of \texttt{main}, it waits in an endless loop. Can be used with minimalistic C programs.
-\item \texttt{startup.c} -- Full support for C programs.
+\item \texttt{startup.c} -- Full support for C programs. Can be used with \texttt{malloc} et al.
 \end{itemize}
 \item Next issue the command:
 \begin{lstlisting}[language=]
@@ -465,21 +469,17 @@ Both descriptions are composed of the following files:
 \item \lstinline|pc.vhd| -- Description of the Program Counter.
 \item \lstinline|instruction_decoder.vhd| -- The instruction decoder.
 \item \lstinline|regs.vhd| -- Description of the register file.
-\item \lstinline|rom.vhd| -- Description of the ROM.
-\item \lstinline|ram.vhd| -- Description of the RAM interface between the address 
+\item \lstinline|rom.vhd| -- Description of the ROM interface between the core and the ROM contents.
+\item \lstinline|rom_inst.vhd| -- Description of the ROM contents. The ROM contents will be placed in onboard, initialized RAM blocks. The file \lstinline|rom.vhd| is then a frontend between the address decoder and data router and the onboard ROM.
+\item \lstinline|ram.vhd| -- Description of the RAM interface between the address decoder and data router and the onboard RAM.
 \item \lstinline|ram_inst.vhd| -- Description of the onboard RAM. Quartus detects this and creates the RAM in onboard RAM blocks.
-\item \lstinline|io.vhd| -- Description of the I/O
+\item \lstinline|io.vhd| -- Description of the I/O. It contains a 32-bit input register, a 32-bit output register and a simple 8-bit UART.
 \item \lstinline|riscv.vhd| -- Top-level description of the processor.
 \item \lstinline|riscv.sdc| -- Constraints file. Sets the target clock frequency.
 \item \lstinline|tb_riscv.vhd| -- VHDL testbench to simulate the design.
 \item \lstinline|tb_riscv.do| -- QuestaSim/Modelsim command script.
 \end{itemize}
 
-The alternative version as one more file:
-
-\begin{itemize}
-\item \lstinline|rom_inst.vhd| -- Description of the ROM. The ROM contents will be placed in onboard, initialized RAM blocks. The file \lstinline|rom.vhd| is then a frontend between the address decoder and data router and the onboard ROM.
-\end{itemize}
 \section{srec2vhdl}
 This is a homebrew utility to convert a Motorola S-record file into a VHDL file suitable for inclusion of the processor. The program is called with:
 
@@ -503,7 +503,11 @@ srec2vhdl [-fbwhqv] [-i <arg>] inputfile [outputfile]
 In de \texttt{CODE} directory, there are a number of software programs available:
 
 \begin{itemize}
-\item \texttt{ldfiles} -- contains the linker scripts.
+\item \texttt{ldfiles} -- contains the linker scripts. There a two scripts:
+\begin{itemize}
+%\item \texttt{riscv.ld} -- default linker script with 16 kB for ROM, RAM and I/O
+\item \texttt{riscv.ld} -- default linker script: ROM = 64 kB, RAM = 32 kB, I/O = 64 kB.
+\end{itemize}
 \item \texttt{crt} -- contains the startup files.
 \item \texttt{bin} -- contains the binary of \texttt{srec2vhdl}.
 \item \texttt{add64} -- simple 64-bit addition.
@@ -516,19 +520,20 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
 \item \texttt{mult} -- integer multiplication (works).
 \item \texttt{shift} -- shifts (works)
+\item \texttt{sprintf} -- prints integers, floats/doubles to a string. This is a big binary (seems to work).
 \item \texttt{string} -- some string functions (seems to work).
 \item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
 \item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
 \item \texttt{trig} -- some float trigonometry functions (seems to work).
-\item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O.
+\item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
 \end{itemize} 
 
 Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection.
 
-Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary.
+Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary. You have to update the data sizes in the VHDL description and update the linker script with suitable data sizes.
 
 \section{Address ranges and memory sizes}
-By default, the ROM starts at address 0x00000000 and and has a size of 16 kB (4 k words). The Program Counter starts at address 0x00000000. The RAM starts at address 0x20000000 and has a size of 16 kB (4 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20004000. The I/O starts at address 0xf0000000 and has a size of 16 kB (4 k words).
+By default, the ROM starts at address 0x00000000 and and has a size of 64 kB (16 k words). The Program Counter starts at address 0x00000000. The RAM starts at address 0x20000000 and has a size of 32 kB (8 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20008000. The I/O starts at address 0xf0000000 and has a size of 16 kB (4 k words).
 
 The ROM may be moved to another start location. The Program Counter is started at the correct address. The placement of the ROM is in 256 MB intervals, which are the 4 most significant bits of a 32-bit address. The same holds for the RAM and the I/O. To move the ROM, open the VHDL file \lstinline|processor_common.vhd| and go down to the end of the file. There you will see the following lines:
 
@@ -543,55 +548,55 @@ constant io_high_nibble : std_logic_vector(3 downto 0) := x"F";
 Change the start locations of the memories by changing the constants. Make sure the memories do not overlap. To change the sizes of the memory, look for the lines as shown below:
 
 \begin{lstlisting}[language=VHDL]
--- The RAM
--- NOTE: the RAM is 4x byte (8 bits) size, supporting
---       32-bit Big Endian storage,
---       so we have to recode to support Little Endian.
---       Set ram_size_bits as if it were bytes
--- NOTE: ram_size_bits must be <= 16
-constant ram_size_bits : integer := 14;
-constant ram_size : integer := 2**(ram_size_bits-2);
--- The type of the RAM block, there are 4 blocks instantiated
-type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
-                    
 -- The ROM
 -- NOTE: the ROM is word (32 bits) size.
 -- NOTE: data is in Little Endian format (as by the toolchain)
 --       for halfword and word entities
 --       Set rom_size_bits as if it were bytes
 -- NOTE: rom_size_bits must be <= 16
-constant rom_size_bits : integer := 14;
+constant rom_size_bits : integer := 16;
 constant rom_size : integer := 2**(rom_size_bits-2);
 type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
 -- The contents of the ROM is loaded by processor_common_rom.vhd
 
+-- The RAM
+-- NOTE: the RAM is 4x byte (8 bits) size, supporting
+--       32-bit Big Endian storage,
+--       so we have to recode to support Little Endian.
+--       Set ram_size_bits as if it were bytes
+-- NOTE: ram_size_bits must be <= 16
+constant ram_size_bits : integer := 15;
+constant ram_size : integer := 2**(ram_size_bits-2);
+-- The type of the RAM block, there are 4 blocks instantiated
+type ram_type is array (0 to ram_size-1) of std_logic_vector(7 downto 0);
+                    
 -- The I/O
 -- NOTE: the I/O is word (32 bits) size, Big Endian
 --       there is no need to recode the data
 --       The I/O can only handle word size access
 --       Set io_size_bits as if it were bytes
-constant io_size_bits : integer := 3;
+constant io_size_bits : integer := 6;
 constant io_size : integer := 2**(io_size_bits-2);
 type io_type is array (0 to io_size-1) of data_type;
 \end{lstlisting}
 
-Set the memories in address bit lengths. So, \texttt{16} means $2^{16} = 65,536$ bytes (524,288 bits). This can be done for ROM and RAM. The standard processor uses Logic Cells to implement the ROM, so only small values are applicable. The alternative processor uses onboard RAM so higher values are possible. Please note that in this case both ROM and RAM bits may not exceed 3,153,920 bits.
+In this setting, the ROM is 64 kB long and the RAM is 32 kB long. Please note that both ROM and RAM bits may not exceed 3,153,920 bits.
 
-Next, open de linker script in \lstinline|<...>/ldfiles/riscv.ld|.
-
-Find the lines as showed below:
-
-\begin{lstlisting}[language=]
-MEMORY
-{
-   ROM (rx)   : ORIGIN = 0x00000000, LENGTH = 16K
-   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 16K
-   IO (rw)    : ORIGIN = 0xf0000000, LENGTH = 16K
-}
-\end{lstlisting}
-
-Change the start addresses at the top op the file and changes the sizes if needed.
-Then recompile your programs.
+%Next, open de linker script in \lstinline|<...>/ldfiles/riscv.ld|.
+%
+%Find the lines as showed below:
+%
+%\begin{lstlisting}[language=]
+%MEMORY
+%{
+%   ROM (rx)   : ORIGIN = 0x00000000, LENGTH = 16K
+%   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 16K
+%   IO (rw)    : ORIGIN = 0xf0000000, LENGTH = 16K
+%}
+%\end{lstlisting}
+%
+%Change the start addresses at the top op the file and changes the sizes if needed.
+%Then recompile your programs.
 
 \section{Future plans}
 Some future plans:
@@ -605,4 +610,92 @@ Some future plans:
 
 \section{Author's note}
 I managed to create this basic RISC-V processor within one week, including compiling the GNU C compiler and the created C program examples. Of course, this is not the fastest core available, but it gives a good example on designing a RISC-V processor yourself. Next in line is to make the standard C library work. In the mean time, files will change, so be sure to grab the latest GitHub repository clone.
+
+\appendix
+\section{I/O registers}
+
+This is a list of currently supported I/O addresses. 
+The default start address is 0xF0000000. The offset is given in bytes. Note that the I/O can only be accesses on 4-byte boundaries and on word size accesses.
+
+%\begin{register}{H}{PIN$x$}{0x00$+3x$}%
+\begin{register}{H}{PIN$x$}{0x00}%
+\label{pinx}%
+\regfield{PIN$x$}{32}{0}{{0}}% READ_ONLY
+\reglabel{Reset}\regnewline%
+\end{register}
+
+%\begin{register}{H}{PIN$x$}{0x01$+3x$}%
+\begin{register}{H}{POUT$x$}{0x04}%
+\label{poutx}%
+\regfield{POUT$x$}{32}{0}{{0}}
+\reglabel{Reset}\regnewline%
+\end{register}
+
+\begin{register}{H}{USART\_DATA}{0x20}
+\label{usartdata}
+\regfield{Reserved}{24}{8}{{0}}
+\regfield{Data}{8}{0}{{0}}
+\reglabel{Reset}\regnewline%
+\end{register}
+\begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
+\itemsep-1.5ex
+\item[Write] The data is written to an internal buffer and transmitted.
+\item[Read] The last received data is read.
+\end{reglist}\end{regdesc}
+
+\begin{register}{H}{USART\_BAUD}{0x24}
+\label{usartbaud}
+\regfield{Rerserved}{16}{16}{{0}}
+\regfield{Prescaler}{16}{0}{{0}}
+\reglabel{Reset}\regnewline%
+\end{register}
+\begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
+\itemsep-1.5ex
+\item[Prescaler] Baud rate = $\dfrac{f_{system}}{\textrm{prescaler}+1}$
+\end{reglist}\end{regdesc}
+
+\begin{register}{H}{USART\_CTRL}{0x28}
+\label{usartctrl}
+\regfield{Reserved}{32}{0}{{0}}
+%\regfield{Rerserved}{16}{16}{{0}}
+%\regfield{Prescaler}{16}{0}{{0}}
+\reglabel{Reset}\regnewline%
+\end{register}
+\begin{regdesc}[0.6\textwidth]\begin{reglist}[00000]
+\itemsep-1.5ex
+\item [note:] currently no bits are assigned to the Control Register.
+%\item[Stop Bits] Meaning
+%\item[0] 1 Stop bit
+%\item[1] 2 Stop bits
+%\item
+%\item[Parity] Meaning
+%\item[00] No parity
+%\item[01] Reserved
+%\item[10] Even parity
+%\item[11] Odd parity
+%\item
+%\item[Data bits]
+%\item[0] 8 bits
+%\item[9] 9 bits
+\end{reglist}\end{regdesc}
+
+
+\begin{register}{H}{USART\_STAT}{0x2c}
+\label{usartstat}
+\regfield{reserved}{27}{5}{{0}}
+\regfield{TC}{1}{4}{{0}}
+\regfield{Reserved}{1}{3}{{0}}
+\regfield{RC}{1}{2}{{0}}
+\regfield{RF}{1}{1}{{0}}
+\regfield{FE}{1}{0}{{0}}
+\reglabel{Reset}\regnewline%
+\end{register}
+\begin{regdesc}[0.8\textwidth]\begin{reglist}[0000]
+\itemsep-1.5ex
+\item[TC] Set to 1 when a character is transmitted. Automatically cleared when writing new character or when writing 0 in the USART\_STAT bit.
+\item[RC] Set to 1 when a character is received. Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
+\item[RF] Set to 1 when failed receiving (invalid start bit). Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
+\item [FE] Set to 1 when a low is detected at the position of the stop bit. Automatically cleared when receiving a new character or writing a 0 in the USART\_STAT bit.
+\end{reglist}\end{regdesc}
+
 \end{document}
