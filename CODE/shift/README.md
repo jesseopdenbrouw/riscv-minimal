@@ -2,7 +2,7 @@
 
 ## Description
 
-Some test for shifting
+Some tests for shifting
 
 ## Status
 
