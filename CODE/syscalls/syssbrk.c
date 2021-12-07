@@ -6,13 +6,6 @@
 #include <sys/time.h>
 #include <sys/times.h>
 
-/* These are system call stubs. The user can implement
- * these. By default, the system calls return 0 or
- * an error. Global errno can be checked. */
-
-/* Only _sbrk is implemented to facilitate malloc()
- * and friends. */
-
 /* _sbrk must be provided to accomodate malloc et. al. */
 static uint8_t *__sbrk_heap_end = NULL;
 
