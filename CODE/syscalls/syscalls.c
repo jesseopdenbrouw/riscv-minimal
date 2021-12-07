@@ -10,9 +10,6 @@
  * these. By default, the system calls return 0 or
  * an error. Global errno can be checked. */
 
-/* Only _sbrk is implemented to facilitate malloc()
- * and friends. */
-
 /* User callable functions */
 __attribute__((weak)) int __io_putchar(int ch) {
 	return 0;
@@ -21,7 +18,6 @@ __attribute__((weak)) int __io_putchar(int ch) {
 __attribute__((weak)) int __io_getchar(void) {
 	return 0;
 }
-
 
 int _read(int fd, char *buf, int n) {
 
