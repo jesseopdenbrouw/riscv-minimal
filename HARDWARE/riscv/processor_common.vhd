@@ -59,7 +59,7 @@ package processor_common is
     -- The ROM
     -- NOTE: the ROM is word (32 bits) size.
     -- NOTE: data is in Little Endian format (as by the toolchain)
-    --       for halfword and word entities
+    --       for half word and word entities
     --       Set rom_size_bits as if it were bytes
     -- NOTE: rom_size_bits must be <= 16
     --       default is 64 kB data
