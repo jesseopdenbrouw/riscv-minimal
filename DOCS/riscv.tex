@@ -68,10 +68,10 @@ This is work in progress. Things will certainly change in the future.
 
 \clearpage
 \section{Introduction}
-This document describes the buildup of a simple, dual/triple clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions will be handled in software. The C-compiler will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz.
+This document describes the buildup of a simple, dual/triple clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions will be handled in software. The C-compiler will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz. The processor utilizes some simple I/O making it a microcontroller.
 
-\section{The processor in VHDL}
-This RISC-V processor consists of the following building blocks:
+\section{The processor}
+This RISC-V processor consists of one \textit{core} and of the following building blocks:
 
 \begin{itemize}
 \item The registers contain intermediate data for calculations.
@@ -86,7 +86,7 @@ This RISC-V processor consists of the following building blocks:
 
 A block diagram is shown in Figure~\ref{fig:blockdiagram}.
 
-The processor uses preprogrammed onboard RAM blocks to implement the ROM. Register/register and register/immediate instructions require two clock cycles, register/memory instructions require two clock cycles for a write operations and register/memory instructions require three clock cycles for read operations.
+The processor uses preprogrammed onboard RAM blocks to implement the ROM. Register/register and register/immediate instructions require two clock cycles, register/memory instructions require two clock cycles for a write operations and three clock cycles for read operations (ROM/RAM only).
  
 \begin{sidewaysfigure}[!p]
 \centering
@@ -126,6 +126,9 @@ The processor uses preprogrammed onboard RAM blocks to implement the ROM. Regist
 \draw[<-] (15,-9) node[left] {waitfordata} -- ++(1,0);
 \draw[->] (18,-15.5) -- ++(1,0) node[right] {wrio};
 \draw[->] (18,-16.0) -- ++(1,0) node[right] {wrram};
+\draw[->] (18,-4) -- ++(1,0) node [right] {csrom};
+\draw[->] (18,-4.5) -- ++(1,0) node [right] {csram};
+\draw[->] (18,-5) -- ++(1,0) node [right] {csio};
 
 % Instruction decoder
 \draw (9,-10.5) rectangle ++(3,-6.5) node[midway,align=center] {Instruction\\Decoder};
@@ -146,10 +149,12 @@ The processor uses preprogrammed onboard RAM blocks to implement the ROM. Regist
 %\draw[->,red] (8,-15) node[left] {intreq} -- ++(1,0);
 
 % ROM
-\draw (22,-1) rectangle ++(2,-3) node[midway,align=center,yshift=0.4cm] {ROM\\(Dual Port)};
+\draw (22,-1) rectangle ++(2,-3) node[midway,align=center,yshift=0.4cm] {ROM\\(control)};
 \draw[<-] (24,-2.5) -- ++(1,0) node[right] {PC};
 \draw[->] (24,-3.0) -- ++(1,0) node[right] {instruction};
 \draw[->] (18,-2) -- ++(4,0) node[midway,above] {address+offset};
+\draw (24,-1.5) -- ++(0.5,0) -- ++(0,-3) -- ++(-1,0) -- ++(0,0.5);
+\node at (24.75,-3) [rotate=90] {onboard ROM};
 
 % Address lines to RAM and I/O
 \draw[->] (21,-2) -- ++(0,-5) -- ++(1,0);
@@ -169,7 +174,7 @@ The processor uses preprogrammed onboard RAM blocks to implement the ROM. Regist
 \draw (22,-6) rectangle ++(2,-3) node[midway,align=center] {RAM\\(control)};
 \draw[->] (23,-10) node[below] {wrram} -- ++(0,1);
 \draw (24,-6.5) -- ++(0.5,0) -- ++(0,-3) -- ++(-1,0) -- ++(0,0.5);
-\node at (25,-8) [rotate=90] {onbard RAM};
+\node at (25,-8) [rotate=90] {onboard RAM};
 
 % I/O
 \draw (22,-11.5) rectangle ++(2,-3) node[midway] {I/O};
@@ -244,13 +249,15 @@ Register & Name & Purpose & Saver \\
 
 \subsection{ROM}
 \label{sec:rom}
-The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, halfword accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The processor instantiates the ROM in onboard RAM. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
+The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, half word accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The processor instantiates the ROM in onboard RAM. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
 
 Note: because the ROM is instantiated using onboard RAM, each read (instruction and data) requires an extra clock cycle.
 
+Note: the Cyclone V has 3,153,920 bits of RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
+
 \subsection{RAM}
 \label{sec:ram}
-The RAM consists of bytes and is byte, halfword and word addressable. Half word and word entries are in Little Endian format. The RAM itself is made up of word (i.e. 32-bit) entries and is instantiated with onboard RAM blocks. Due to this fact, halfword accesses are only permitted on 2-byte boundaries and word accesses are only permitted on 4-byte boundaries. The RAM returns undefined data if an access is not aligned. Writes will not take place if an access is unaligned. This simplifies the decoding circuitry. For the Cyclone V a maximum of 65536 words of RAM can be instantiated. Rearranging half word and word data accesses in Big Endian format is handled by the RAM decoding unit.
+The RAM consists of bytes and is byte, half word and word addressable. Half word and word entries are in Little Endian format. The RAM itself is made up of word (i.e. 32-bit) entries and is instantiated with onboard RAM blocks. Due to this fact, half word accesses are only permitted on 2-byte boundaries and word accesses are only permitted on 4-byte boundaries. The RAM returns undefined data if an access is not aligned. Writes will not take place if an access is unaligned. This simplifies the decoding circuitry. For the Cyclone V a maximum of 65536 words of RAM can be instantiated. Rearranging half word and word data accesses in Big Endian format is handled by the RAM decoding unit.
 
 Note: the Cyclone V has 3,153,920 bits of RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
 
@@ -264,7 +271,7 @@ The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only 
 
 \subsection{ALU}
 \label{sec:alu}
-The Arithmetic and Logic Unit (ALU) handles all computations on data. It can add, subtract, do logic operations such as AND, OR en XOR, can shift data left or right, and sign extend byte and halfword data. Some operations require two registers, some only use one register. Furthermore the ALU is also used to determine if a conditional branch should be taken. Note that the RISC-V programmer's model does not incorporate status flags as some other architectures do. This requires some extra instructions when adding or subtracting double word (64-bit) data. The ALU is also used to compute the return address from unconditional function calls (JAL and JALR instructions). The data is in Big Endian format.
+The Arithmetic and Logic Unit (ALU) handles all computations on data. It can add, subtract, do logic operations such as AND, OR en XOR, can shift data left or right, and sign extend byte and half word data. Some operations require two registers, some only use one register. Furthermore the ALU is also used to determine if a conditional branch should be taken. Note that the RISC-V programmer's model does not incorporate status flags as some other architectures do. This requires some extra instructions when adding or subtracting double word (64-bit) data. The ALU is also used to compute the return address from unconditional function calls (JAL and JALR instructions). The data is in Big Endian format. The ALU is the only building block that can write registers.
 
 Note that the computation of jump target addresses is handled by the Program Counter (PC)
 
@@ -284,7 +291,7 @@ The instruction decoder is non-pipelined. That simplifies the design but slows d
 \label{sec:addressdecoderanddatarouter}
 The Address Decoder and Data Router routes reads and writes to the ROM (only reads), RAM and the I/O. The processor uses a 32-bit linear address space for ROM, RAM and I/O. In the default setting, ROM starts at address 0x00000000 and the length is 64 kB. Unused ROM addresses return 0x0000000. The RAM starts at address 0x20000000 and length is 32 kB. The I/O starts at address 0xF0000000 and the length is 16 kB by default.
 
-When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and halfword accesses) if needed. Please note that reading data from the RAM and ROM requires an extra clock cycle. Reading data from I/O requires no extra clock cycle.
+When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and half word accesses) if needed. Please note that reading data from the RAM and ROM requires an extra clock cycle. Reading data from I/O requires no extra clock cycle.
 
 \subsection{Stack pointer}
 The stack pointer is fully implemented although the ISA does not provide pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address + 1 on startup (which is 0x20008000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
@@ -294,12 +301,12 @@ All RV32I Unprivileged instructions are implemented with the exception of FENCE,
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has 18480 ALMs available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 ALMs (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has 18480 ALMs available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 ALMs (about 12\,\% - 15\,\%) and 786,432 bits of internal memory (25\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
 
 It is possible to add the Quartus' Signal Tap (embedded) Logic Analyzer. Follow the instructions on \url{https://people.ece.cornell.edu/land/courses/ece5760/Quartus/Signal_tap.html}.
 
 \section{Simulation}
-The designs can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
+The designs can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, half word and word accesses. Simulation can be started from Quartus.
 
 \section{Cloning the RISC-V project}
 \label{sec:cloning}
@@ -384,7 +391,7 @@ gcc version 11.1.0 (GCC)
 \end{enumerate}
 
 \subsection{Register subset}
-It is possible to compile the toolchain to only use register \texttt{x0} to \texttt{x15}. This is called the RISC-V E extension. As a positive side effect, the register file can be cut down from 32 registers to 16 registers. This will lower the cell count and possible speed up the device. A negative side effect is that the pressure on register allocation is higher, possibly increasing instruction count when saving registers on the stack.
+It is possible to compile the toolchain to only use register \texttt{x0} to \texttt{x15}. This is called the RISC-V E extension. As a positive side effect, the register file can be cut down from 32 registers to 16 registers. This will lower the ALM (cell) count and possible speed up the device. A negative side effect is that the pressure on register allocation is higher, possibly increasing instruction count when saving registers on the stack.
 
 To configure the GNU C compiler for the E extension issue the command:
 
@@ -462,7 +469,7 @@ This will copy the VHDL file to the RISC-V processor ROM file.
 \end{itemize}
 
 \section{VHDL files}
-Both descriptions are composed of the following files:
+The VHDL description is composed of the following files:
 
 \begin{itemize}
 \item \lstinline|processor_common.vhd| -- Common types and constants.
@@ -473,11 +480,11 @@ Both descriptions are composed of the following files:
 \item \lstinline|instruction_decoder.vhd| -- The instruction decoder.
 \item \lstinline|regs.vhd| -- Description of the register file.
 \item \lstinline|rom.vhd| -- Description of the ROM interface between the core and the ROM contents.
-\item \lstinline|rom_inst.vhd| -- Description of the ROM contents. The ROM contents will be placed in onboard, initialized RAM blocks. The file \lstinline|rom.vhd| is then a frontend between the address decoder and data router and the onboard ROM.
+\item \lstinline|rom_inst.vhd| -- Interface between the ROM contents and the ROM interface. The ROM contents itself is in the file \lstinline|processor_common_rom.vhd|. The ROM contents will be placed in onboard, initialized RAM blocks. 
 \item \lstinline|ram.vhd| -- Description of the RAM interface between the address decoder and data router and the onboard RAM.
 \item \lstinline|ram_inst.vhd| -- Description of the onboard RAM. Quartus detects this and creates the RAM in onboard RAM blocks.
 \item \lstinline|io.vhd| -- Description of the I/O. It contains a 32-bit input register, a 32-bit output register and a simple 8-bit UART.
-\item \lstinline|riscv.vhd| -- Top-level description of the processor.
+\item \lstinline|riscv.vhd| -- Top-level description of the processor. Connects are the building blocks to a viable processor.
 \item \lstinline|riscv.sdc| -- Constraints file. Sets the target clock frequency.
 \item \lstinline|tb_riscv.vhd| -- VHDL testbench to simulate the design.
 \item \lstinline|tb_riscv.do| -- QuestaSim/Modelsim command script.
@@ -495,21 +502,22 @@ srec2vhdl [-fbwhqv] [-i <arg>] inputfile [outputfile]
 \begin{itemize}
 \item \texttt{-f} makes a full output that directly can be used. If not used, only the ROM table contents itself is produced.
 \item \texttt{-w} ROM contents is in words (32 bits).
-\item \texttt{-h} ROM contents is in halfwords (16 bits).
+\item \texttt{-h} ROM contents is in half words (16 bits).
 \item \texttt{-b} ROM contents is in bytes (8 bits).
 \item \texttt{-v} Verbose output
 \item \texttt{-q} Quiet output, only error messages are displayed.
 \item \texttt{-i <arg>} indents each line with \texttt{<arg>} spaces.
 \end{itemize}
 
+Note: uninitialized ROM contents is emitted as don't care, Quartus will set this to 0 by default.
+
 \section{Software programs}
 In de \texttt{CODE} directory, there are a number of software programs available:
 
 \begin{itemize}
-\item \texttt{ldfiles} -- contains the linker scripts. There a two scripts:
+\item \texttt{ldfiles} -- contains the linker scripts. There is one script:
 \begin{itemize}
-%\item \texttt{riscv.ld} -- default linker script with 16 kB for ROM, RAM and I/O
-\item \texttt{riscv.ld} -- default linker script: ROM = 64 kB, RAM = 32 kB, I/O = 64 kB.
+\item \texttt{riscv.ld} -- default linker script: ROM = 64 kB, RAM = 32 kB, I/O = 16 kB.
 \end{itemize}
 \item \texttt{crt} -- contains the startup files.
 \item \texttt{bin} -- contains the binary of \texttt{srec2vhdl}.
@@ -520,18 +528,19 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{flash} -- flash the DE0-CV board leds (works on the board)
 \item \texttt{float} -- some floating point float computations (seems to work).
 \item \texttt{global} -- test for globals and local statics with initialization (seems to works).
+\item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
 \item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
-\item \texttt{mult} -- integer multiplication (works).
+\item \texttt{mult} -- integer multiplication using the C library (works).
+\item  \texttt{qsort} -- sorts an integer array using the \texttt{qsort} C library function (seems to work).
 \item \texttt{shift} -- shifts (works)
 \item \texttt{sprintf} -- prints integers, floats/doubles to a string. This is a big binary (seems to work).
 \item \texttt{string} -- some string functions (seems to work).
 \item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
 \item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
 \item \texttt{trig} -- some float trigonometry functions (seems to work).
-\item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
 \end{itemize} 
 
-Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection.
+Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection. You will see compiler warnings from C library functions.
 
 Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary. You have to update the data sizes in the VHDL description and update the linker script with suitable data sizes.
 
@@ -554,7 +563,7 @@ Change the start locations of the memories by changing the constants. Make sure 
 -- The ROM
 -- NOTE: the ROM is word (32 bits) size.
 -- NOTE: data is in Little Endian format (as by the toolchain)
---       for halfword and word entities
+--       for half word and word entities
 --       Set rom_size_bits as if it were bytes
 -- NOTE: rom_size_bits must be <= 16
 constant rom_size_bits : integer := 16;
@@ -621,19 +630,26 @@ I managed to create this basic RISC-V processor within one week, including compi
 This is a list of currently supported I/O addresses. 
 The default start address is 0xF0000000. The offset is given in bytes. Note that the I/O can only be accesses on 4-byte boundaries and on word size accesses.
 
-%\begin{register}{H}{PIN$x$}{0x00$+3x$}%
 \begin{register}{H}{Port input register PIN$x$}{0x00}%
 \label{pinx}%
 \regfield{PIN$x$}{32}{0}{{0}}% READ_ONLY
 \reglabel{Reset}\regnewline%
 \end{register}
+\begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
+\itemsep-1.5ex
+\item[Note:] This I/O register can only be read.
+\end{reglist}\end{regdesc}
 
-%\begin{register}{H}{PIN$x$}{0x01$+3x$}%
 \begin{register}{H}{Port output register POUT$x$}{0x04}%
 \label{poutx}%
 \regfield{POUT$x$}{32}{0}{{0}}
 \reglabel{Reset}\regnewline%
 \end{register}
+\begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
+\itemsep-1.5ex
+\item[Write] The data is written to the output pins.
+\item[Read] The last entered data is read back.
+\end{reglist}\end{regdesc}
 
 \begin{register}{H}{Usart data register USART\_DATA}{0x20}
 \label{usartdata}
