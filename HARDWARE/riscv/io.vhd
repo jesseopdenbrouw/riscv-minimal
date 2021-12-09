@@ -68,7 +68,7 @@ type rxstate_type is (rx_idle, rx_wait, rx_iter, rx_ready, rx_fail);
 signal rxstate : rxstate_type;
 signal rxbittimer : integer range 0 to 65535;
 signal rxshiftcounter : integer range 0 to 15;
-
+signal RxD_sync : std_logic;
 begin
 
     -- Fetch internal register of io_size_bits bits minus 2
@@ -121,6 +121,7 @@ begin
             usartctrl_int <= (others => '0');
             usartstat_int <= (others => '0');
             txstart <= '0';
+            txstate <= tx_idle;
             txbuffer <= (others => '0');
             txbittimer <= 0;
             TxD <= '1';
@@ -128,6 +129,7 @@ begin
             rxstate <= rx_idle;
             rxbittimer <= 0;
             rxshiftcounter <= 0;
+            RxD_sync <= '1';
         elsif rising_edge(clk) then
             -- Common register writes
             txstart <= '0';
@@ -190,11 +192,12 @@ begin
             end case;
             
             -- Receive character
+            RxD_sync <= RxD;
             case rxstate is
                 -- Rx idle, wait for start bit
                 when rx_idle =>
                     -- If detected a start bit ...
-                    if RxD = '0' then
+                    if RxD_sync = '0' then
                         usartstat_int(2) <= '0';
                         usartstat_int(1) <= '0';
                         usartstat_int(0) <= '0';
@@ -210,7 +213,7 @@ begin
                         rxbittimer <= rxbittimer - 1;
                     else
                         -- Start bit is still 0, so continue
-                        if RxD = '0' then
+                        if RxD_sync = '0' then
                             rxbittimer <= to_integer(unsigned(usartbaud_int));
                             rxshiftcounter <= 8;
                             rxbuffer <= (others => '0');
@@ -227,14 +230,14 @@ begin
                     elsif rxshiftcounter > 0 then
                         rxbittimer <= to_integer(unsigned(usartbaud_int));
                         rxshiftcounter <= rxshiftcounter - 1;
-                        rxbuffer(7 downto 0) <= RxD & rxbuffer(7 downto 1);
+                        rxbuffer(7 downto 0) <= RxD_sync & rxbuffer(7 downto 1);
                     else
                         rxstate <= rx_ready;
                     end if;
                 -- When ready, all bits are shifted in
                 when rx_ready =>
                     -- Test for a stray 0...
-                    if RxD = '0' then
+                    if RxD_sync = '0' then
                         -- Signal frame error
                         usartstat_int(0) <= '1';
                     end if;
