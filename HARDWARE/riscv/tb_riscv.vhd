@@ -68,6 +68,8 @@ begin
         wait for 1000 us;
         
         -- Send start bit
+        -- Transmission speed is slightly
+        -- faster than 9600 bps
         RxD <= '0';
         wait for 104 us;
         -- Send character
