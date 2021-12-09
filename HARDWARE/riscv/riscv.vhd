@@ -165,6 +165,7 @@ signal waitfordata_int : std_logic;
 begin
 
     -- Input push button is active low
+    -- TODO: implement a reset synchronizer
     areset_int <= not areset;
     
     -- The registers
