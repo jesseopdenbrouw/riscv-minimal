@@ -26,6 +26,7 @@ use work.processor_common_rom.all;
 entity rom is
     port (
         clk : in std_logic;
+        csrom : in std_logic;
         address1 : in data_type;
         address2 : in data_type;
         size2 : size_type;
@@ -62,7 +63,7 @@ begin
     
 
     -- ROM decoder
-    process(address1, address2, instr, data, size2) is
+    process(address1, address2, instr, data, size2, csrom) is
     begin
         error <= '0';
         -- By 4 for instructions
@@ -75,23 +76,27 @@ begin
         end if;
      
         -- By natural size
-        if size2 = size_word and address2(1 downto 0) = "00" then
-            data2 <= data(7 downto 0) & data(15 downto 8) & data(23 downto 16) & data(31 downto 24);
-        elsif size2 = size_halfword and address2(1 downto 0) = "00" then
-            data2 <= x(31 downto 16) & data(23 downto 16) & data(31 downto 24);
-        elsif size2 = size_halfword and address2(1 downto 0) = "10" then
-            data2 <= x(31 downto 16) & data(7 downto 0) & data(15 downto 8);
-        elsif size2 = size_byte then
-            case address2(1 downto 0) is
-                when "00" => data2 <= x(31 downto 8) & data(31 downto 24);
-                when "01" => data2 <= x(31 downto 8) & data(23 downto 16);
-                when "10" => data2 <= x(31 downto 8) & data(15 downto 8);
-                when "11" => data2 <= x(31 downto 8) & data(7 downto 0);
-                when others => data2 <= x; error <= '1';
-            end case;
+        if csrom = '1' then
+            if size2 = size_word and address2(1 downto 0) = "00" then
+                data2 <= data(7 downto 0) & data(15 downto 8) & data(23 downto 16) & data(31 downto 24);
+            elsif size2 = size_halfword and address2(1 downto 0) = "00" then
+                data2 <= x(31 downto 16) & data(23 downto 16) & data(31 downto 24);
+            elsif size2 = size_halfword and address2(1 downto 0) = "10" then
+                data2 <= x(31 downto 16) & data(7 downto 0) & data(15 downto 8);
+            elsif size2 = size_byte then
+                case address2(1 downto 0) is
+                    when "00" => data2 <= x(31 downto 8) & data(31 downto 24);
+                    when "01" => data2 <= x(31 downto 8) & data(23 downto 16);
+                    when "10" => data2 <= x(31 downto 8) & data(15 downto 8);
+                    when "11" => data2 <= x(31 downto 8) & data(7 downto 0);
+                    when others => data2 <= x; error <= '1';
+                end case;
+            else
+                data2 <= x;
+                error <= '1';
+            end if;
         else
             data2 <= x;
-            error <= '1';
         end if;
     end process;
     
