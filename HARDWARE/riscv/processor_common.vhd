@@ -65,8 +65,8 @@ package processor_common is
     --       default is 64 kB data
     constant rom_size_bits : integer := 16;
     constant rom_size : integer := 2**(rom_size_bits-2);
-    type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
-    -- The contents of the ROM is loaded by rom_contents.vhd
+    type rom_type is array(0 to rom_size-1) of data_type;
+    -- The contents of the ROM is loaded by processor_common_rom.vhd
     
     -- The RAM
     -- NOTE: the RAM is 4x byte (8 bits) size, supporting
