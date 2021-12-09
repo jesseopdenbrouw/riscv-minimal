@@ -37,8 +37,8 @@
     basicstyle = \ttfamily,
     breaklines = true,
     showspaces=false,
-    prebreak = \raisebox{-0.5ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
-    postbreak = \raisebox{-0.5ex}[0ex][0ex]{\ensuremath{\hookrightarrow}},
+    prebreak = \raisebox{-0.5ex}[0ex][0ex]{\color{red}\ensuremath{\hookleftarrow}},
+    postbreak = \raisebox{-0.5ex}[0ex][0ex]{\color{red}\ensuremath{\hookrightarrow}},
 }
 
 \usepackage{tikz}
@@ -294,7 +294,9 @@ All RV32I Unprivileged instructions are implemented with the exception of FENCE,
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has 18480 cells available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 cells (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has 18480 ALMs available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 ALMs (about 12\,\% - 15\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
+
+It is possible to add the Quartus' Signal Tap (embedded) Logic Analyzer. Follow the instructions on \url{https://people.ece.cornell.edu/land/courses/ece5760/Quartus/Signal_tap.html}.
 
 \section{Simulation}
 The designs can be simulated fully, using QuestaSim Intel Starter or ModelSim Intel Starter. You need a (free) license for QuestaSim. During simulation, all essential signals can be viewed, as is the RAM. The RAM is viewed as 32-bit entries, so we need to do some manual calculations to correctly find byte, halfword and word accesses. Simulation can be started from Quartus.
@@ -314,7 +316,7 @@ In the created directory, you will see the following directories:
 \texttt{HARDWARE} -- the VHDL description \\
 \texttt{OLD} -- yes, really old files for backup
 
-Change directory to \texttt{CODE}. Make sure the RISC-V C compiler is in your path environment variable. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
+Change directory to \texttt{CODE}. Make sure the RISC-V C compiler is available (see Section~\ref{sec:ccompiler}) and is in your path environment variable. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
 
 Next, start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
 
@@ -322,6 +324,7 @@ To test one of the programs, change directory to one of the directories and copy
 Now start Quartus and start the compilation. After a successful compilation, you can program the Cyclone V on a DE0-CV board.
 
 \section{Setting up the GNU C compiler for \textit{this} RISC-V}
+\label{sec:ccompiler}
 The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (from Linux) is straightforward:
 
 \begin{enumerate}
@@ -410,12 +413,12 @@ Compiling a program requires the following steps:
 \item Create a C program file, we assume \lstinline|flash.c|.
 \item Now issue the command:
 \begin{lstlisting}[language=]
-riscv32-unknown-elf-gcc -O2 -g -o flash flash.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/minimal.S
+riscv32-unknown-elf-gcc -O2 -g -o flash flash.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/startup.c
 \end{lstlisting}
-We supply our own linker file (\lstinline|-T ../ldfiles/riscv.ld|) and we supply our own startup file (\lstinline|../crt/minimal.S|). Make sure to use \lstinline|-nostartupfiles| otherwise the default startup file will be linked and errors will report. There a three startup files:
+We supply our own linker file (\lstinline|-T ../ldfiles/riscv.ld|) and we supply our own startup file (\lstinline|../crt/startup.c|). Make sure to use \lstinline|-nostartupfiles| otherwise the default startup file will be linked and errors will report. There a three startup files:
 \begin{itemize}
 \item \texttt{empty.S} -- Empty startup file only providing the entry symbol. Can be used with assembler programs.
-\item \texttt{minimal.S} -- Loads the global pointer and stack pointer and calls \texttt{main}. On return of \texttt{main}, it waits in an endless loop. Can be used with minimalistic C programs.
+\item \texttt{minimal.S} -- Provides the entry symbol, loads the global pointer and stack pointer and calls \texttt{main}. On return of \texttt{main}, it waits in an endless loop. Can be used with minimalistic C programs.
 \item \texttt{startup.c} -- Full support for C programs. Can be used with \texttt{malloc} et al.
 \end{itemize}
 \item Next issue the command:
@@ -533,9 +536,9 @@ Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM
 Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary. You have to update the data sizes in the VHDL description and update the linker script with suitable data sizes.
 
 \section{Address ranges and memory sizes}
-By default, the ROM starts at address 0x00000000 and and has a size of 64 kB (16 k words). The Program Counter starts at address 0x00000000. The RAM starts at address 0x20000000 and has a size of 32 kB (8 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20008000. The I/O starts at address 0xf0000000 and has a size of 16 kB (4 k words).
+By default, the ROM starts at address 0x00000000 and and has a size of 64 kB (16 k words). The Program Counter starts at address 0x00000000. The RAM starts at address 0x20000000 and has a size of 32 kB (8 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20008000. The I/O starts at address 0xF0000000 and has a size of 16 kB (4 k words).
 
-The ROM may be moved to another start location. The Program Counter is started at the correct address. The placement of the ROM is in 256 MB intervals, which are the 4 most significant bits of a 32-bit address. The same holds for the RAM and the I/O. To move the ROM, open the VHDL file \lstinline|processor_common.vhd| and go down to the end of the file. There you will see the following lines:
+The ROM, RAM and I/O may be moved to another start location. The Program Counter is started at the correct address. The placement of the ROM is in 256 MB intervals, which are the 4 most significant bits of a 32-bit address. The same holds for the RAM and the I/O. To move the ROM, open the VHDL file \lstinline|processor_common.vhd| and go down to the end of the file. There you will see the following lines:
 
 \begin{lstlisting}[language=VHDL]
 -- The highest nibble (4 bits) of the ROM, RAM and I/O
@@ -580,7 +583,7 @@ constant io_size : integer := 2**(io_size_bits-2);
 type io_type is array (0 to io_size-1) of data_type;
 \end{lstlisting}
 
-In this setting, the ROM is 64 kB long and the RAM is 32 kB long. Please note that both ROM and RAM bits may not exceed 3,153,920 bits.
+In this setting, the ROM is 64 kB long and the RAM is 32 kB long. Please note that both ROM and RAM bits may not exceed 3,153,920 bits. For increased ROM and RAM size, typical values may be 128 kB ROM and 64 kB RAM.
 
 %Next, open de linker script in \lstinline|<...>/ldfiles/riscv.ld|.
 %
@@ -605,7 +608,8 @@ Some future plans:
 \item Implement exceptions and interrupts in general. This will bring the possibility to add more I/O, such as timers. This needs implementation of the ``Zicsr'' standard.
 \item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers but division has to be handled with a multi-cycle FSM.
 \item Implement more General Purpose I/O (pins), with data direction registers. On the Cyclone V this is an issue, since the tri-state buffers must be in the top level of the design. This makes it hard to implement this processor as part of greater design.
-\item Implement more functions of the standard library. Now only a few functions work.
+\item Test more functions of the standard and mathematical libraries. Now only a few functions are tested.
+\item Implement a simple 2-stage pipeline. The ROM is created with onboard RAM blocks and after setting an address, a read requires an clock cycle to fetch the selected ROM contents (for both instruction and data).
 \end{itemize}
 
 \section{Author's note}
@@ -618,23 +622,23 @@ This is a list of currently supported I/O addresses.
 The default start address is 0xF0000000. The offset is given in bytes. Note that the I/O can only be accesses on 4-byte boundaries and on word size accesses.
 
 %\begin{register}{H}{PIN$x$}{0x00$+3x$}%
-\begin{register}{H}{PIN$x$}{0x00}%
+\begin{register}{H}{Port input register PIN$x$}{0x00}%
 \label{pinx}%
 \regfield{PIN$x$}{32}{0}{{0}}% READ_ONLY
 \reglabel{Reset}\regnewline%
 \end{register}
 
 %\begin{register}{H}{PIN$x$}{0x01$+3x$}%
-\begin{register}{H}{POUT$x$}{0x04}%
+\begin{register}{H}{Port output register POUT$x$}{0x04}%
 \label{poutx}%
 \regfield{POUT$x$}{32}{0}{{0}}
 \reglabel{Reset}\regnewline%
 \end{register}
 
-\begin{register}{H}{USART\_DATA}{0x20}
+\begin{register}{H}{Usart data register USART\_DATA}{0x20}
 \label{usartdata}
-\regfield{Reserved}{24}{8}{{0}}
-\regfield{Data}{8}{0}{{0}}
+\regfield{Reserved}{24}{8}{{0}}%
+\regfield{Data}{8}{0}{{0}}%
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
@@ -643,10 +647,10 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \item[Read] The last received data is read.
 \end{reglist}\end{regdesc}
 
-\begin{register}{H}{USART\_BAUD}{0x24}
+\begin{register}{H}{USART baud rate register USART\_BAUD}{0x24}
 \label{usartbaud}
-\regfield{Rerserved}{16}{16}{{0}}
-\regfield{Prescaler}{16}{0}{{0}}
+\regfield{Rerserved}{16}{16}{{0}}%
+\regfield{Prescaler}{16}{0}{{0}}%
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
@@ -654,9 +658,9 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \item[Prescaler] Baud rate = $\dfrac{f_{system}}{\textrm{prescaler}+1}$
 \end{reglist}\end{regdesc}
 
-\begin{register}{H}{USART\_CTRL}{0x28}
+\begin{register}{H}{USART control register USART\_CTRL}{0x28}
 \label{usartctrl}
-\regfield{Reserved}{32}{0}{{0}}
+\regfield{Reserved}{32}{0}{{0}}%
 %\regfield{Rerserved}{16}{16}{{0}}
 %\regfield{Prescaler}{16}{0}{{0}}
 \reglabel{Reset}\regnewline%
@@ -680,22 +684,26 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \end{reglist}\end{regdesc}
 
 
-\begin{register}{H}{USART\_STAT}{0x2c}
+\begin{register}{H}{USART status register USART\_STAT}{0x2c}
 \label{usartstat}
-\regfield{reserved}{27}{5}{{0}}
-\regfield{TC}{1}{4}{{0}}
-\regfield{Reserved}{1}{3}{{0}}
-\regfield{RC}{1}{2}{{0}}
-\regfield{RF}{1}{1}{{0}}
-\regfield{FE}{1}{0}{{0}}
+\regfield{reserved}{27}{5}{{0}}%
+\regfield{TC}{1}{4}{{0}}%
+\regfield{Reserved}{1}{3}{{0}}%
+\regfield{RC}{1}{2}{{0}}%
+\regfield{RF}{1}{1}{{0}}%
+\regfield{FE}{1}{0}{{0}}%
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.8\textwidth]\begin{reglist}[0000]
 \itemsep-1.5ex
-\item[TC] Set to 1 when a character is transmitted. Automatically cleared when writing new character or when writing 0 in the USART\_STAT bit.
-\item[RC] Set to 1 when a character is received. Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
-\item[RF] Set to 1 when failed receiving (invalid start bit). Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
-\item [FE] Set to 1 when a low is detected at the position of the stop bit. Automatically cleared when receiving a new character or writing a 0 in the USART\_STAT bit.
+\item[TC] Transmit completed. Set to 1 when a character is transmitted. Automatically cleared when writing new character or when writing 0 in the USART\_STAT bit.
+\item[RC] Receive completed. Set to 1 when a character is received. Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
+\item[RF] Receive failed. Set to 1 when failed receiving (invalid start bit). Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
+\item [FE] Frame error. Set to 1 when a low is detected at the position of the stop bit. Automatically cleared when receiving a new character or writing a 0 in the USART\_STAT bit.
 \end{reglist}\end{regdesc}
+
+%\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv/processor_common.vhd}
+
+%\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv/processor_common_rom.vhd}
 
 \end{document}
