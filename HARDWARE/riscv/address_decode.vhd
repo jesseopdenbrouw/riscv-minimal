@@ -30,6 +30,9 @@ entity address_decoder_and_data_router is
           wrio : out std_logic;
           addressout : out data_type;
           waitfordata : out std_logic;
+          csrom : out std_logic;
+          csram : out std_logic;
+          csio : out std_logic;
           addresserror : out std_logic
    );
 end entity address_decoder_and_data_router;
@@ -39,28 +42,41 @@ signal address : data_type;
 begin
 
     -- Address decoding and data routing for ROM, RAM and I/O to registers
+    address <= std_logic_vector(unsigned(rs) + unsigned(offset));
+    addressout <= address;
 
     process (address, rs, offset, romdatain, ramdatain, iodatain, memaccess) is
     begin
-        address <= std_logic_vector(unsigned(rs) + unsigned(offset));
         wrram <= '0';
         wrio <= '0';
         waitfordata <= '0';
         addresserror <= '0';
+        csrom <= '0';
+        csram <= '0';
+        csio <= '0';
         -- ROM @ 0xxxxxxx, 256M space, read only
         if address(31 downto 28) = rom_high_nibble then
-            dataout <= romdatain;
+            if memaccess = memaccess_read then
+                csrom <= '1';
+            end if;
             if memaccess = memaccess_read then
                 waitfordata <= '1';
             end if;
+            dataout <= romdatain;
         -- I/O @ Fxxxxxxx, 256M space
         elsif address(31 downto 28) = io_high_nibble then
+            if memaccess = memaccess_read or memaccess = memaccess_write then
+                csio <= '1';
+            end if;
             if memaccess = memaccess_write then
                 wrio <='1';
             end if;
             dataout <= iodatain;
         -- RAM @ 2xxxxxxx, 256M space
         elsif address(31 downto 28) = ram_high_nibble then
+            if memaccess = memaccess_read or memaccess = memaccess_write then
+                csram <= '1';
+            end if;
             if memaccess = memaccess_write then
                 wrram <='1';
             elsif memaccess = memaccess_read then
@@ -68,13 +84,12 @@ begin
             end if;
             dataout <= ramdatain;
         else
-            dataout <= (others => '-');
             -- Check for read/write in unspecified address region
             if memaccess = memaccess_write or memaccess = memaccess_read then
                 addresserror <= '1';
             end if;
+            dataout <= (others => '-');
         end if;
-        addressout <= address;
     end process;
 
 end architecture rtl;
