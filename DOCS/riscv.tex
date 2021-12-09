@@ -592,23 +592,7 @@ constant io_size : integer := 2**(io_size_bits-2);
 type io_type is array (0 to io_size-1) of data_type;
 \end{lstlisting}
 
-In this setting, the ROM is 64 kB long and the RAM is 32 kB long. Please note that both ROM and RAM bits may not exceed 3,153,920 bits. For increased ROM and RAM size, typical values may be 128 kB ROM and 64 kB RAM.
-
-%Next, open de linker script in \lstinline|<...>/ldfiles/riscv.ld|.
-%
-%Find the lines as showed below:
-%
-%\begin{lstlisting}[language=]
-%MEMORY
-%{
-%   ROM (rx)   : ORIGIN = 0x00000000, LENGTH = 16K
-%   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 16K
-%   IO (rw)    : ORIGIN = 0xf0000000, LENGTH = 16K
-%}
-%\end{lstlisting}
-%
-%Change the start addresses at the top op the file and changes the sizes if needed.
-%Then recompile your programs.
+In this setting, the ROM is 64 kB long and the RAM is 32 kB long. Please note that both ROM and RAM bits may not exceed 3,153,920 bits of onboard RAM. For increased ROM and RAM size, typical values may be 128 kB ROM and 64 kB RAM.
 
 \section{Future plans}
 Some future plans:
