@@ -71,22 +71,8 @@ void _start(void)
 		pdRom++;
 	}
 
-/*
-	// What
-	volatile uint32_t *start_to_copy = &_edata;
-	pStart = &_srodata;
-	pEnd = &_erodata;
-	while (pStart < pEnd) {
-		*start_to_copy = *pStart;
-	       pStart++;
-	       start_to_copy++;
-	}	       
-*/
-
         /* Initialize the C library */
-//#ifndef __cplusplus
         __libc_init_array();
-//#endif    
 
 	/* Just call main */
 	main();
