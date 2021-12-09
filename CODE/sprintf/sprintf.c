@@ -8,8 +8,6 @@ volatile double j = 1.2;
 
 int main(void)
 {
-
-
 	sprintf(str, "%d %f", i, j);
 }
 
