@@ -43,17 +43,24 @@ begin
         elsif rising_edge(clk) then
             case pc_op is
                 when pc_hold =>
+                    -- Hold the PC
                     null;
                 when pc_incr =>
+                    -- Next instruction address
                     pc_int <= pc_int + 4;
                 when pc_loadoffset =>
+                    -- Current PC + offset
                     pc_int <= pc_int + unsigned(offset);
                 when pc_loadoffsetregister =>
+                    -- Jump to register contents AND offset
                     pc_int <= unsigned(offset) + unsigned(rs);
                 when pc_branch =>
+                    -- Check if branch (conditional)
                     if branch = '1' then
+                        -- If yes, then branch
                         pc_int <= pc_int + unsigned(offset);
                     else
+                        -- Continue to next instruction
                         pc_int <= pc_int + 4;
                     end if;
                 when others =>
