@@ -22,6 +22,7 @@ all:
 	$(MAKE) -C global all
 	$(MAKE) -C sprintf all
 	$(MAKE) -C usart all
+	$(MAKE) -C qsort_int all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -42,4 +43,5 @@ clean:
 	$(MAKE) -C global clean
 	$(MAKE) -C sprintf clean
 	$(MAKE) -C usart clean
+	$(MAKE) -C qsort_int clean
 	rm -rf bin
