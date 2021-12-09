@@ -75,6 +75,7 @@ component instruction_decoder is
 end component instruction_decoder;
 component rom is
     port (clk : in std_logic;
+          csrom : in std_logic;
           address1 : in data_type;
           address2 : in data_type;
           size2 : size_type;
@@ -105,11 +106,15 @@ component address_decoder_and_data_router is
           wrio : out std_logic;
           addressout : out data_type;
           waitfordata : out std_logic;
+          csrom : out std_logic;
+          csram : out std_logic;
+          csio : out std_logic;
           addresserror : out std_logic
-   );
+         );
 end component address_decoder_and_data_router;
 component ram is
     port (clk : in std_logic;
+          csram : in std_logic;
           address : in data_type;
           datain : in data_type;
           size : in size_type;
@@ -121,6 +126,7 @@ end component ram;
 component io is
     port (clk : in std_logic;
           areset : in std_logic;
+          csio : in std_logic;
           address : in data_type;
           size : size_type;
           wren : in std_logic;
@@ -162,6 +168,9 @@ signal wrram_int : std_logic;
 signal wrio_int : std_logic;
 signal address_int : data_type;
 signal waitfordata_int : std_logic;
+signal csrom_int : std_logic;
+signal csram_int : std_logic;
+signal csio_int : std_logic;
 begin
 
     -- Input push button is active low
@@ -227,6 +236,7 @@ begin
     -- The ROM
     rom0 : rom
     port map (clk => clk,
+              csrom => csrom_int,
               address1 => pc_int,
               address2 => address_int,
               size2 => size_int,
@@ -247,14 +257,17 @@ begin
               wrram => wrram_int,
               wrio => wrio_int,
               addressout => address_int,
+              csrom => csrom_int,
+              csram => csram_int,
+              csio => csio_int,
               waitfordata => waitfordata_int,
               addresserror => open
     );
 
     -- The RAM
     ram0 : ram
-    port map (
-              clk => clk,
+    port map (clk => clk,
+              csram => csram_int,
               address => address_int,
               datain => rs2data_int,
               size => size_int,
@@ -267,6 +280,7 @@ begin
     io0 : io
     port map (clk => clk,
               areset => areset_int,
+              csio => csio_int,
               address => address_int,
               size => size_int,
               wren => wrio_int,
