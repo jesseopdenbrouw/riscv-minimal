@@ -59,7 +59,7 @@ begin
     end process;
 -- synthesis translate_on
 
-    -- Four 16Kx8-bit RAM blocks.
+    -- Four 8Kx8-bit RAM blocks (by default).
     -- Quartus will detect this and create onboard RAM
     ram0: process (clock) is
     begin
