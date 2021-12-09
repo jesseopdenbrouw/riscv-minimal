@@ -11,8 +11,8 @@ int main(void)
 	/* Set baud rate generator */
 	USART_BAUD = F_CPU/BAUD-1;
 
-	/* Send a 'B' */
-	USART_DATA = 0x62;
+	/* Read 8 switches from input */
+	USART_DATA = GPIOA_PIN & 0x000000ff;
 
 	/* Wait for transmission end */
 	while ((USART_STAT & 0x10) == 0);
