@@ -3,7 +3,7 @@
 --
 -- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
--- io.vhd - Simple I/O register file
+-- io.vhd - Simple I/O register file (input/output, UART)
 
 -- This hardware description is for educational purposes only. 
 -- This hardware description is distributed in the hope that it
@@ -21,6 +21,7 @@ use work.processor_common.all;
 entity io is
     port (clk : in std_logic;
           areset : in std_logic;
+          csio : in std_logic;
           address : in data_type;
           size : size_type;
           wren : in std_logic;
@@ -33,7 +34,7 @@ entity io is
           RxD : in std_logic
          );
 end entity io;
-
+    
 architecture rtl of io is
 -- Some local internal signals
 signal io : io_type;
@@ -79,9 +80,10 @@ begin
     isword <= TRUE when size = size_word and address(1 downto 0) = "00" else FALSE;
     
     -- Data out to ALU
-    process (io, isword, reg_int) is
+    process (io, isword, reg_int, csio) is
     begin
-        if isword then
+        -- Only at word boundaries AND chip select
+        if isword and csio = '1' then
             dataout <= io(reg_int);
         else
             dataout <= (others => 'X');
@@ -100,7 +102,8 @@ begin
             -- Only write to I/O when write is enabled AND size is word
             -- Only write to the outputs, not the inputs
             -- Only write if on 4-byte boundary
-            if wren = '1' and isword then
+            -- Only write when Chip Select (cs)
+            if wren = '1' and isword and csio = '1' then
                 if reg_int = pouta_addr then
                     pouta_int <= datain;
                 end if;
@@ -109,7 +112,6 @@ begin
     end process;
      -- Data to outside world
     pouta <= pouta_int;
-    
     
     -- USART (well, really and UART)
     process (clk, areset) is
@@ -131,9 +133,10 @@ begin
             rxshiftcounter <= 0;
             RxD_sync <= '1';
         elsif rising_edge(clk) then
-            -- Common register writes
+            -- Default for start transmission
             txstart <= '0';
-            if wren = '1' and isword then
+            -- Common register writes
+            if wren = '1' and isword and csio = '1' then
                 if reg_int = usartbaud_addr then
                     -- Use only 16 bits for baud rate
                     usartbaud_int <= (others => '0');
@@ -161,6 +164,7 @@ begin
                     TxD <= '1';
                     -- If start triggered...
                     if txstart = '1' then
+                        -- Load the prescaler, set the number of bits (including start bit)
                         txbittimer <= to_integer(unsigned(usartbaud_int));
                         txshiftcounter <= 9;
                         usartstat_int(4) <= '0'; 
@@ -170,6 +174,8 @@ begin
                     end if;
                 -- Transmit the bits
                 when tx_iter =>
+                    -- Cycle trough all bits in the transmit buffer
+                    -- First in line is the start bit
                     TxD <= txbuffer(0);
                     if txbittimer > 0 then
                         txbittimer <= txbittimer - 1;
@@ -198,10 +204,7 @@ begin
                 when rx_idle =>
                     -- If detected a start bit ...
                     if RxD_sync = '0' then
-                        usartstat_int(2) <= '0';
-                        usartstat_int(1) <= '0';
-                        usartstat_int(0) <= '0';
-                        -- At half bit time ...
+                        -- Set half bit time ...
                         rxbittimer <= to_integer(unsigned(usartbaud_int))/2;
                         rxstate <= rx_wait;
                     else
@@ -212,8 +215,12 @@ begin
                     if rxbittimer > 0 then
                         rxbittimer <= rxbittimer - 1;
                     else
+                        -- At half bit time...
                         -- Start bit is still 0, so continue
                         if RxD_sync = '0' then
+                            usartstat_int(2) <= '0';
+                            usartstat_int(1) <= '0';
+                            usartstat_int(0) <= '0';
                             rxbittimer <= to_integer(unsigned(usartbaud_int));
                             rxshiftcounter <= 8;
                             rxbuffer <= (others => '0');
@@ -224,6 +231,7 @@ begin
                         end if;
                     end if;
                 -- Shift in the data bits
+                -- We sample in the middle of a bit time...
                 when rx_iter =>
                     if rxbittimer > 0 then
                         rxbittimer <= rxbittimer - 1;
@@ -241,18 +249,19 @@ begin
                         -- Signal frame error
                         usartstat_int(0) <= '1';
                     end if;
+                    -- Anyway, copy the received data to the data register
                     usartdata_int <= (others => '0');
                     usartdata_int(7 downto 0) <= rxbuffer(7 downto 0);
                     usartstat_int(2) <= '1';
                     rxstate <= rx_idle;
                 -- Wrong start bit detected, no data present
                 when rx_fail =>
+                    -- Failed to receive a correct start bit...
                     rxstate <= rx_idle;
                     usartstat_int(1) <= '1';
                 when others =>
                     rxstate <= rx_idle;
             end case;
-            
         end if;
     end process;
     
