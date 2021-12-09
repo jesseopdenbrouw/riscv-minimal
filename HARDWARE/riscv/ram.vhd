@@ -30,6 +30,7 @@ use work.processor_common.all;
 entity ram is
     port (
           clk : in std_logic;
+          csram : in std_logic;
           address : in data_type;
           datain : in data_type;
           size : in size_type;
@@ -69,7 +70,7 @@ begin
     -- Input & output recoding
     -- The RAM is 32 bits, Big Endian, so we have to recode the inputs
     -- to support Little Endian
-    process (address, size, datain, wren, dataout_int) is
+    process (address, size, datain, wren, dataout_int, csram) is
     constant x : std_logic_vector(7 downto 0) := (others => '-');
     begin
         -- Need only the upper bits for address, the lower two bits select word, halfword or byte
@@ -82,79 +83,89 @@ begin
         byteena_int <= "0000";
          
         -- Input recoding
-        case size is
-            -- Byte size
-            when size_byte =>
-                case address(1 downto 0) is
-                    when "00" => datain_int <= datain(7 downto 0) & x & x & x; byteena_int <= "1000";
-                    when "01" => datain_int <= x & datain(7 downto 0) & x & x; byteena_int <= "0100";
-                    when "10" => datain_int <= x & x & datain(7 downto 0) & x; byteena_int <= "0010";
-                    when "11" => datain_int <= x & x & x & datain(7 downto 0); byteena_int <= "0001";
-                    when others => datain_int <= x & x & x & x;
-                end case;
-            -- Half word size, on 2-byte boundaries
-            when size_halfword =>
-                if address(1 downto 0) = "00" then
-                    datain_int <= datain(7 downto 0) & datain(15 downto 8) & x & x;
-                    byteena_int <= "1100";
-                elsif address(1 downto 0) = "10" then
-                    datain_int <= x & x & datain(7 downto 0) & datain(15 downto 8);
-                    byteena_int <= "0011";
-                else
-                    datain_int <=  x & x & x & x;
-                    error <= '1';
+        if csram = '1' then
+            case size is
+                -- Byte size
+                when size_byte =>
+                    case address(1 downto 0) is
+                        when "00" => datain_int <= datain(7 downto 0) & x & x & x; byteena_int <= "1000";
+                        when "01" => datain_int <= x & datain(7 downto 0) & x & x; byteena_int <= "0100";
+                        when "10" => datain_int <= x & x & datain(7 downto 0) & x; byteena_int <= "0010";
+                        when "11" => datain_int <= x & x & x & datain(7 downto 0); byteena_int <= "0001";
+                        when others => datain_int <= x & x & x & x;
+                    end case;
+                -- Half word size, on 2-byte boundaries
+                when size_halfword =>
+                    if address(1 downto 0) = "00" then
+                        datain_int <= datain(7 downto 0) & datain(15 downto 8) & x & x;
+                        byteena_int <= "1100";
+                    elsif address(1 downto 0) = "10" then
+                        datain_int <= x & x & datain(7 downto 0) & datain(15 downto 8);
+                        byteena_int <= "0011";
+                    else
+                        datain_int <=  x & x & x & x;
+                        error <= '1';
+                        wren_int <= '0';
+                    end if;
+                -- Word size, on 4-byte boundaries
+                when size_word =>
+                    if address(1 downto 0) = "00" then
+                        datain_int <= datain(7 downto 0) & datain(15 downto 8) & datain(23 downto 16) & datain(31 downto 24);
+                        byteena_int <= "1111";
+                    else
+                        datain_int <=  x & x & x & x;
+                        error <= '1';
+                        wren_int <= '0';
+                    end if;
+                when others =>
+                    datain_int <= x & x & x & x;
+                    -- Do not write the RAM
                     wren_int <= '0';
-                end if;
-            -- Word size, on 4-byte boundaries
-            when size_word =>
-                if address(1 downto 0) = "00" then
-                    datain_int <= datain(7 downto 0) & datain(15 downto 8) & datain(23 downto 16) & datain(31 downto 24);
-                    byteena_int <= "1111";
-                else
-                    datain_int <=  x & x & x & x;
                     error <= '1';
-                    wren_int <= '0';
-                end if;
-            when others =>
-                datain_int <= x & x & x & x;
-                -- Do not write the RAM
-                wren_int <= '0';
-                error <= '1';
-        end case;
+            end case;
+        else
+            -- set write enable to 0 anyway
+            wren_int <= '0';
+            datain_int <= x & x & x & x;
+        end if;
+        
 
         -- Output recoding
-        case size is
-            -- Byte size
-            when size_byte =>
-                case address(1 downto 0) is
-                    when "00" => dataout <= x & x & x & dataout_int(31 downto 24);
-                    when "01" => dataout <= x & x & x & dataout_int(23 downto 16);
-                    when "10" => dataout <= x & x & x & dataout_int(15 downto 8);
-                    when "11" => dataout <= x & x & x & dataout_int(7 downto 0);
-                    when others => dataout <= x & x & x & x;
-                end case;
-            -- Half word size
-            when size_halfword =>
-                if address(1 downto 0) = "00" then
-                    dataout <= x & x & dataout_int(23 downto 16) & dataout_int(31 downto 24);
-                elsif address(1 downto 0) = "10" then
-                    dataout <= x & x & dataout_int(7 downto 0) & dataout_int(15 downto 8);
-                else
+        if csram = '1' then
+            case size is
+                -- Byte size
+                when size_byte =>
+                    case address(1 downto 0) is
+                        when "00" => dataout <= x & x & x & dataout_int(31 downto 24);
+                        when "01" => dataout <= x & x & x & dataout_int(23 downto 16);
+                        when "10" => dataout <= x & x & x & dataout_int(15 downto 8);
+                        when "11" => dataout <= x & x & x & dataout_int(7 downto 0);
+                        when others => dataout <= x & x & x & x;
+                    end case;
+                -- Half word size
+                when size_halfword =>
+                    if address(1 downto 0) = "00" then
+                        dataout <= x & x & dataout_int(23 downto 16) & dataout_int(31 downto 24);
+                    elsif address(1 downto 0) = "10" then
+                        dataout <= x & x & dataout_int(7 downto 0) & dataout_int(15 downto 8);
+                    else
+                        dataout <= x & x & x & x;
+                        error <= '1';
+                    end if;
+                -- Word size
+                when size_word =>
+                    if address(1 downto 0) = "00" then
+                        dataout <= dataout_int(7 downto 0) & dataout_int(15 downto 8) & dataout_int(23 downto 16) & dataout_int(31 downto 24);
+                    else
+                        dataout <= x & x & x & x;
+                        error <= '1';
+                    end if;
+                when others =>
                     dataout <= x & x & x & x;
-                    error <= '1';
-                end if;
-            -- Word size
-            when size_word =>
-                if address(1 downto 0) = "00" then
-                    dataout <= dataout_int(7 downto 0) & dataout_int(15 downto 8) & dataout_int(23 downto 16) & dataout_int(31 downto 24);
-                else
-                    dataout <= x & x & x & x;
-                    error <= '1';
-                end if;
-            when others =>
-                dataout <= x & x & x & x;
-                --error <= '1';
-        end case;
+            end case;
+        else
+            dataout <= x & x & x & x;
+        end if;
     end process;
  
  end architecture rtl;
