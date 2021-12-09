@@ -89,6 +89,9 @@ add wave            -label rs2data_int dut/rs2data_int
 add wave            -label memory_int dut/memory_int
 add wave            -label address_int dut/address_int
 add wave            -label instr_int dut/instr_int
+add wave            -label csrom_int dut/csrom_int
+add wave            -label csram_int dut/csram_int
+add wave            -label csio_int dut/csio_int
 add wave -divider "FSM"
 add wave            -label state dut/instruction_decoder0/state
 add wave -divider "Registers"
