@@ -23,6 +23,7 @@ all:
 	$(MAKE) -C sprintf all
 	$(MAKE) -C usart all
 	$(MAKE) -C qsort_int all
+	$(MAKE) -C riemann_left all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -44,4 +45,5 @@ clean:
 	$(MAKE) -C sprintf clean
 	$(MAKE) -C usart clean
 	$(MAKE) -C qsort_int clean
+	$(MAKE) -C riemann_left clean
 	rm -rf bin
