@@ -26,7 +26,12 @@ _start:
 
 
         la  x1, _start
-	lw  x3, 4(x1);
+	la  x2, _start_ram
+	lw  x4, 4(x1);
+	sw  x4, 0(x2)
+
+	lw  x5, 0(x2)
+
 #	sw  s0, 0(t1)
 
 #        lw  t0, 0(zero)
