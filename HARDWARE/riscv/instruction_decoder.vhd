@@ -147,7 +147,7 @@ begin
                         when "111" => alu_op <= alu_bgeu;
                         when others =>
                             -- Reset defaults
-                            rs1 <= (others => '-'); rs1 <= (others => '-');
+                            rs1 <= (others => '-'); rs2 <= (others => '-');
                             offset <= (others => '-');
                             pc_op <= pc_incr;
                             error <= '1';
@@ -259,7 +259,7 @@ begin
                             rs2 <= rs2_i;
                             offset <= (others => instr(31));
                             offset(11 downto 0) <= instr(31 downto 25) & instr(11 downto 7);
-                        -- Store wordword
+                        -- Store word
                         when "010" =>
                             alu_op <= alu_nop;
                             memaccess <= memaccess_write;
