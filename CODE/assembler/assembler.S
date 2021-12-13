@@ -12,18 +12,6 @@ _start:
 
 	la gp, __global_pointer$
         la sp, __stack_pointer$ 
-#
-#loop:   addi t0,t0,1     # Increment t0
-#        slti t2,t0,10    # Set t2 to 1 is t0 < 10
-#        j loop           # Jump to begin
-
-#	 la t2,10
-#         la t0,0
-#
-#loop:
-#         addi t0,t0,1
-#         bltu t0,t2,loop
-
 
         la  x1, _start
 	la  x2, _start_ram
@@ -32,25 +20,19 @@ _start:
 
 	lw  x5, 0(x2)
 
-#	sw  s0, 0(t1)
+halt:   addi x0,x0,0
+	addi x0,x0,1
+	addi x0,x0,2
 
-#        lw  t0, 0(zero)
-#       sw  t0, 0(t1)
-#        lw  t0, 4(zero)
-#        sw  t0, 4(t1)
+	beq x0,x0,halt
 
+	addi x0,x0,3
+	addi x0,x0,4
+	addi x0,x0,5
+#	jalr x0,0x2c
 
-#        lw  t2, 0(t1)
-#	nop
-#        lw  t3, 4(t1)
+einde:	j einde
 
-
-#	li t1,0xffffffff
-#	li t2,0xffffffff
-#	mul t3,t2,t1
-#	mulhu t4,t2,t1
-
-halt:   j halt
 
 .option pop
 

@@ -8,6 +8,8 @@
  */
 
 
+float result = -1.0f;
+
 #include <math.h>
 
 float f(float x) {
@@ -31,6 +33,8 @@ int main() {
     for (k = 0; k < n; k++) {
         sum = sum + f(a + k*deltax) * deltax;
     }
+
+    result = sum;
 
     return 0;
 }
