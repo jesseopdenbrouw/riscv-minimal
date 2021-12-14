@@ -3,6 +3,8 @@
 ## riscv
 
 This directory contains the VHDL description of the processor.
-ROM is created using onboard RAM so each instruction takes two
-clock cycles. A (data) read from ROM and RAM takes an extra
-clock cycle.
+The standard processor requires two clock cycles to execute
+an instruction. The pipelined processor requires one clock
+cycle to execute an instruction. Then, jumps/branches taken
+require an extra clock cycle. In both processors, a read from
+RAM or ROM requires an extra clock cycle.
