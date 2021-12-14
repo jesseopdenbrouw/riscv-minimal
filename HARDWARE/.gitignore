@@ -1,4 +1,4 @@
-riscv-pipe/*
+riscv-pipe-signaltap/*
 riscv-test/*
 riscv-alt/*
 riscv.orig/*
