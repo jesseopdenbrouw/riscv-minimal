@@ -1,4 +1,6 @@
-all: srec2vhdl.c
+all: srec2vhdl
+
+srec2vhdl: srec2vhdl.c
 	gcc -o srec2vhdl srec2vhdl.c -Wall
 
 clean:
