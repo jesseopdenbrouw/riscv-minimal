@@ -52,11 +52,18 @@
 
 \vfill
 \begin{abstract}
+\parskip=0.5\baselineskip
 \noindent
 The RISC-V Instruction Set Architecture (ISA) is an open source instruction set for a processor. This means that anybody can create a processor that uses this instruction set. There are already processors available such as E2-core from SiFive. More freeware cores are available on several platforms (e.g. on GitHub). This documents describes a basic 32-bit RISC-V core in VHDL. The core can only execute the RV32I unprivileged instruction set. The processor incorporates a ROM, RAM and some simple I/O. It is targeted for implementation on an FPGA. It is tested on an Intel Cyclone V with a DE0-CV development board from Terasic with the use of Quartus Prime Lite 21.1 and QuestaSim Intel Starter Edition 2021.2. The GNU C-compiler for RISC-V is used for software development. Currently only simple C programs can be compiled and run. C++ is currently not supported.
 
 \noindent
-This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students. The processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM. ROM and RAM reads need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. Exceptions are currently not implemented. This will be for future development.
+This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students.
+
+\noindent
+There are two versions available. The standard processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM. ROM and RAM reads need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. The pipelined processor has a simple two-stage pipeline and executes each instruction in one clock cycle except for jump/branches taken, which requires two clock cycles. ROM and RAM reads need an extra clock cycle. 
+
+\noindent
+Exceptions are currently not implemented. This will be for future development.
 
 \noindent
 This is work in progress. Things will certainly change in the future.
@@ -68,10 +75,13 @@ This is work in progress. Things will certainly change in the future.
 
 \clearpage
 \section{Introduction}
-This document describes the buildup of a simple, dual/triple clock cycle, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions will be handled in software. The C-compiler will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz. The processor utilizes some simple I/O making it a microcontroller.
+This document describes the buildup of a simple, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions will be handled in software. The C-compiler will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz. The processor utilizes some simple I/O effectively making it a microcontroller.
 
+There are two version: a non-pipelined version which requires two/three clock cycles to complete an instruction, and a pipelined version which requires one/two clock cycles to complete an instruction. The extra clock cycle is needed when reading ROM or RAM (data) because ROM and RAM is realized using onboard RAM block (which are buffered with an output register).
+
+The non-pipelined processor executes 0.5 MIPS/MHz because each instruction fetch requires a clock cycle. The pipelined processor executes at top 1 MIPS/MHz (jump/branches taken and reading ROM/RAM for data requires an extra clock cycle). 
 \section{The processor}
-This RISC-V processor consists of one \textit{core} and of the following building blocks:
+Both RISC-V processors consist of one \textit{core} and of the following building blocks:
 
 \begin{itemize}
 \item The registers contain intermediate data for calculations.
@@ -84,9 +94,9 @@ This RISC-V processor consists of one \textit{core} and of the following buildin
 \item The Instruction Decoder decodes the currently executing instruction and provides control signals to other building blocks.
 \end{itemize}
 
-A block diagram is shown in Figure~\ref{fig:blockdiagram}.
+A block diagram of the non-pipelined processor is shown in Figure~\ref{fig:blockdiagram}.
 
-The processor uses preprogrammed onboard RAM blocks to implement the ROM. Register/register and register/immediate instructions require two clock cycles, register/memory instructions require two clock cycles for a write operations and three clock cycles for read operations (ROM/RAM only).
+%The processor uses preprogrammed onboard RAM blocks to implement the ROM. Register/register and register/immediate instructions require two clock cycles, register/memory instructions require two clock cycles for a write operations and three clock cycles for read operations (ROM/RAM only).
  
 \begin{sidewaysfigure}[!p]
 \centering
@@ -251,21 +261,19 @@ Register & Name & Purpose & Saver \\
 \label{sec:rom}
 The ROM consists of bytes and is only word addressable for instructions. The ROM is byte, half word and word addressable when reading constant data. Half word and word entries are in Litte Endian format. When reading data from the ROM, half word accesses must be on 2-byte boundaries and word accesses must be on 4-byte boundaries. This simplifies the decoding circuitry. The ROM returns undefined data if an access is not aligned. The processor instantiates the ROM in onboard RAM. Rearranging half word and word data accesses in Big Endian format is handled by the ROM decoding unit.
 
-Note: because the ROM is instantiated using onboard RAM, each read (instruction and data) requires an extra clock cycle.
-
-Note: the Cyclone V has 3,153,920 bits of RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
+Note: the Cyclone V has 3,153,920 bits of onboard RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
 
 \subsection{RAM}
 \label{sec:ram}
 The RAM consists of bytes and is byte, half word and word addressable. Half word and word entries are in Little Endian format. The RAM itself is made up of word (i.e. 32-bit) entries and is instantiated with onboard RAM blocks. Due to this fact, half word accesses are only permitted on 2-byte boundaries and word accesses are only permitted on 4-byte boundaries. The RAM returns undefined data if an access is not aligned. Writes will not take place if an access is unaligned. This simplifies the decoding circuitry. For the Cyclone V a maximum of 65536 words of RAM can be instantiated. Rearranging half word and word data accesses in Big Endian format is handled by the RAM decoding unit.
 
-Note: the Cyclone V has 3,153,920 bits of RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
+Note: the Cyclone V has 3,153,920 bits of onboard RAM available. Because of the 32-bit entries a maximum of 2,097,152 (65536 x 32) bits can be instantiated. This is equivalent to 262,144 bytes.
 
-Writing the RAM (byte, half word of word) requires two clock cycle. Reading the RAM (byte, half word, word) requires three clock cycles because the RAM output is buffered by a register. This is automatically handled by the processor.
+Reading the RAM (byte, half word, word) requires an extra clock cycles because the RAM output is buffered by a register. This is automatically handled by the processor.
 
 \subsection{I/O}
 \label{sec/io}
-Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple UART. More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data.
+Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple UART. More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data. Reading and writing I/O requires one clock cycle.
 
 The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only (8N1).
 
@@ -277,15 +285,15 @@ Note that the computation of jump target addresses is handled by the Program Cou
 
 \subsection{PC}
 \label{sec:pc}
-The Program Counter contains the address of the currently executed instruction. The address is always on a 4-byte boundary although function calls and conditional jump (JAL, JALR en B$xx$ instructions) can be on non 4-byte boundaries (the C compiler will always create 4-bytes boundaries). The PC (or rather the VHDL description of the PC) handles the address calculations of jumps and branches taken.
+The Program Counter contains the address of the currently executed instruction (non-pipelined) or the next instruction (pipelined). The address is always on a 4-byte boundary although function calls and conditional jump (JAL, JALR en B$xx$ instructions) can be on non 4-byte boundaries (the C compiler will always create 4-bytes boundaries). The PC (or rather the VHDL description of the PC) handles the address calculations of jumps and branches taken.
 
 \subsection{Instruction Decoder}
 \label{sec:instructiondecoder}
 The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4-bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder and the register file.
 
-In the processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. The FSM takes care of that.
+In the processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. In the pipelined processor, the PC points to +4 of the currently executing instruction. The FSM takes care of that.
 
-The instruction decoder is non-pipelined. That simplifies the design but slows down the computational speed.
+%The instruction decoder is non-pipelined. That simplifies the design but slows down the computational speed.
 
 \subsection{Address Decoder and Data Router}
 \label{sec:addressdecoderanddatarouter}
@@ -335,7 +343,7 @@ Now start Quartus and start the compilation. After a successful compilation, you
 The processor can run simple compiled C-programs that are compiled using the GNU C-compiler for RISC-V. Besides that, a separate linker script is needed to setup the compiled code. Building the C compiler (from Linux) is straightforward:
 
 \begin{enumerate}
-\item You need a current GNU C-compiler installed or your Linux box.
+\item You need a current GNU C-compiler installed or your Linux box. You also need all essential building tools.
 \item You need the texinfo package. On Ubuntu et al.\@ issue
 \begin{lstlisting}[language=]
 apt install texinfo
@@ -425,7 +433,8 @@ riscv32-unknown-elf-gcc -O2 -g -o flash flash.c -Wall -T ../ldfiles/riscv.ld -ma
 We supply our own linker file (\lstinline|-T ../ldfiles/riscv.ld|) and we supply our own startup file (\lstinline|../crt/startup.c|). Make sure to use \lstinline|-nostartupfiles| otherwise the default startup file will be linked and errors will report. There a three startup files:
 \begin{itemize}
 \item \texttt{empty.S} -- Empty startup file only providing the entry symbol. Can be used with assembler programs.
-\item \texttt{minimal.S} -- Provides the entry symbol, loads the global pointer and stack pointer and calls \texttt{main}. On return of \texttt{main}, it waits in an endless loop. Can be used with minimalistic C programs.
+\item \texttt{minmal.S} -- Provides the entry symbol, loads the global pointer and stack pointer. Can be used with assembler programs.
+\item \texttt{startup.S} -- Provides the entry symbol, loads the global pointer and stack pointer and calls \texttt{main}. On return of \texttt{main}, it waits in an endless loop. Can be used with minimalistic C programs.
 \item \texttt{startup.c} -- Full support for C programs. Can be used with \texttt{malloc} et al.
 \end{itemize}
 \item Next issue the command:
@@ -602,7 +611,7 @@ Some future plans:
 \item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers but division has to be handled with a multi-cycle FSM.
 \item Implement more General Purpose I/O (pins), with data direction registers. On the Cyclone V this is an issue, since the tri-state buffers must be in the top level of the design. This makes it hard to implement this processor as part of greater design.
 \item Test more functions of the standard and mathematical libraries. Now only a few functions are tested.
-\item Implement a simple 2-stage pipeline. The ROM is created with onboard RAM blocks and after setting an address, a read requires an clock cycle to fetch the selected ROM contents (for both instruction and data).
+%\item Implement a simple 2-stage pipeline. The ROM is created with onboard RAM blocks and after setting an address, a read requires an clock cycle to fetch the selected ROM contents (for both instruction and data).
 \end{itemize}
 
 \section{Author's note}
@@ -614,9 +623,9 @@ I managed to create this basic RISC-V processor within one week, including compi
 This is a list of currently supported I/O addresses. 
 The default start address is 0xF0000000. The offset is given in bytes. Note that the I/O can only be accesses on 4-byte boundaries and on word size accesses.
 
-\begin{register}{H}{Port input register PIN$x$}{0x00}%
+\begin{register}{H}{Port input register PIN}{0x00}%
 \label{pinx}%
-\regfield{PIN$x$}{32}{0}{{0}}% READ_ONLY
+\regfield{PIN}{32}{0}{{0}}% READ_ONLY
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
@@ -624,9 +633,9 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \item[Note:] This I/O register can only be read.
 \end{reglist}\end{regdesc}
 
-\begin{register}{H}{Port output register POUT$x$}{0x04}%
+\begin{register}{H}{Port output register POUT}{0x04}%
 \label{poutx}%
-\regfield{POUT$x$}{32}{0}{{0}}
+\regfield{POUT}{32}{0}{{0}}
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
