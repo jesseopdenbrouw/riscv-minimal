@@ -124,6 +124,7 @@ int main(int argc, char *argv[]) {
 		printf("   -h        Halfword output\n");
 		printf("   -w        Word output\n");
 		printf("If outputfile is omitted, stdout is used\n");
+		printf("Program size must be less then 1 MB\n");
 		exit(EXIT_SUCCESS);
 	}
 
