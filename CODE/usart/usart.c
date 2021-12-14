@@ -18,7 +18,7 @@ int main(void)
 	while ((USART_STAT & 0x10) == 0);
 
 	/* Wait for received character */
-	while((USART_STAT & 0x04) == 0);
+	while ((USART_STAT & 0x04) == 0);
 
 	/* Put data on leds */
 	GPIOA_POUT = USART_DATA;
