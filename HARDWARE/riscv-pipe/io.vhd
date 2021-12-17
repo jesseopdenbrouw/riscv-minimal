@@ -154,6 +154,18 @@ begin
                     -- bits are set to 1. Most right bit is start bit.
                     txbuffer <= (others => '1');
                     txbuffer(8 downto 0) <= datain(7 downto 0) & '0';
+                    -- Signal that we are sending
+                    usartstat_int(4) <= '0'; 
+                end if;
+            end if;
+            
+            -- If data register is read
+            if wren = '0' and isword and csio = '1' then
+                if reg_int = usartdata_addr then
+                    -- Clear the received status bits
+                    usartstat_int(2) <= '0';
+                    usartstat_int(1) <= '0';
+                    usartstat_int(0) <= '0';
                 end if;
             end if;
             
@@ -167,7 +179,6 @@ begin
                         -- Load the prescaler, set the number of bits (including start bit)
                         txbittimer <= to_integer(unsigned(usartbaud_int));
                         txshiftcounter <= 9;
-                        usartstat_int(4) <= '0'; 
                         txstate <= tx_iter;
                     else
                         txstate <= tx_idle;
@@ -190,7 +201,7 @@ begin
                 when tx_ready =>
                     TxD <= '1';
                     txstate <= tx_idle;
-                    -- Signal transmitted character
+                    -- Signal character transmitted
                     usartstat_int(4) <= '1'; 
                 when others =>
                     TxD <= '1';
@@ -218,9 +229,6 @@ begin
                         -- At half bit time...
                         -- Start bit is still 0, so continue
                         if RxD_sync = '0' then
-                            usartstat_int(2) <= '0';
-                            usartstat_int(1) <= '0';
-                            usartstat_int(0) <= '0';
                             rxbittimer <= to_integer(unsigned(usartbaud_int));
                             rxshiftcounter <= 8;
                             rxbuffer <= (others => '0');
