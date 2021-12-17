@@ -705,10 +705,10 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \end{register}
 \begin{regdesc}[0.8\textwidth]\begin{reglist}[0000]
 \itemsep-1.5ex
-\item[TC] Transmit completed. Set to 1 when a character is transmitted. Automatically cleared when writing new character or when writing 0 in the USART\_STAT bit.
-\item[RC] Receive completed. Set to 1 when a character is received. Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
-\item[RF] Receive failed. Set to 1 when failed receiving (invalid start bit). Automatically cleared when receiving new character or when writing 0 in the USART\_STAT bit.
-\item [FE] Frame error. Set to 1 when a low is detected at the position of the stop bit. Automatically cleared when receiving a new character or writing a 0 in the USART\_STAT bit.
+\item[TC] Transmit completed. Set to 1 when a character is transmitted. Automatically cleared when writing new character to the data register or when writing 0 in the USART\_STAT bit.
+\item[RC] Receive completed. Set to 1 when a character is received. Automatically cleared when data register is read or when writing 0 in the USART\_STAT bit.
+\item[RF] Receive failed. Set to 1 when failed receiving (invalid start bit). Automatically cleared when data register is read or when writing 0 in the USART\_STAT bit.
+\item [FE] Frame error. Set to 1 when a low is detected at the position of the stop bit. Automatically cleared when data register is read or writing a 0 in the USART\_STAT bit.
 \end{reglist}\end{regdesc}
 
 %\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv/processor_common.vhd}
