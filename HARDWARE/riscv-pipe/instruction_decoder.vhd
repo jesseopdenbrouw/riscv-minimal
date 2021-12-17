@@ -47,7 +47,7 @@ alias rd_i : reg_type is instr(11 downto 7);
 alias rs1_i : reg_type is instr(19 downto 15);
 alias rs2_i : reg_type is instr(24 downto 20);
 alias shamt : shift_type is instr(24 downto 20);
-type state_type is (state_unknown, state_fetch, state_fexecute, state_wait, state_penalty);
+type state_type is (state_unknown, state_fetch, state_fexecute, state_wait);
 signal state : state_type;
 signal penalty : std_logic;
 signal instrlast : data_type;
@@ -91,9 +91,6 @@ begin
                         instrlast <= instr;
                     end if;
                 -- Jump/branch to new address, needs penalty
-                when state_penalty =>
-                    state <= state_fetch;
-                    instrlast <= instr;
                 when others =>
                     state <= state_fetch;
                     instrlast <= instr;
@@ -120,7 +117,7 @@ begin
         
         case state is
         when state_fetch =>
-            pc_op <= pc_incr;
+            null;
         when state_fexecute =>
             -- Parse opcodes
             case opcode is
@@ -538,8 +535,6 @@ begin
                 when others =>
                     error <= '1';
             end case;
-        when state_penalty =>
-            null;
         when others =>
             null;
         end case;
