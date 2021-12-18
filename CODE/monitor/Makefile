@@ -10,3 +10,4 @@ monitor: monitor.c io.h
 	$(SREC2VHDL) -wf monitor.srec monitor.vhd
 clean:
 	rm -f monitor monitor.srec monitor.vhd
+	rm -rf __pycache__
