@@ -42,7 +42,7 @@
 }
 
 \usepackage{tikz}
-\usetikzlibrary{backgrounds,shapes,arrows}
+\usetikzlibrary{backgrounds,shapes,arrows, automata}
 
 \usepackage{hyperref}
 \hypersetup{colorlinks}
@@ -291,9 +291,42 @@ The Program Counter contains the address of the currently executed instruction (
 \label{sec:instructiondecoder}
 The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4-bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder and the register file.
 
-In the processor, a simple three-state FSM is used. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. In the pipelined processor, the PC points to +4 of the currently executing instruction. The FSM takes care of that.
+In the processor, a simple three-state FSM is used, see Figure~\ref{fsmnonpipe}. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM.
 
-%The instruction decoder is non-pipelined. That simplifies the design but slows down the computational speed.
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=3cm]
+\node[state,initial,initial text=reset] (fetch) {fetch};
+\node[state,right of=fetch] (exec) {exec};
+\node[state,right of=exec] (wait) {wait};
+\path[-latex] (fetch) edge [bend left] node[above] {--} (exec)
+          (exec)  edge [bend left] node[below] {!wait} (fetch)
+          (exec)  edge             node[above] {wait} (wait)
+          (wait)  edge [bend right=45] node[above] {--} (fetch)
+;
+\end{tikzpicture}
+\caption{FSM of the instruction decoder of the non-pipelined processor.}
+\label{fsmnonpipe}
+\end{figure}
+
+The pipelined processor uses a simple three-state FSM, see figure~\ref{fsmpipe}. The PC points to +4 of the currently executing instruction. If a jump or branch taken occurs, the FSM inserts a penalty because the PC has to be loaded with the correct value and a new instruction must be fetched. Reading RAM and ROM requires an extra state. Note that penalty and wait cannot occur at the same time.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=3cm]
+\node[state,initial,initial text=reset] (fetch) {fetch};
+\node[state,right of=fetch] (fexec) {fexec};
+\node[state,right of=fexec] (wait) {wait};
+\path[-latex] (fetch) edge [bend left] node[above] {--} (fexec)
+          (fexec) edge [bend left] node[below] {penalty} (fetch)
+          (fexec) edge [bend right] node[below] {wait} (wait)
+          (wait)  edge [bend right] node[above] {--} (fexec)
+          (fexec) edge [loop below] node[below] {!wait$\,\cdot\,$!penalty} (fexec)
+;
+\end{tikzpicture}
+\caption{FSM of the instruction decoder of the pipelined processor.}
+\label{fsmpipe}
+\end{figure}
 
 \subsection{Address Decoder and Data Router}
 \label{sec:addressdecoderanddatarouter}
@@ -309,7 +342,7 @@ All RV32I Unprivileged instructions are implemented with the exception of FENCE,
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has 18480 ALMs available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 ALMs (about 12\,\% - 15\,\%) and 786,432 bits of internal memory (25\,\%). This FPGA is mounted on a Terasic DE0-CV board, see \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has 18480 ALMs available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2000-2500 ALMs (about 12\,\% - 15\,\%) and 786,432 bits of internal memory (25\,\%). The clock frequency is 50\,MHz which is sufficient for all program examples. This FPGA is mounted on a Terasic DE0-CV board. The board has 10 switches, 4 push buttons, 1 reset push button, 10 leds, and 6 seven-segment displays. See \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
 
 It is possible to add the Quartus' Signal Tap (embedded) Logic Analyzer. Follow the instructions on \url{https://people.ece.cornell.edu/land/courses/ece5760/Quartus/Signal_tap.html}.
 
@@ -374,7 +407,7 @@ The toolchain is currently configured for 64-bit RISC-V. That is not what we wan
 \begin{lstlisting}[language=]
 ../configure --prefix=/opt/riscv32 --with-arch=rv32i --with-abi=ilp32
 \end{lstlisting}
-This will set the architecture to RV32I and the ABI to ipl32. This means that integers, long integers and pointers use 32-bit entries. The destination directory is \lstinline|/opt/riscv32|
+This will set the architecture to RV32I and the ABI to ipl32. This means that integers, long integers and pointers use 32-bit entities. The destination directory is \lstinline|/opt/riscv32|
 \item Now enter the make command as root: \lstinline|make|\\
 MAKE SURE TO ENTER THIS COMMAND AS root, because the toolchain is put in \lstinline|/opt/riscv32|. This takes a long time (about 45 minutes on a Zbook G5). At some points the compilation seems to hang, but it is just compiling complicated C-files. By the way, you will see a lot of warnings.
 \item Now that the toolchain is setup, we have to put the path into the \lstinline|$PATH| environment variable so enter
@@ -539,19 +572,38 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{global} -- test for globals and local statics with initialization (seems to works).
 \item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
 \item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
+\item \texttt{monitor} -- simple monitor program. Works on the board. Uses strings, USART, RAM, ROM, I/O and \texttt{sprintf}.
 \item \texttt{mult} -- integer multiplication using the C library (works).
-\item  \texttt{qsort} -- sorts an integer array using the \texttt{qsort} C library function (seems to work).
+\item \texttt{qsort\_int} -- sorts an integer array using the \texttt{qsort} C library function (seems to work).
+\item \texttt{riemann\_left} -- calculates the Riemann Left Sum of $\sin^2 x$ from $0$ to $2\pi$.
 \item \texttt{shift} -- shifts (works)
 \item \texttt{sprintf} -- prints integers, floats/doubles to a string. This is a big binary (seems to work).
 \item \texttt{string} -- some string functions (seems to work).
 \item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
 \item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
 \item \texttt{trig} -- some float trigonometry functions (seems to work).
+\item \texttt{usart} -- simple USART program.
 \end{itemize} 
 
 Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection. You will see compiler warnings from C library functions.
 
 Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary. You have to update the data sizes in the VHDL description and update the linker script with suitable data sizes.
+
+\subsection{Monitor program}
+A simple monitor program is available, see the \texttt{monitor} directory in software examples. It makes use of the USART. You need a terminal program like Putty and a USART to USB device for your computer. Currently the following commands are available:
+
+\begin{itemize}
+\item \texttt{l} -- set Little Endian (default),
+\item \texttt{b} -- set Big endian.
+\item \texttt{rw <address>} -- read word at address (4-byte boundary),
+\item \texttt{rh <address>} -- read half word at address (2-byte boundary),
+\item \texttt{rb <address>} -- read byte at address,
+\item \texttt{ww <address> <data>} -- write word at address (4-byte boundary),
+\item \texttt{wh <address> <data>} -- write half word at address (2-byte boundary),
+\item \texttt{wb <address> <data>} -- write byte at address,
+\end{itemize}
+
+\texttt{<address>} and \texttt{<data>} in hexadecimal and Big Endian format. For ROM and RAM read accesses, best set to Little Endian. For I/O accesses, set Big Endian. Make sure to read and write I/O as words.
 
 \section{Address ranges and memory sizes}
 By default, the ROM starts at address 0x00000000 and and has a size of 64 kB (16 k words). The Program Counter starts at address 0x00000000. The RAM starts at address 0x20000000 and has a size of 32 kB (8 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20008000. The I/O starts at address 0xF0000000 and has a size of 16 kB (4 k words).
@@ -608,7 +660,7 @@ Some future plans:
 
 \begin{itemize}
 \item Implement exceptions and interrupts in general. This will bring the possibility to add more I/O, such as timers. This needs implementation of the ``Zicsr'' standard.
-\item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers but division has to be handled with a multi-cycle FSM.
+\item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers (most FPGAs have those onboard and the synthesizer will use them) but division has to be handled with a multi-cycle FSM.
 \item Implement more General Purpose I/O (pins), with data direction registers. On the Cyclone V this is an issue, since the tri-state buffers must be in the top level of the design. This makes it hard to implement this processor as part of greater design.
 \item Test more functions of the standard and mathematical libraries. Now only a few functions are tested.
 %\item Implement a simple 2-stage pipeline. The ROM is created with onboard RAM blocks and after setting an address, a read requires an clock cycle to fetch the selected ROM contents (for both instruction and data).
