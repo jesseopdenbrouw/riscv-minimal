@@ -17,14 +17,14 @@
 #define USART_STAT (*(volatile uint32_t*)(IO_BASE+0x0000002CUL))
 
 typedef struct {
-	uint32_t DATA;
-	uint32_t BAUD;
-	uint32_t CTRL;
-	uint32_t STAT;
+	volatile uint32_t DATA;
+	volatile uint32_t BAUD;
+	volatile uint32_t CTRL;
+	volatile uint32_t STAT;
 } USART_struct_t;
 
 #define USART_BASE (IO_BASE+0x00000020UL)
 
-#define USART ((volatile USART_struct_t *) USART_BASE)
+#define USART ((USART_struct_t *) USART_BASE)
 
 #endif
