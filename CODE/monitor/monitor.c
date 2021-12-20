@@ -178,7 +178,7 @@ int main(void)
 		usart_gets(buffer, sizeof buffer);
 		len = strlen(buffer);
 		if (len == 0) {
-			usart_puts("Enter a command\r\n");
+			usart_puts("Enter a command or h for help\r\n");
 			continue;
 		}
 
@@ -210,7 +210,7 @@ int main(void)
 		}
 
 		if (len < 3) {
-			usart_puts("Enter a correct command\r\n");
+			usart_puts("Enter a correct command of h for help\r\n");
 			continue;
 		}
 
