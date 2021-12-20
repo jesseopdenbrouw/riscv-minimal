@@ -54,7 +54,8 @@ package processor_common is
                          alu_lui, alu_auipc,
                          alu_lw, alu_lh, alu_lhu, alu_lb, alu_lbu,
                          alu_jal, alu_jalr,
-                         alu_beq, alu_bne, alu_blt, alu_bge, alu_bltu, alu_bgeu
+                         alu_beq, alu_bne, alu_blt, alu_bge, alu_bltu, alu_bgeu,
+                         alu_mul, alu_mulh, alu_mulhu, alu_mulhsu
                         );
     -- The ROM
     -- NOTE: the ROM is word (32 bits) size.
