@@ -456,6 +456,7 @@ begin
                     else
                         error <= '1';
                     end if;
+                    
                 -- FENCE (not implemented)
                 when "0001111" =>
                     if func3 = "000" then
