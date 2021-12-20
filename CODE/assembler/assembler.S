@@ -29,7 +29,10 @@ halt:   addi x0,x0,0
 	addi x0,x0,3
 	addi x0,x0,4
 	addi x0,x0,5
-#	jalr x0,0x2c
+
+	# Not supported (yet)
+	mulh x1,x2,x3
+	mul x1,x2,x3
 
 einde:	j einde
 
