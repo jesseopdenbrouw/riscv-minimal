@@ -41,6 +41,7 @@ begin
     begin
         a := unsigned(dataa);
         b := unsigned(datab);
+        r := (others => '0');
         as := signed(dataa);
         bs := signed(datab);
         case alu_op is
@@ -161,11 +162,13 @@ begin
                 r := (others => '0');
                 r(7 downto 0) := unsigned(memory(7 downto 0));
 
+            -- Jumps and calls
             when alu_jal =>
                 r := unsigned(pc);
             when alu_jalr =>
                 r := unsigned(pc);
-                
+            
+            -- Branches
             when alu_beq =>
                 r := (others => '0');
                 if a = b then
@@ -196,7 +199,7 @@ begin
                 if a >= b then
                     r(0) := '1';
                 end if;
-                
+
             when others =>
                 r := (others => 'X');
         end case;
