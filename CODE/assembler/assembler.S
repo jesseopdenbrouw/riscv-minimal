@@ -34,6 +34,10 @@ halt:   addi x0,x0,0
 	mulh x1,x2,x3
 	mul x1,x2,x3
 
+	# Not supported yet
+	rdtime x1
+	rdcycle x2
+
 einde:	j einde
 
 
