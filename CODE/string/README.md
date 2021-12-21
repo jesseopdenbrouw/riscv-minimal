@@ -2,8 +2,8 @@
 
 ## Description
 
-Tests `strlen`, `strcpy`, `strcmp`
+Tests `strlen`, `strcpy`, `strcat` and `strcmp`
 
 ## Status
 
-Works, needs test on `strcat`
+Works

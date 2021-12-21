@@ -3,8 +3,8 @@
 
 int main(void) {
 
-	/* The strinfg */
-	char str[] = "Hello dit is een string";
+	/* The strinf */
+	char str[] = "Hello this is a string";
 
 	/* Make a non-volatile buffer */
 	volatile char to[100];
@@ -14,6 +14,9 @@ int main(void) {
 
 	/* Copy the string */
 	strcpy(to, str);
+
+	/* Concatenate a string */
+	strcat(to, "! And it works!");
 
 	/* Get string compare */
 	x = strcmp("Hello", str);
