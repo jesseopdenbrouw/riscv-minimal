@@ -1,5 +1,7 @@
 riscv-pipe-signaltap/*
-riscv-pipe-csr/*
 riscv-test/*
 riscv-alt/*
 riscv.orig/*
+division/*
+mdu/*
+mdu_vhdl/*
