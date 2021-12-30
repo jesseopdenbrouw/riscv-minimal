@@ -4,7 +4,7 @@
 \title{A Minimal RISC-V processor in VHDL}
 \date{\today\\[2ex]\normalsize\url{https://github.com/jesseopdenbrouw/riscv-minimal}}
 
-\usepackage[a4paper,inner=1.0in,outer=1.2in,top=1in,bottom=1.5in,footskip=0.4in,showframe]{geometry}
+\usepackage[a4paper,inner=1.0in,outer=1.2in,top=1in,bottom=1.5in,footskip=0.4in]{geometry}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage[charter]{mathdesign}
@@ -60,7 +60,7 @@ The RISC-V Instruction Set Architecture (ISA) is an open source instruction set 
 This processor is not intended as a replacement for commercial available processors. It is intended as a study object for Computer Science students.
 
 \noindent
-There are two versions available. The standard processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM. ROM and RAM reads need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. The pipelined processor has a simple two-stage pipeline and executes each instruction in one clock cycle except for jump/branches taken, which requires two clock cycles. ROM and RAM reads need an extra clock cycle. 
+There are two versions available. The standard processor executes each instruction in two clock cycles because the ROM is inferred using onboard RAM. ROM and RAM reads need an extra clock cycle. The processor has a simple, non-pipelined instruction decoder. The pipelined processor has a simple two-stage pipeline and executes each instruction in one clock cycle except for jump/branches taken, which requires two clock cycles. ROM and RAM reads need an extra clock cycle. This processor also has a basic Control and Status Registers (CSR) set.
 
 \noindent
 Exceptions are currently not implemented. This will be for future development.
@@ -77,9 +77,10 @@ This is work in progress. Things will certainly change in the future.
 \section{Introduction}
 This document describes the buildup of a simple, one core, RISC-V processor, completely written in VHDL. The processor is able to run a simple compiled C-program. C++ is currently not supported. The processor can handle the RV32I Base Integer Instruction Set as set forward in ``The RISC-V Instruction Set Manual Volume I: Unprivileged ISA''. The RV32M Instruction Set is currently not supported, so multiplications and divisions will be handled in software. The C-compiler will take care of that when supplied with the correct parameters. The aim is to synthesize for a minimum clock frequency of 50\,MHz. The processor utilizes some simple I/O effectively making it a microcontroller.
 
-There are two version: a non-pipelined version which requires two/three clock cycles to complete an instruction, and a pipelined version which requires one/two clock cycles to complete an instruction. The extra clock cycle is needed when reading ROM or RAM (data) because ROM and RAM is realized using onboard RAM block (which are buffered with an output register).
+There are two version: a non-pipelined version (\texttt{riscv}) which requires two/three clock cycles to complete an instruction and a pipelined version with a basic implementation of the Control and Status Registers (\texttt{riscv-pipe-csr}). This processor also requires two clock cycles to complete an instruction, but the next instruction is fetched while the current instruction is executed. Jumps, calls and branches taken requires two clock cycles because an new instruction has to be fetched. Also, an extra clock cycle is needed when reading ROM or RAM (data) because ROM and RAM is implemented using onboard RAM block (which are buffered with an output register). This processor has a basic Control and Status Registers set, offering CYCLE and CYCLEH (completed clock cycles), TIME and TIMEH (time since last reset, in microseconds) and INSTRET and INSTRETH (number of retired instructions).
 
-The non-pipelined processor executes 0.5 MIPS/MHz because each instruction fetch requires a clock cycle. The pipelined processor executes at top 1 MIPS/MHz (jump/branches taken and reading ROM/RAM for data requires an extra clock cycle). 
+The non-pipelined processor executes at top 0.5 MIPS/MHz because each instruction fetch and execution requires a clock cycle. The pipelined processors execute at top 1 MIPS/MHz (jump and branches taken and reading ROM/RAM for data requires an extra clock cycle).
+ 
 \section{The processor}
 Both RISC-V processors consist of one \textit{core} and of the following building blocks:
 
@@ -92,12 +93,11 @@ Both RISC-V processors consist of one \textit{core} and of the following buildin
 \item The PC is used to point to the currently executing instruction.
 \item The Address Decoder and Data Router is an interface between the memory (ROM, RAM, I/O) and the ALU and registers.
 \item The Instruction Decoder decodes the currently executing instruction and provides control signals to other building blocks.
+\item (only for \texttt{riscv-pipe-csr}) The Control and Status Registers contains a basic set of register. Currently only RDTIME(h), RDCYCLE(h) and RDINSTRET(h).
 \end{itemize}
 
 A block diagram of the non-pipelined processor is shown in Figure~\ref{fig:blockdiagram}.
 
-%The processor uses preprogrammed onboard RAM blocks to implement the ROM. Register/register and register/immediate instructions require two clock cycles, register/memory instructions require two clock cycles for a write operations and three clock cycles for read operations (ROM/RAM only).
- 
 \begin{sidewaysfigure}[!p]
 \centering
 \begin{tikzpicture}[thick,font=\sffamily\footnotesize,>=latex,scale=.75,framed,background rectangle/.style={fill=none}]
@@ -223,7 +223,7 @@ A block diagram of the non-pipelined processor is shown in Figure~\ref{fig:block
 
 \draw[->] (-0.5,-17.6667) node[below] {rs1\_data} -- ++(0,2) -- ++(1.5,0);
 \end{tikzpicture}
-\caption{The complete RISC-V MCU.}
+\caption{The complete, non-pipelined RISC-V MCU.}
 \label{fig:blockdiagram}
 \end{sidewaysfigure}
 
@@ -275,7 +275,7 @@ Reading the RAM (byte, half word, word) requires an extra clock cycles because t
 \label{sec/io}
 Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple UART. More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data. Reading and writing I/O requires one clock cycle.
 
-The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only (8N1).
+The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only (8N1). Tested speeds are 9600 bps and 115200 bps. Several status flags are implemented to guide transmission.
 
 \subsection{ALU}
 \label{sec:alu}
@@ -291,7 +291,7 @@ The Program Counter contains the address of the currently executed instruction (
 \label{sec:instructiondecoder}
 The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4-bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder and the register file.
 
-In the processor, a simple three-state FSM is used, see Figure~\ref{fsmnonpipe}. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM.
+In the standard processor, a simple three-state FSM is used, see Figure~\ref{fsmnonpipe}. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM.
 
 \begin{figure}[!ht]
 \centering
@@ -334,11 +334,22 @@ The Address Decoder and Data Router routes reads and writes to the ROM (only rea
 
 When data is read, the data is collected from the accessed memory and put on an internal bus to the ALU. The ALU can perform sign extension (byte and half word accesses) if needed. Please note that reading data from the RAM and ROM requires an extra clock cycle. Reading data from I/O requires no extra clock cycle.
 
+\subsection{Control and Status registers}
+The RISC-V describes a set of 4096 control and status register in a separate address space. Currently only a basic set is implemented:
+
+\begin{itemize}
+\item CYCLE and CYCLEH -- these 32-bit register form a 64-bit value that contains the counted clock cycles since the last reset.
+\item TIME and TIMEH -- these 32-bit registers form a 64-bit value that contains the counted wall-clock microseconds since the last reset.
+\item INSTRET and INSTRETH -- these 32-bit registers form a 64-bit value that contains the counted retired instructions since the last reset.
+\end{itemize}
+
+Note that these registers are read-only. Writes are ignored. Other registers may be added.
+
 \subsection{Stack pointer}
 The stack pointer is fully implemented although the ISA does not provide pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address + 1 on startup (which is 0x20008000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
 
 \subsection{Implemented instructions}
-All RV32I Unprivileged instructions are implemented with the exception of FENCE, ECALL and EBREAK instructions. These instructions act as a no-operation (NOP). This is because exceptions are not implemented.
+All RV32I Unprivileged instructions are implemented with the exception of FENCE, ECALL and EBREAK instructions. These instructions act as a no-operation (NOP). This is because exceptions are not implemented. The pipelined version with CSR (\texttt{riscv-pipe-csr}) can handle the RV32 ``Zicsr'' instruction set.
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
@@ -361,7 +372,7 @@ In the created directory, you will see the following directories:
 
 \texttt{CODE} -- Sample software programs, linker script and startup files\\
 \texttt{DOCS} -- Documentation\\
-\texttt{HARDWARE} -- the VHDL description \\
+\texttt{HARDWARE} -- the VHDL descriptions \\
 \texttt{OLD} -- yes, really old files for backup
 
 Change directory to \texttt{CODE}. Make sure the RISC-V C compiler is available (see Section~\ref{sec:ccompiler}) and is in your path environment variable. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
@@ -407,7 +418,7 @@ The toolchain is currently configured for 64-bit RISC-V. That is not what we wan
 \begin{lstlisting}[language=]
 ../configure --prefix=/opt/riscv32 --with-arch=rv32i --with-abi=ilp32
 \end{lstlisting}
-This will set the architecture to RV32I and the ABI to ipl32. This means that integers, long integers and pointers use 32-bit entities. The destination directory is \lstinline|/opt/riscv32|
+This will set the architecture to RV32I and the ABI to ilp32. This means that integers, long integers and pointers use 32-bit entities. The destination directory is \lstinline|/opt/riscv32|
 \item Now enter the make command as root: \lstinline|make|\\
 MAKE SURE TO ENTER THIS COMMAND AS root, because the toolchain is put in \lstinline|/opt/riscv32|. This takes a long time (about 45 minutes on a Zbook G5). At some points the compilation seems to hang, but it is just compiling complicated C-files. By the way, you will see a lot of warnings.
 \item Now that the toolchain is setup, we have to put the path into the \lstinline|$PATH| environment variable so enter
@@ -526,6 +537,7 @@ The VHDL description is composed of the following files:
 \item \lstinline|ram.vhd| -- Description of the RAM interface between the address decoder and data router and the onboard RAM.
 \item \lstinline|ram_inst.vhd| -- Description of the onboard RAM. Quartus detects this and creates the RAM in onboard RAM blocks.
 \item \lstinline|io.vhd| -- Description of the I/O. It contains a 32-bit input register, a 32-bit output register and a simple 8-bit UART.
+\item \lstinline|csr.vhd| -- Description of the Control and Status registers (only for \texttt{riscv-pipe-csr}).
 \item \lstinline|riscv.vhd| -- Top-level description of the processor. Connects are the building blocks to a viable processor.
 \item \lstinline|riscv.sdc| -- Constraints file. Sets the target clock frequency.
 \item \lstinline|tb_riscv.vhd| -- VHDL testbench to simulate the design.
@@ -565,6 +577,7 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{bin} -- contains the binary of \texttt{srec2vhdl}.
 \item \texttt{add64} -- simple 64-bit addition.
 \item \texttt{assembler} -- a simple assembler program.
+\item \texttt{clock} -- a simple clock using the CSR TIME and TIMEH registers to fetch the time since last reset. Can only be used with the pipelined processor. Works on the board.
 \item \texttt{ctest} -- scratch C-program test.
 \item \texttt{double} -- some floating point double computations (seems to work).
 \item \texttt{flash} -- flash the DE0-CV board leds (works on the board)
@@ -582,12 +595,13 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
 \item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
 \item \texttt{trig} -- some float trigonometry functions (seems to work).
-\item \texttt{usart} -- simple USART program.
+\item \texttt{usart} -- simple USART program (works on the board).
+\item \texttt{usart\_sprintf} -- simple program that prints an integer, a pointer, a float and a double to the terminal, this is a big binary (works on the board).
 \end{itemize} 
 
 Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection. You will see compiler warnings from C library functions.
 
-Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is to large to fit in the ROM. In that case, the linker will issue an error and does not build the binary. You have to update the data sizes in the VHDL description and update the linker script with suitable data sizes.
+Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is too large to fit in the ROM. In that case, the linker will issue an error and does not build the binary. You have to update the data sizes in the VHDL description and update the linker script with suitable data sizes.
 
 \subsection{Monitor program}
 A simple monitor program is available, see the \texttt{monitor} directory in software examples. It makes use of the USART. You need a terminal program like Putty and a USART to USB device for your computer. Currently the following commands are available:
@@ -603,7 +617,7 @@ A simple monitor program is available, see the \texttt{monitor} directory in sof
 \item \texttt{wb <address> <data>} -- write byte at address,
 \end{itemize}
 
-\texttt{<address>} and \texttt{<data>} in hexadecimal and Big Endian format. For ROM and RAM read accesses, best set to Little Endian. For I/O accesses, set Big Endian. Make sure to read and write I/O as words.
+\texttt{<address>} and \texttt{<data>} in hexadecimal and Big Endian format. For ROM and RAM read accesses, best set to Little Endian. For I/O accesses, set Big Endian. Make sure to read and write I/O as words. Note that ROM cannot be written.
 
 \section{Address ranges and memory sizes}
 By default, the ROM starts at address 0x00000000 and and has a size of 64 kB (16 k words). The Program Counter starts at address 0x00000000. The RAM starts at address 0x20000000 and has a size of 32 kB (8 k words). The stack pointer is set to one address above the last RAM byte, by default at 0x20008000. The I/O starts at address 0xF0000000 and has a size of 16 kB (4 k words).
@@ -655,19 +669,20 @@ type io_type is array (0 to io_size-1) of data_type;
 
 In this setting, the ROM is 64 kB long and the RAM is 32 kB long. Please note that both ROM and RAM bits may not exceed 3,153,920 bits of onboard RAM. For increased ROM and RAM size, typical values may be 128 kB ROM and 64 kB RAM.
 
+Note that we do not use full address decoding for ROM, RAM and I/O. This means that, for example, the ROM is visible multiple times in the address space. This is called \emph{memory foldback}. For the ROM this is at 64 kB intervals. So the contents of address 0x00000000 is also available at address 0x00010000.
+
 \section{Future plans}
 Some future plans:
 
 \begin{itemize}
-\item Implement exceptions and interrupts in general. This will bring the possibility to add more I/O, such as timers. This needs implementation of the ``Zicsr'' standard.
+\item Implement exceptions and interrupts in general. This will bring the possibility to add more I/O, such as timers.
 \item Implement the M standard: multiplier and divider. Multiplication can be achieved with the onboard multipliers (most FPGAs have those onboard and the synthesizer will use them) but division has to be handled with a multi-cycle FSM.
 \item Implement more General Purpose I/O (pins), with data direction registers. On the Cyclone V this is an issue, since the tri-state buffers must be in the top level of the design. This makes it hard to implement this processor as part of greater design.
 \item Test more functions of the standard and mathematical libraries. Now only a few functions are tested.
-%\item Implement a simple 2-stage pipeline. The ROM is created with onboard RAM blocks and after setting an address, a read requires an clock cycle to fetch the selected ROM contents (for both instruction and data).
 \end{itemize}
 
 \section{Author's note}
-I managed to create this basic RISC-V processor within one week, including compiling the GNU C compiler and the created C program examples. Of course, this is not the fastest core available, but it gives a good example on designing a RISC-V processor yourself. Next in line is to make the standard C library work. In the mean time, files will change, so be sure to grab the latest GitHub repository clone.
+I managed to create the basic RISC-V processor within one week, including compiling the GNU C compiler and the created C program examples. Of course, this is not the fastest core available, but it gives a good example on designing a RISC-V processor yourself. Next in line is to make the standard C library work. In the mean time, files will change, so be sure to grab the latest GitHub repository clone.
 
 \appendix
 \section{I/O registers}
@@ -728,7 +743,7 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[00000]
 \itemsep-1.5ex
-\item [note:] currently no bits are assigned to the Control Register.
+\item [Note:] currently no bits are assigned to the Control Register.
 %\item[Stop Bits] Meaning
 %\item[0] 1 Stop bit
 %\item[1] 2 Stop bits
