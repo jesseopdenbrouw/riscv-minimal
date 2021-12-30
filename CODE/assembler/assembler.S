@@ -24,19 +24,15 @@ halt:   addi x0,x0,0
 	addi x0,x0,1
 	addi x0,x0,2
 
-	beq x0,x0,halt
+	#beq x0,x0,halt
 
-	addi x0,x0,3
-	addi x0,x0,4
-	addi x0,x0,5
+	rdcycle a0
+	rdcycleh a1
 
-	# Not supported (yet)
-	mulh x1,x2,x3
-	mul x1,x2,x3
-
-	# Not supported yet
-	rdtime x1
-	rdcycle x2
+	li x9,0x11111111
+	csrrw	x11,3103,x9
+	csrrw	x11,3103,x0
+	csrrwi	x11,3103,31
 
 einde:	j einde
 
