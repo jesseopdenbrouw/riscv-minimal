@@ -102,6 +102,7 @@ int usart_gets(char buffer[], int size) {
 }
 
 int main(void) {
+
 	int j = 2;
 	float k = 1.2f;
 	double l = 0.6;
