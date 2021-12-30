@@ -26,6 +26,7 @@ all:
 	$(MAKE) -C riemann_left all
 	$(MAKE) -C monitor all
 	$(MAKE) -C usart_sprintf all
+	$(MAKE) -C clock all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -50,4 +51,5 @@ clean:
 	$(MAKE) -C riemann_left clean
 	$(MAKE) -C monitor clean
 	$(MAKE) -C usart_sprintf clean
+	$(MAKE) -C clock clean
 	rm -rf bin
