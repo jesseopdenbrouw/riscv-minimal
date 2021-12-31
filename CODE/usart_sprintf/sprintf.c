@@ -39,6 +39,67 @@ void usart_puts(char *s)
 	}
 }
 
+/* Get one character from the USART in
+ * blocking mode */
+int usart_getc(void)
+{
+	/* Wait for received character */
+	while ((USART->STAT & 0x04) == 0);
+
+	/* Return 8-bit data */
+	return USART->DATA & 0x000000ff;
+}
+
+/* Gets a string terminated by a newline character from usart
+ * The newline character is not part of the returned string.
+ * The string is null-terminated.
+ * A maximum of size-1 characters are read.
+ * Some simple line handling is implemented */
+int usart_gets(char buffer[], int size) {
+	int index = 0;
+	char chr;
+
+	while (1) {
+		chr = usart_getc();
+		switch (chr) {
+			case '\n':
+			case '\r':	buffer[index] = '\0';
+					usart_puts("\r\n");
+					return index;
+					break;
+			/* Backspace key */
+			case 0x7f:
+			case '\b':	if (index>0) {
+						usart_putc(0x7f);
+						index--;
+					} else {
+						usart_putc('\a');
+					}
+					break;
+			/* control-U */
+			case 21:	while (index>0) {
+						usart_putc(0x7f);
+						index--;
+					}
+					break;
+			/* control-C */
+			case 0x03:  	usart_puts("<break>\r\n");
+					index=0;
+					break;
+			default:	if (index<size-1) {
+						if (chr>0x1f && chr<0x7f) {
+							buffer[index] = chr;
+							index++;
+							usart_putc(chr);
+						}
+					} else {
+						usart_putc('\a');
+					}
+					break;
+		}
+	}
+	return index;
+}
 int main(void) {
 
 	int j = 2;
@@ -57,4 +118,4 @@ int main(void) {
 	usart_puts(buffer);
 
 	return 0;
-}	
+}
