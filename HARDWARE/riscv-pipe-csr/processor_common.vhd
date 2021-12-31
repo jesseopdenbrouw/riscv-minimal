@@ -21,6 +21,10 @@ package processor_common is
     constant SYSTEM_FREQUENCY : integer := 50000000;
     -- Set to 1 MHz, so elapsed time is in micro seconds
     constant CLOCK_FREQUENCY : integer := 1000000;
+    
+    -- Make use of the E standard (reduced register set),
+    -- set to 16. For the I standard, use 32.
+    constant NUMBER_OF_REGISTERS : integer := 32;
 
     -- The common data type is 32 bits wide
     subtype data_type is std_logic_vector(31 downto 0);
