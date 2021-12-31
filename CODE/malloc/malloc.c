@@ -30,6 +30,12 @@ int main(void) {
 		pint[i] = -1;
 	}
 
+	pint = (int *) realloc(pint, 120);
+
+	for (int i = 0; i < 25; i++) {
+		pint[i] = -1000;
+	}
+
 	free(pint);
 
 	/* seems to work */
