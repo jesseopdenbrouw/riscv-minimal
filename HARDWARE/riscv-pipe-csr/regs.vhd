@@ -33,7 +33,7 @@ entity regs is
 end entity regs;
 
 architecture rtl of regs is
-type regs_array_type is array (0 to 31) of std_logic_vector(31 downto 0);
+type regs_array_type is array (0 to NUMBER_OF_REGISTERS-1) of std_logic_vector(31 downto 0);
 signal regs_int : regs_array_type;
 begin
     
