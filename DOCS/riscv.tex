@@ -682,8 +682,190 @@ Some future plans:
 I managed to create the basic RISC-V processor within one week, including compiling the GNU C compiler and the created C program examples. Of course, this is not the fastest core available, but it gives a good example on designing a RISC-V processor yourself. Next in line is to make the standard C library work. In the mean time, files will change, so be sure to grab the latest GitHub repository clone.
 
 \appendix
-\section{I/O registers}
+\section{Port I/O}
+The processor is equipped with a single 32-bit input and 32-bit output port. There is no data direction register. The reason for this is that the tri-state buffers for bi-direction must be in the top-level entity of the hardware design, making it impossible to use the processor in a greater design. Note that all accesses on the I/O are in Big Endian. This means that bit 31 of the input will be placed in bit 31 of the used variable.
 
+The I/O registers are directly addressable of by a struct. See the listing below.
+
+\begin{lstlisting}[language=C]
+#ifndef _IO_H
+#define _IO_H
+
+#include <stdint.h>
+
+#define IO_BASE (0xf0000000UL)
+
+#define GPIOA_PIN  (*(volatile uint32_t*)(IO_BASE+0x00000000UL))
+#define GPIOA_POUT (*(volatile uint32_t*)(IO_BASE+0x00000004UL))
+
+typedef struct {
+        volatile uint32_t PIN;
+        volatile uint32_t POUT;
+} GPIO_struct_t;
+
+#define GPIOA_BASE (IO_BASE+0x00000000UL)
+
+#define GPIOA ((GPIO_struct_t *) GPIOA_BASE)
+
+#define USART_DATA (*(volatile uint32_t*)(IO_BASE+0x00000020UL))
+#define USART_BAUD (*(volatile uint32_t*)(IO_BASE+0x00000024UL))
+#define USART_CTRL (*(volatile uint32_t*)(IO_BASE+0x00000028UL))
+#define USART_STAT (*(volatile uint32_t*)(IO_BASE+0x0000002CUL))
+
+typedef struct {
+	volatile uint32_t DATA;
+	volatile uint32_t BAUD;
+	volatile uint32_t CTRL;
+	volatile uint32_t STAT;
+} USART_struct_t;
+
+#define USART_BASE (IO_BASE+0x00000020UL)
+
+#define USART ((USART_struct_t *) USART_BASE)
+
+#endif
+\end{lstlisting}
+
+To read the inputs, use:
+
+\begin{lstlisting}[language=C]
+uint32_t input;
+
+input = GPIOA->PIN;
+\end{lstlisting}
+
+To set the outputs, use:
+
+\begin{lstlisting}[language=C]
+uint32_t output = 0xff00ff00;
+
+GPIOA->POUT = output;
+\end{lstlisting}
+
+\section{UART Code}
+
+The UART can currently transmit and receive data with one stop bit, 8 data bits and 1 stop bit. No parity is supported. This is called 8N1. Transmission is tested with a baud rate of 9600 bps and 115200 bps. There are no auxiliary control signals (e.g. RTS and CTS). There is no embedded FIFO to buffer incoming data. The UART is programmable using I/O registers, see Appendix~\ref{sec:ioregisters}.
+
+To initialize the UART, use the code in the listing below:
+
+\begin{lstlisting}[language=C]
+/* Frequency of the DE0-CV board */
+#define F_CPU (50000000UL)
+/* Transmission speed */
+#define BAUD_RATE (9600UL)
+
+/* Initialize the Baud Rate Generator */
+void usart_init(void)
+{
+    /* Set baud rate generator */
+    USART->BAUD = F_CPU/BAUD_RATE-1;
+}
+\end{lstlisting}
+
+To send a single character with waiting, use the code in the listing below:
+
+\begin{lstlisting}[language=C]
+/* Send one character over the USART */
+void usart_putc(int ch)
+{
+    /* Transmit data */
+    USART->DATA = (uint8_t) ch;
+            
+    /* Wait for transmission end */
+    while ((USART->STAT & 0x10) == 0);
+}
+\end{lstlisting}
+
+To send a null-terminated string, use the code in the listing below:
+
+\begin{lstlisting}[language=C]
+/* Send a null-terminated string over the USART */
+void usart_puts(char *s)
+{
+    if (s == NULL)
+    {
+        return;
+    }
+
+    while (*s != '\0')
+    {
+        usart_putc(*s++);
+    }
+}
+\end{lstlisting}
+
+To wait for a character reception, use the code in the listing below:
+
+\begin{lstlisting}[language=C]
+/* Get one character from the USART in
+ * blocking mode */
+int usart_getc(void)
+{
+        /* Wait for received character */
+        while ((USART->STAT & 0x04) == 0);
+
+        /* Return 8-bit data */
+        return USART->DATA & 0x000000ff;
+}
+\end{lstlisting}
+
+To receive a string from the UART, including some line editing, use the code in the listing below:
+
+\begin{lstlisting}[language=C]
+/* Gets a string terminated by a newline character from usart
+ * The newline character is not part of the returned string.
+ * The string is null-terminated.
+ * A maximum of size-1 characters are read.
+ * Some simple line handling is implemented */
+int usart_gets(char buffer[], int size) {
+    int index = 0;
+    char chr;
+
+    while (1) {
+        chr = usart_getc();
+        switch (chr) {
+            case '\n':
+            case '\r':  buffer[index] = '\0';
+                        usart_puts("\r\n");
+                        return index;
+                        break;
+            /* Backspace key */
+            case 0x7f:
+            case '\b':  if (index>0) {
+                            usart_putc(0x7f);
+                            index--;
+                        } else {
+                            usart_putc('\a');
+                        }
+                    break;
+            /* control-U */
+            case 21:    while (index>0) {
+                            usart_putc(0x7f);
+                            index--;
+                        }
+                        break;
+            /* control-C */
+            case 0x03:   usart_puts("<break>\r\n");
+                        index=0;
+                        break;
+            default:    if (index<size-1) {
+                            if (chr>0x1f && chr<0x7f) {
+                                buffer[index] = chr;
+                                index++;
+                                usart_putc(chr);
+                            }
+                        } else {
+                            usart_putc('\a');
+                        }
+                        break;
+        }
+    }
+    return index;
+}
+\end{lstlisting}
+
+\section{I/O registers}
+\label{sec:ioregisters}
 This is a list of currently supported I/O addresses. 
 The default start address is 0xF0000000. The offset is given in bytes. Note that the I/O can only be accesses on 4-byte boundaries and on word size accesses.
 
@@ -769,10 +951,10 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \end{register}
 \begin{regdesc}[0.8\textwidth]\begin{reglist}[0000]
 \itemsep-1.5ex
-\item[TC] Transmit completed. Set to 1 when a character is transmitted. Automatically cleared when writing new character to the data register or when writing 0 in the USART\_STAT bit.
-\item[RC] Receive completed. Set to 1 when a character is received. Automatically cleared when data register is read or when writing 0 in the USART\_STAT bit.
-\item[RF] Receive failed. Set to 1 when failed receiving (invalid start bit). Automatically cleared when data register is read or when writing 0 in the USART\_STAT bit.
-\item [FE] Frame error. Set to 1 when a low is detected at the position of the stop bit. Automatically cleared when data register is read or writing a 0 in the USART\_STAT bit.
+\item[TC] Transmit completed. Set directly to 1 when a character was transmitted. Automatically cleared when writing new character to the data register or when writing 0 in the TC bit in USART\_STAT.
+\item[RC] Receive completed. Set to 1 when a character was received. Automatically cleared when data register is read or when writing 0 in the RC bit in USART\_STAT.
+\item[RF] Receive failed. Set to 1 when failed receiving (invalid start bit). Automatically cleared when data register is read or when writing 0 in the RF bit in USART\_STAT.
+\item [FE] Frame error. Set to 1 when a low is detected at the position of a stop bit. Automatically cleared when data register is read or writing a 0 in the FE bit in USART\_STAT.
 \end{reglist}\end{regdesc}
 
 %\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv/processor_common.vhd}
