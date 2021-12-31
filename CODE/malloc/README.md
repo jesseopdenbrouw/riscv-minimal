@@ -2,8 +2,13 @@
 
 ## Description
 
-Tests for `malloc`, `calloc` and `free`
+Tests for `malloc`, `realloc`, `calloc` and `free`
 
 ## Status
 
-Works, `realloc` not tested
+Works on the board.A
+
+## Notes
+
+`malloc` et al. are frequently used by C library functions
+e.g. `sprintf`.
