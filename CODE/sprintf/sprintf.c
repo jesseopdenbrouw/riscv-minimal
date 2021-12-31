@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-volatile char str[50] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+volatile char str[60] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 volatile int i = 1234;
 
@@ -10,6 +10,6 @@ volatile unsigned long long int k = 0x7fffffffffff;
 
 int main(void)
 {
-	sprintf(str, "%d %f %llu", i, j, k);
+	sprintf(str, "| %d | %f | %llu |", i, j, k);
 }
 
