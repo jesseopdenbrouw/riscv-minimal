@@ -17,6 +17,9 @@
  *      -i <arg>   Indents the tables entries by <arg>
  *      -v         Verbose output
  *      -q         Quiet output, only errors are reported
+ *      -b         Output as bytes
+ *      -h         Output as half words (16 bits, Little Endian)
+ *      -w         Output as words (32 bits, Little Endian)
  *
  * */
 
@@ -105,6 +108,7 @@ int main(int argc, char *argv[]) {
 	int verbose, full;
 	int indentarg;
 	int size = BYTE;
+	char unused = '-';
 
 	/* Set defaults on options */
 	full = 0;
@@ -121,15 +125,16 @@ int main(int argc, char *argv[]) {
 		printf("   -v        Verbose\n");
 		printf("   -q        Quiet. Only errors are reported\n");
 		printf("   -b        Byte output (default)\n");
-		printf("   -h        Halfword output\n");
-		printf("   -w        Word output\n");
+		printf("   -h        Halfword output (16 bits, Little Endian)\n");
+		printf("   -w        Word output (32 bits, Little Endian)\n");
+		printf("   -0        Output unused data as 0's\n");
 		printf("If outputfile is omitted, stdout is used\n");
 		printf("Program size must be less then 1 MB\n");
 		exit(EXIT_SUCCESS);
 	}
 
 	/* Parse options */
-	while ((opt = getopt(argc, argv, "bhwvqfi:")) != -1) {
+	while ((opt = getopt(argc, argv, "0bhwvqfi:")) != -1) {
 	        switch (opt) {
        		case 'f':
 	            full = 1;
@@ -154,6 +159,8 @@ int main(int argc, char *argv[]) {
 	            break;
 	        case 'q':
 	            verbose = 0;
+	        case '0':
+	            unused = '0';
 	            break;
 	        default: /* '?' */
 		    fprintf(stderr, "Unknown option '%c'\n", opt);
@@ -313,9 +320,13 @@ int main(int argc, char *argv[]) {
 				fprintf(fout, " ");
 			}
 		}
-		fprintf(fout, "others => (others => '-')\n");
+		fprintf(fout, "others => (others => '%c')\n", unused);
        		fprintf(fout, "    );\n");
 		fprintf(fout, "end package processor_common_rom;\n");
+	}
+
+	if (verbose) {
+		fprintf(stderr, "Written %lu of bytes.\n", address);
 	}
 
 	fclose(fp);
