@@ -27,6 +27,8 @@ all:
 	$(MAKE) -C monitor all
 	$(MAKE) -C usart_sprintf all
 	$(MAKE) -C clock all
+	$(MAKE) -C interval all
+	$(MAKE) -C hex_display all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -52,4 +54,6 @@ clean:
 	$(MAKE) -C monitor clean
 	$(MAKE) -C usart_sprintf clean
 	$(MAKE) -C clock clean
+	$(MAKE) -C interval clean
+	$(MAKE) -C hex_display clean
 	rm -rf bin
