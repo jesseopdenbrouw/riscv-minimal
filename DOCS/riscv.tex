@@ -79,7 +79,7 @@ This document describes the buildup of a simple, one core, RISC-V processor, com
 
 There are two version: a non-pipelined version (\texttt{riscv}) which requires two/three clock cycles to complete an instruction and a pipelined version with a basic implementation of the Control and Status Registers (\texttt{riscv-pipe-csr}). This processor also requires two clock cycles to complete an instruction, but the next instruction is fetched while the current instruction is executed. Jumps, calls and branches taken requires two clock cycles because an new instruction has to be fetched. Also, an extra clock cycle is needed when reading ROM or RAM (data) because ROM and RAM is implemented using onboard RAM block (which are buffered with an output register). This processor has a basic Control and Status Registers set, offering CYCLE and CYCLEH (completed clock cycles), TIME and TIMEH (time since last reset, in microseconds) and INSTRET and INSTRETH (number of retired instructions).
 
-The non-pipelined processor executes at top 0.5 MIPS/MHz because each instruction fetch and execution requires a clock cycle (2 clock cycles total). The pipelined processors execute at top 1 MIPS/MHz (jump and branches taken and reading ROM/RAM for data requires an extra clock cycle).
+The non-pipelined processor executes at top 0.5 MIPS/MHz because each instruction fetch and execution requires a clock cycle (2 clock cycles total). The pipelined processor executes at top 1 MIPS/MHz (jump and branches taken and reading ROM/RAM for data requires an extra clock cycle).
  
 \section{The processor}
 Both RISC-V processors consist of one \textit{core} and of the following building blocks:
@@ -93,7 +93,7 @@ Both RISC-V processors consist of one \textit{core} and of the following buildin
 \item The PC is used to point to the currently executing instruction.
 \item The Address Decoder and Data Router is an interface between the memory (ROM, RAM, I/O) and the ALU and registers.
 \item The Instruction Decoder decodes the currently executing instruction and provides control signals to other building blocks.
-\item (only for \texttt{riscv-pipe-csr}) The Control and Status Registers contains a basic set of register. Currently only RDTIME(h), RDCYCLE(h) and RDINSTRET(h).
+\item (only for \texttt{riscv-pipe-csr}) The Control and Status Registers contains a basic set of register. Currently only TIME(H), CYCLE(H) and INSTRET(H) are supported.
 \end{itemize}
 
 A block diagram of the non-pipelined processor is shown in Figure~\ref{fig:blockdiagram}.
@@ -275,7 +275,7 @@ Reading the RAM (byte, half word, word) requires an extra clock cycles because t
 \label{sec/io}
 Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple UART. More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data. Reading and writing I/O requires one clock cycle.
 
-The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only (8N1). Tested speeds are 9600 bps and 115200 bps. Several status flags are implemented to guide transmission.
+The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only (8N1). Tested speeds are 9600 bps and 115200 bps. Several status flags are implemented to guide transmission. Note: more identical UARTs will be added.
 
 \subsection{ALU}
 \label{sec:alu}
@@ -545,7 +545,7 @@ The VHDL description is composed of the following files:
 This is a homebrew utility to convert a Motorola S-record file into a VHDL file suitable for inclusion of the processor. The program is called with:
 
 \begin{lstlisting}[language=c]
-srec2vhdl [-fbwhqv] [-i <arg>] inputfile [outputfile]
+srec2vhdl [-fbwhqv0] [-i <arg>] inputfile [outputfile]
 \end{lstlisting}
 
 \texttt{inputfile} is the S-record file, created by the \texttt{objdump} program. \texttt{outputfile} is the VHDL outputfile. When omitted, \texttt{stdout} is used. There are a number of options:
@@ -556,6 +556,7 @@ srec2vhdl [-fbwhqv] [-i <arg>] inputfile [outputfile]
 \item \texttt{-h} ROM contents is in half words (16 bits).
 \item \texttt{-b} ROM contents is in bytes (8 bits).
 \item \texttt{-v} Verbose output
+\item \texttt{-0} Output unused data as 0 instead of don't care
 \item \texttt{-q} Quiet output, only error messages are displayed.
 \item \texttt{-i <arg>} indents each line with \texttt{<arg>} spaces.
 \end{itemize}
@@ -580,6 +581,8 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{flash} -- flash the DE0-CV board leds (works on the board)
 \item \texttt{float} -- some floating point float computations (seems to work).
 \item \texttt{global} -- test for globals and local statics with initialization (seems to works).
+\item \texttt{hex\_display} -- program that reads 8 switches from the board and display them as a 2-digit hexadecimal value on the 7-segment display. Works on the board.
+\item \texttt{interval} -- program that uses the \texttt{clock} C library function to time 5 seconds since last read. Uses the USART. Works on the board.
 \item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
 \item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
 \item \texttt{monitor} -- simple monitor program. Works on the board. Uses strings, USART, RAM, ROM, I/O and \texttt{sprintf}.
