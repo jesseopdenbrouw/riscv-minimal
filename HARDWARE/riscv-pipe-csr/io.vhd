@@ -138,12 +138,15 @@ begin
             -- Common register writes
             if wren = '1' and isword and csio = '1' then
                 if reg_int = usartbaud_addr then
+                    -- A write to the baud rate register
                     -- Use only 16 bits for baud rate
                     usartbaud_int <= (others => '0');
                     usartbaud_int(15 downto 0) <= datain(15 downto 0);
                 elsif reg_int = usartctrl_addr then
+                    -- A write to the control register
                     usartctrl_int <= datain;
                 elsif reg_int = usartstat_addr then
+                    -- A write to the status register
                     usartstat_int <= datain;
                 elsif reg_int = usartdata_addr then
                     -- A write to the data register triggers a transmission
@@ -243,8 +246,10 @@ begin
                 -- We sample in the middle of a bit time...
                 when rx_iter =>
                     if rxbittimer > 0 then
+                        -- Bit timer not finished, so keep counting...
                         rxbittimer <= rxbittimer - 1;
                     elsif rxshiftcounter > 0 then
+                        -- Bit counter not finished, so restart timer and shift in data bit
                         rxbittimer <= to_integer(unsigned(usartbaud_int));
                         rxshiftcounter <= rxshiftcounter - 1;
                         rxbuffer(7 downto 0) <= RxD_sync & rxbuffer(7 downto 1);
@@ -253,7 +258,7 @@ begin
                     end if;
                 -- When ready, all bits are shifted in
                 when rx_ready =>
-                    -- Test for a stray 0...
+                    -- Test for a stray 0 in position of start bit
                     if RxD_sync = '0' then
                         -- Signal frame error
                         usartstat_int(0) <= '1';
