@@ -21,14 +21,14 @@ is a simple 8-bit UART.
 ROM starts at 0x00000000, RAM starts at 0x20000000, I/O starts
 at 0xF0000000.
 
-We successfully tested some simple C programs. It seems thati
+We successfully tested some simple C programs. It seems that
 integer, float and double calculations work correctly, as is
 the sbrk system call for use with malloc(). sprint is tested
 (also for floating point) and seems to work. I/O functions
 (printf, scanf et al) are not tested.
 
 There are two version available: one version with a non-pipelined
-instruction decoder and one with a two-stages instruction
+instruction decoder and one with a two-stage instruction
 pipeline and a basic CSR (only CYCLE, TIME and INSTRET are supported).
 
 Work in progress. Things might change. Use with care.
