@@ -62,7 +62,7 @@ begin
         areset <= '0';
         -- RxD input is idle high
         RxD <= '1';
-        pina <= x"ffffffff";
+        pina <= x"ffffff00";
         wait for 25 ns;
         areset <= '1';
         wait for 1000 us;
