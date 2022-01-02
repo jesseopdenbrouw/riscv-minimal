@@ -113,7 +113,7 @@ begin
      -- Data to outside world
     pouta <= pouta_int;
     
-    -- USART (well, really and UART)
+    -- USART (well, really an UART)
     process (clk, areset) is
     begin
         -- Common resets et al.
@@ -138,12 +138,15 @@ begin
             -- Common register writes
             if wren = '1' and isword and csio = '1' then
                 if reg_int = usartbaud_addr then
+                    -- A write to the baud rate register
                     -- Use only 16 bits for baud rate
                     usartbaud_int <= (others => '0');
                     usartbaud_int(15 downto 0) <= datain(15 downto 0);
                 elsif reg_int = usartctrl_addr then
+                    -- A write to the control register
                     usartctrl_int <= datain;
                 elsif reg_int = usartstat_addr then
+                    -- A write to the status register
                     usartstat_int <= datain;
                 elsif reg_int = usartdata_addr then
                     -- A write to the data register triggers a transmission
@@ -178,7 +181,12 @@ begin
                     if txstart = '1' then
                         -- Load the prescaler, set the number of bits (including start bit)
                         txbittimer <= to_integer(unsigned(usartbaud_int));
-                        txshiftcounter <= 9;
+                        -- Test for one or two stop bits
+                        if usartctrl_int(0) = '1' then
+                            txshiftcounter <= 10;
+                        else
+                            txshiftcounter <= 9;
+                        end if;
                         txstate <= tx_iter;
                     else
                         txstate <= tx_idle;
@@ -209,6 +217,7 @@ begin
             end case;
             
             -- Receive character
+            -- Input synchronizer
             RxD_sync <= RxD;
             case rxstate is
                 -- Rx idle, wait for start bit
@@ -242,8 +251,10 @@ begin
                 -- We sample in the middle of a bit time...
                 when rx_iter =>
                     if rxbittimer > 0 then
+                        -- Bit timer not finished, so keep counting...
                         rxbittimer <= rxbittimer - 1;
                     elsif rxshiftcounter > 0 then
+                        -- Bit counter not finished, so restart timer and shift in data bit
                         rxbittimer <= to_integer(unsigned(usartbaud_int));
                         rxshiftcounter <= rxshiftcounter - 1;
                         rxbuffer(7 downto 0) <= RxD_sync & rxbuffer(7 downto 1);
@@ -251,8 +262,11 @@ begin
                         rxstate <= rx_ready;
                     end if;
                 -- When ready, all bits are shifted in
+                -- Even if we use two stop bits, we only check one and
+                -- signal reception. This leave some computation time
+                -- before the next reception occurs.
                 when rx_ready =>
-                    -- Test for a stray 0...
+                    -- Test for a stray 0 in position of start bit
                     if RxD_sync = '0' then
                         -- Signal frame error
                         usartstat_int(0) <= '1';
