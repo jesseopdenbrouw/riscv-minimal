@@ -113,7 +113,7 @@ begin
      -- Data to outside world
     pouta <= pouta_int;
     
-    -- USART (well, really and UART)
+    -- USART (well, really an UART)
     process (clk, areset) is
     begin
         -- Common resets et al.
@@ -181,7 +181,12 @@ begin
                     if txstart = '1' then
                         -- Load the prescaler, set the number of bits (including start bit)
                         txbittimer <= to_integer(unsigned(usartbaud_int));
-                        txshiftcounter <= 9;
+                        -- Test for one or two stop bits
+                        if usartctrl_int(0) = '1' then
+                            txshiftcounter <= 10;
+                        else
+                            txshiftcounter <= 9;
+                        end if;
                         txstate <= tx_iter;
                     else
                         txstate <= tx_idle;
@@ -257,6 +262,9 @@ begin
                         rxstate <= rx_ready;
                     end if;
                 -- When ready, all bits are shifted in
+                -- Even if we use two stop bits, we only check one and
+                -- signal reception. This leave some computation time
+                -- before the next reception occurs.
                 when rx_ready =>
                     -- Test for a stray 0 in position of start bit
                     if RxD_sync = '0' then
