@@ -125,32 +125,16 @@ begin
                     when csr_rw =>
                         csr(rwtest_addr) <= csr_datain;
                     when csr_rs =>
-                        for i in 31 downto 0 loop
-                            if csr_datain(i) = '1' then
-                                csr(rwtest_addr)(i) <= '1';
-                            end if;
-                        end loop;
+                        csr(rwtest_addr) <= csr(rwtest_addr) or csr_datain;
                     when csr_rc =>
-                        for i in 31 downto 0 loop
-                            if csr_datain(i) = '1' then
-                                csr(rwtest_addr)(i) <= '0';
-                            end if;
-                        end loop;
+                        csr(rwtest_addr) <= csr(rwtest_addr) and not csr_datain;
                     when csr_rwi =>
                         csr(rwtest_addr)(31 downto 5) <= (others => '0');
                         csr(rwtest_addr)(4 downto 0) <= csr_immrs1;
                     when csr_rsi =>
-                        for i in 4 downto 0 loop
-                            if csr_immrs1(i) = '1' then
-                                csr(rwtest_addr)(i) <= '1';
-                            end if;
-                        end loop;
+                        csr(rwtest_addr)(4 downto 0) <= csr(rwtest_addr)(4 downto 0) or csr_datain(4 downto 0);
                     when csr_rci =>
-                        for i in 4 downto 0 loop
-                            if csr_immrs1(i) = '1' then
-                                csr(rwtest_addr)(i) <= '1';
-                            end if;
-                        end loop;
+                        csr(rwtest_addr)(4 downto 0) <= csr(rwtest_addr)(4 downto 0) and not csr_datain(4 downto 0);
                     when others =>
                         null;
                 end case;
