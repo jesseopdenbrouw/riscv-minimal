@@ -9,9 +9,9 @@ _start:
 .option push
 .option norelax
 
-
 	la gp, __global_pointer$
         la sp, __stack_pointer$ 
+/*
 
         la  x1, _start
 	la  x2, _start_ram
@@ -24,8 +24,6 @@ halt:   addi x0,x0,0
 	addi x0,x0,1
 	addi x0,x0,2
 
-	#beq x0,x0,halt
-
 	rdcycle a0
 	rdcycleh a1
 
@@ -34,6 +32,11 @@ halt:   addi x0,x0,0
 	csrrw	x11,3103,x0
 	csrrwi	x11,3103,31
 
+*/
+	li      x4,0x21
+	li	x3,0x10
+	mul	x5,x4,x3
+	rem	x5,x4,x3
 einde:	j einde
 
 
