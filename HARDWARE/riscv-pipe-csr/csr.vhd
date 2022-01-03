@@ -37,15 +37,23 @@ architecture rtl of csr is
 signal csr : csr_type;
 signal csr_addr_int : integer range 0 to 2**csr_size_bits-1;
 
-constant rdcycle_addr : integer := 3072; -- c00
-constant rdtime_addr : integer := 3073; -- c01
-constant rdinstret_addr : integer := 3074; -- c02
-constant rdcycleh_addr : integer := 3200; -- c80
-constant rdtimeh_addr : integer := 3201; -- c81
-constant rdinstreth_addr : integer := 3202; --c82
+constant rdcycle_addr : integer := 16#c00#; --3072
+constant rdtime_addr : integer := 16#c01#; -- 3073
+constant rdinstret_addr : integer := 16#c02#; -- 3074
+constant rdcycleh_addr : integer := 16#c80#; -- 3200
+constant rdtimeh_addr : integer := 16#c81#; -- 3201
+constant rdinstreth_addr : integer := 16#c82#; -- 3202
 
-constant rwtest_addr : integer := 3072+31; -- c1f
-constant rwtesth_addr : integer := 3200+31; -- c9f
+constant rwtest_addr : integer := 16#400#; --
+constant rwtesth_addr : integer := 16#401#; --
+
+constant mvendorid_addr : integer := 16#f11#;
+constant marchid_addr : integer := 16#f12#;
+constant mimpid_addr : integer := 16#f13#;
+constant mhartid_addr : integer := 16#f14#;
+
+constant misa_addr : integer := 16#301#;
+
 
 begin
 
@@ -143,37 +151,28 @@ begin
                     when csr_rw =>
                         csr(rwtesth_addr) <= csr_datain;
                     when csr_rs =>
-                        for i in 31 downto 0 loop
-                            if csr_datain(i) = '1' then
-                                csr(rwtesth_addr)(i) <= '1';
-                            end if;
-                        end loop;
+                        csr(rwtesth_addr) <= csr(rwtesth_addr) or csr_datain;
                     when csr_rc =>
-                        for i in 31 downto 0 loop
-                            if csr_datain(i) = '1' then
-                                csr(rwtesth_addr)(i) <= '0';
-                            end if;
-                        end loop;
+                        csr(rwtesth_addr) <= csr(rwtesth_addr) and not csr_datain;
                     when csr_rwi =>
                         csr(rwtesth_addr)(31 downto 5) <= (others => '0');
                         csr(rwtesth_addr)(4 downto 0) <= csr_immrs1;
                     when csr_rsi =>
-                        for i in 4 downto 0 loop
-                            if csr_immrs1(i) = '1' then
-                                csr(rwtesth_addr)(i) <= '1';
-                            end if;
-                        end loop;
+                        csr(rwtesth_addr)(4 downto 0) <= csr(rwtesth_addr)(4 downto 0) or csr_datain(4 downto 0);
                     when csr_rci =>
-                        for i in 4 downto 0 loop
-                            if csr_immrs1(i) = '1' then
-                                csr(rwtesth_addr)(i) <= '1';
-                            end if;
-                        end loop;
+                        csr(rwtesth_addr)(4 downto 0) <= csr(rwtesth_addr)(4 downto 0) and not csr_datain(4 downto 0);
                     when others =>
                         null;
                 end case;
             end if;
         end if;
     end process;
+
+    csr(mvendorid_addr) <= (others => '0'); --
+    csr(marchid_addr) <= (others => '0');
+    csr(mimpid_addr) <= (others => '0');
+    csr(mhartid_addr) <= (others => '0');
+    
+    csr(misa_addr) <= x"40001100" when NUMBER_OF_REGISTERS = 32 else x"40001110";
     
 end architecture rtl;
