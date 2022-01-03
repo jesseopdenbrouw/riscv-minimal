@@ -275,7 +275,7 @@ Reading the RAM (byte, half word, word) requires an extra clock cycles because t
 \label{sec/io}
 Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple UART. More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data. Reading and writing I/O requires one clock cycle.
 
-The UART can transmit and receive data at 8 bits, no parity and 1 stop bit only (8N1). Tested speeds are 9600 bps and 115200 bps. Several status flags are implemented to guide transmission. Note: more identical UARTs will be added.
+The UART can transmit and receive data at 8 bits, no parity and 1 or 2 stop bits only (8N1, 8N2). Tested speeds are 9600 bps and 115200 bps. Several status flags are implemented to guide transmission. Note: more identical UARTs will be added.
 
 \subsection{ALU}
 \label{sec:alu}
@@ -344,6 +344,8 @@ The RISC-V describes a set of 4096 control and status register in a separate add
 \end{itemize}
 
 Note that these registers are read-only. Writes are ignored. Other registers may be added.
+
+Note that not all CSRs are implemented. Good synthesizers will remove not-used CSRs.
 
 \subsection{Stack pointer}
 The stack pointer is fully implemented although the ISA does not provide pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address + 1 on startup (which is 0x20008000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
@@ -582,7 +584,7 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{float} -- some floating point float computations (seems to work).
 \item \texttt{global} -- test for globals and local statics with initialization (seems to works).
 \item \texttt{hex\_display} -- program that reads 8 switches from the board and display them as a 2-digit hexadecimal value on the 7-segment display. Works on the board.
-\item \texttt{interval} -- program that uses the \texttt{clock} C library function to time 5 seconds since last read. Uses the USART. Works on the board.
+\item \texttt{interval} -- program that uses the \texttt{clock} C library function to time 5 seconds since last read. Works only on the pipelined processor. Uses the USART. Works on the board.
 \item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
 \item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
 \item \texttt{monitor} -- simple monitor program. Works on the board. Uses strings, USART, RAM, ROM, I/O and \texttt{sprintf}.
@@ -747,7 +749,7 @@ GPIOA->POUT = output;
 
 \section{UART Code}
 
-The UART can currently transmit and receive data with one stop bit, 8 data bits and 1 stop bit. No parity is supported. This is called 8N1. Transmission is tested with a baud rate of 9600 bps and 115200 bps. There are no auxiliary control signals (e.g. RTS and CTS). There is no embedded FIFO to buffer incoming data. The UART is programmable using I/O registers, see Appendix~\ref{sec:ioregisters}.
+The UART can currently send and receive data with one start bit, 8 data bits and 1 or 2 stop bits. No parity is supported. This is called 8N1/8N2. Transmission is tested with a baud rate of 9600 bps and 115200 bps. Send and receive speeds are equal. There are no auxiliary control signals (e.g. RTS and CTS). There is no embedded FIFO to buffer incoming data. The UART is programmable using I/O registers, see Appendix~\ref{sec:ioregisters}.
 
 To initialize the UART, use the code in the listing below:
 
@@ -918,14 +920,13 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 
 \begin{register}{H}{USART control register USART\_CTRL}{0x28}
 \label{usartctrl}
-\regfield{Reserved}{32}{0}{{0}}%
-%\regfield{Rerserved}{16}{16}{{0}}
-%\regfield{Prescaler}{16}{0}{{0}}
+\regfield{Reserved}{31}{1}{{0}}%
+\regfield{SP}{1}{0}{{0}}
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[00000]
 \itemsep-1.5ex
-\item [Note:] currently no bits are assigned to the Control Register.
+\item[SP] 0: one stop bit, 1: two stop bits.
 %\item[Stop Bits] Meaning
 %\item[0] 1 Stop bit
 %\item[1] 2 Stop bits
