@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
 
 extern uint32_t _sbss, _ebss;
 extern uint32_t _sdata, _edata;
@@ -78,5 +79,5 @@ void _start(void)
 	main();
 
 	/* Stop */
-	exit(0);
+	_exit(0);
 }
