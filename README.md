@@ -1,11 +1,11 @@
 # riscv-minimal
 A minimalistic RISC-V 32-bit processor written in VHDL targeted for an FPGA
 
-The RISV-C processor uses the RV32I instruction set with the
+The RISV-C processor uses the RV32I/RV32IM instruction set with the
 exception of the FENCE, ECALL and EBREAK instructions.
 Exceptions are currently not supported.
-Software support is limited. Only simple C programs have
-been tested, created by the GNU C Compiler for
+Software support is limitedi as can be expected with microcontrollers.
+Only simple C programs have been tested, created by the GNU C Compiler for
 RISC-V. Assembler programs can be compiled by the C compiler.
 
 The processor is developed on a Cyclone V FPGA with the use
@@ -25,11 +25,13 @@ We successfully tested some simple C programs. It seems that
 integer, float and double calculations work correctly, as is
 the sbrk system call for use with malloc(). sprint is tested
 (also for floating point) and seems to work. I/O functions
-(printf, scanf et al) are not tested.
+(printf) with the use of the onboard USART are tested.
+scanf is not tested (yet)
 
 There are two version available: one version with a non-pipelined
 instruction decoder and one with a two-stage instruction
-pipeline and a basic CSR (only CYCLE, TIME and INSTRET are supported).
+pipeline and a basic CSR (only CYCLE, TIME and INSTRET are supported)
+and a hardware multiply/divide unit (M-standard).
 
 Work in progress. Things might change. Use with care.
 
