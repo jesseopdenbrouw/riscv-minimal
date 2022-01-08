@@ -1,13 +1,26 @@
 CC = riscv32-unknown-elf-gcc
 OBJCOPY = riscv32-unknown-elf-objcopy
 SREC2VHDL = ../bin/srec2vhdl
+AR = riscv32-unknown-elf-ar
 
-all: monitor
+TARGET = monitor
 
-monitor: monitor.c io.h
-	$(CC) -Os -g -o monitor monitor.c syssbrk.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -mabi=ilp32 -nostartfiles --specs=nano.specs ../crt/startup.c
-	$(OBJCOPY) -O srec monitor monitor.srec
-	$(SREC2VHDL) -wf monitor.srec monitor.vhd
+CFLAGS = -Wall -O2 -g -march=rv32i -mabi=ilp32 -Isyscalls
+LDFLAGS = startup.o $(TARGET).o -static -g -lm -Lsyscalls -T ../ldfiles/riscv.ld -march=rv32i -mabi=ilp32 -nostartfiles --specs=syscalls/libsys.specs --specs=syscalls/nano.specs
+
+
+all: lib $(TARGET)
+
+lib:
+	make -C syscalls
+
+$(TARGET): $(TARGET).c $(LIBSYS)
+	$(CC) $(CFLAGS) -c crt/startup.c
+	$(CC) $(CFLAGS) -c $(TARGET).c
+	$(CC) -o $(TARGET) $(LDFLAGS)
+	$(OBJCOPY) -O srec $(TARGET) $(TARGET).srec
+	$(SREC2VHDL) -wf $(TARGET).srec $(TARGET).vhd
+
 clean:
-	rm -f monitor monitor.srec monitor.vhd
-	rm -rf __pycache__
+	make -C syscalls clean
+	rm -f $(TARGET) $(TARGET).srec $(TARGET).vhd *.o
