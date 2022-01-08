@@ -3,10 +3,10 @@ OBJCOPY = riscv32-unknown-elf-objcopy
 SREC2VHDL = ../bin/srec2vhdl
 AR = riscv32-unknown-elf-ar
 
-TARGET = sprintf
+TARGET = printf
 
 CFLAGS = -Wall -O2 -g -march=rv32i -mabi=ilp32 -Isyscalls
-LDFLAGS = startup.o $(TARGET).o -static -g -lm -Lsyscalls -T ../ldfiles/riscv.ld -march=rv32i -mabi=ilp32 -nostartfiles --specs=syscalls/libsys.specs --specs=syscalls/nano.specs -u _printf_float
+LDFLAGS = startup.o $(TARGET).o -static -g -lm -Lsyscalls -T ../ldfiles/riscv.ld -march=rv32i -mabi=ilp32 -nostartfiles --specs=syscalls/libsys.specs --specs=syscalls/nano.specs -u _printf_float -u _scanf_float
 
 
 all: lib $(TARGET)
