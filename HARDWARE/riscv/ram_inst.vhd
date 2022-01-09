@@ -3,7 +3,7 @@
 --
 -- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
--- ram.vhd - RAM interface between the core and the RAM block
+-- ram_inst.vhd - The RAM
 
 -- This hardware description is for educational purposes only. 
 -- This hardware description is distributed in the hope that it

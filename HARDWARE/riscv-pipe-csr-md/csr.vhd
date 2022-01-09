@@ -3,7 +3,7 @@
 --
 -- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
--- processor_common.vhd - Common types and constants
+-- csr.vhd - Implementation of a simple CSR unit
 
 -- This hardware description is for educational purposes only. 
 -- This hardware description is distributed in the hope that it

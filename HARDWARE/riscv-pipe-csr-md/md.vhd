@@ -3,7 +3,7 @@
 --
 -- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
--- alu.vhd - The Arithmetic and Logic Unit, Big Endian
+-- md.vhd - The Multiply and Divide Unit
 
 -- This hardware description is for educational purposes only. 
 -- This hardware description is distributed in the hope that it
