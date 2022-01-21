@@ -103,8 +103,7 @@ begin
                 -- Wait for mul/div/rem to complete
                 when state_md =>
                     if md_ready = '1' then
-                        -- Ready so goto execute and copy last instruction
-                        --instrlast <= instr;
+                        -- Ready so goto execute
                         state <= state_fexecute;
                     end if;
                 -- Jump/branch to new address, needs penalty
@@ -115,7 +114,8 @@ begin
         end if;
     end process;
     
-    process (state, waitfordata, penalty) is
+    -- Update the retired instruction counter
+    process (state, waitfordata) is
     begin
         csr_instret <= '0';
         if state = state_fexecute and waitfordata = '0' then
