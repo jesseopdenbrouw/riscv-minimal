@@ -53,6 +53,7 @@ alias buf2 is buf(31 downto 0);
 
 begin
 
+    -- Check start of multiplication and load registers
     process (clk, areset) is
     begin
         if areset = '1' then
@@ -79,6 +80,7 @@ begin
         end if;
     end process;
 
+    -- Do the multiplication
     process(clk, areset) is
     begin
         if areset = '1' then
@@ -91,6 +93,7 @@ begin
         end if;
     end process;
     
+    -- Output multiplier result
     process (mul_rd_int, op) is
     begin
         if op(1) = '1' or op(0) = '1' then
@@ -100,6 +103,7 @@ begin
         end if;
     end process;
     
+    -- Check start of division, load registers and do the division
     process (clk, areset)
     variable div_running : std_logic;  
     begin 
@@ -139,6 +143,7 @@ begin
                     count <= count + 1; 
                     div_running := '1';
                     div_ready <= '0';
+                    -- Determine the result sign
                     if (op(0) = '0' and op(1) = '0' and (rs1(31) /= rs2(31)) and rs2 /= all_zeros) or (op(0) = '0' and op(1) = '1' and rs1(31) = '1') then
                         outsign <= '1';
                     else
@@ -146,7 +151,7 @@ begin
                     end if;
 
                 when others =>
-                    -- Do the divide
+                    -- Do the division
                     if buf(62 downto 31) >= dbuf then 
                         buf1 <= '0' & (buf(61 downto 31) - dbuf(30 downto 0)); 
                         buf2 <= buf2(30 downto 0) & '1'; 
@@ -174,8 +179,10 @@ begin
         end if; 
     end process;
     
+    -- Select the divider output
     div_rd <= std_logic_vector(remainder) when op(1) = '1' else std_logic_vector(quotient);
     
+    -- Signal that we are ready
     ready <= div_ready or mul_ready;
 
 end architecture rtl;
