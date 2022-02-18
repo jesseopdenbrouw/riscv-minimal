@@ -43,6 +43,6 @@ package processor_common_rom is
           31 => x"8327c100",
           32 => x"e378f7fe",
           33 => x"6ff01ffb",
-        others => (others => '-')
+        others => (others => '0')
     );
 end package processor_common_rom;
