@@ -8,7 +8,7 @@
 /* Frequency of the DE0-CV board */
 #define F_CPU (50000000UL)
 /* Transmission speed */
-#define BAUD_RATE (9600UL)
+#define BAUD_RATE (9600ULL)
 
 /* Initialize the Baud Rate Generator */
 void usart_init(void)
