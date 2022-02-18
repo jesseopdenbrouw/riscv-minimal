@@ -33,7 +33,7 @@ entity address_decoder_and_data_router is
           csrom : out std_logic;
           csram : out std_logic;
           csio : out std_logic;
-          addresserror : out std_logic
+          address_error : out std_logic
    );
 end entity address_decoder_and_data_router;
 
@@ -50,7 +50,7 @@ begin
         wrram <= '0';
         wrio <= '0';
         waitfordata <= '0';
-        addresserror <= '0';
+        address_error <= '0';
         csrom <= '0';
         csram <= '0';
         csio <= '0';
@@ -86,7 +86,7 @@ begin
         else
             -- Check for read/write in unspecified address region
             if memaccess = memaccess_write or memaccess = memaccess_read then
-                addresserror <= '1';
+                address_error <= '1';
             end if;
             dataout <= (others => '-');
         end if;
