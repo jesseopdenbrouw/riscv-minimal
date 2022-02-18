@@ -245,6 +245,13 @@ signal md_ready_int : std_logic;
 signal md_op_int : std_logic_vector(2 downto 0);
 signal misaligned_error_int : std_logic;
 signal illegal_instruction_error_int : std_logic;
+
+-- Select the architecture of the ALU
+-- The default
+--for alu0 : alu use entity work.alu(rtl);
+-- Optimzed
+for alu0 : alu use entity work.alu(optimized_rtl);
+
 begin
 
     -- Input push button is active low
