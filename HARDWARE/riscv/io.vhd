@@ -1,7 +1,7 @@
 --
 -- This file is part of the RISC-V Minimal Project
 --
--- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
+-- (c)2022, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
 -- io.vhd - Simple I/O register file (input/output, UART)
 
@@ -10,6 +10,12 @@
 -- will be useful, but WITHOUT ANY WARRANTY; without even the
 -- implied warranty of MERCHANTABILITY or FITNESS FOR A
 -- PARTICULAR PURPOSE.
+
+-- The I/O consists of a single 32 bits input register and a
+-- single 32 bit output register. There is no data direction
+-- register. Furthermore the I/O has one UART with 7/8/9 data
+-- bits, N/E/O parity and 1/2 stop bits. Several UART flags
+-- are available
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -31,7 +37,8 @@ entity io is
           pina : in data_type;
           pouta : out data_type;
           TxD : out std_logic;
-          RxD : in std_logic
+          RxD : in std_logic;
+          misaligned_error : out std_logic
          );
 end entity io;
     
@@ -65,7 +72,7 @@ signal txbittimer : integer range 0 to 65535;
 signal txshiftcounter : integer range 0 to 15;
 --Receive signals
 signal rxbuffer : data_type;
-type rxstate_type is (rx_idle, rx_wait, rx_iter, rx_ready, rx_fail);
+type rxstate_type is (rx_idle, rx_wait, rx_iter, rx_parity, rx_parity2, rx_ready, rx_fail);
 signal rxstate : rxstate_type;
 signal rxbittimer : integer range 0 to 65535;
 signal rxshiftcounter : integer range 0 to 15;
@@ -78,6 +85,8 @@ begin
     
     -- Check if an access is on a 4-byte boundary AND is word size
     isword <= TRUE when size = size_word and address(1 downto 0) = "00" else FALSE;
+    -- Misaligned error, when (not on a 4-byte boundary OR not word size) AND chip select
+    misaligned_error <= '1' when isword = FALSE and csio = '1' else '0';
     
     -- Data out to ALU
     process (io, isword, reg_int, csio) is
@@ -115,6 +124,7 @@ begin
     
     -- USART (well, really an UART)
     process (clk, areset) is
+    variable txshiftcounter_var : integer range 0 to 15;
     begin
         -- Common resets et al.
         if areset = '1' then
@@ -140,7 +150,7 @@ begin
                 if reg_int = usartbaud_addr then
                     -- A write to the baud rate register
                     -- Use only 16 bits for baud rate
-                    usartbaud_int <= (others => '0');
+                    usartbaud_int(31 downto 16) <= (others => '0');
                     usartbaud_int(15 downto 0) <= datain(15 downto 0);
                 elsif reg_int = usartctrl_addr then
                     -- A write to the control register
@@ -152,20 +162,47 @@ begin
                     -- A write to the data register triggers a transmission
                     -- Signal start
                     txstart <= '1';
-                    -- Load transmit buffer with 8 data bits and a start bit
+                    -- Load transmit buffer with 7/8/9 data bits, parity bit and
+                    -- a start bit
                     -- Stop bits will be automatically added since the remaining
                     -- bits are set to 1. Most right bit is start bit.
                     txbuffer <= (others => '1');
-                    txbuffer(8 downto 0) <= datain(7 downto 0) & '0';
+                    if usartctrl_int(3 downto 2) = "10" then
+                        -- 9 bits data
+                        txbuffer(9 downto 0) <= datain(8 downto 0) & '0';
+                        -- Have parity
+                        if usartctrl_int(5) = '1' then
+                            txbuffer(10) <= datain(8) xor datain(7) xor datain(6) xor datain(5) xor datain(4)
+                                            xor datain(3) xor datain(2) xor datain(1) xor datain(0) xor usartctrl_int(4);
+                        end if;
+                    elsif usartctrl_int(3 downto 2) = "11" then
+                        -- 7 bits data
+                        txbuffer(7 downto 0) <= datain(6 downto 0) & '0';
+                        -- Have parity
+                        if usartctrl_int(5) = '1' then
+                            txbuffer(8) <= datain(6) xor datain(5) xor datain(4) xor datain(3)
+                                         xor datain(2) xor datain(1) xor datain(0) xor usartctrl_int(4);
+                        end if;
+                    else
+                        -- 8 bits data
+                        txbuffer(8 downto 0) <= datain(7 downto 0) & '0';
+                        -- Have parity
+                        if usartctrl_int(5) = '1' then
+                            txbuffer(9) <= datain(7) xor datain(6) xor datain(5) xor datain(4) xor datain(3)
+                                         xor datain(2) xor datain(1) xor datain(0) xor usartctrl_int(4);
+                        end if;
+                    end if;
                     -- Signal that we are sending
                     usartstat_int(4) <= '0'; 
                 end if;
             end if;
             
-            -- If data register is read
+            -- If data register is read...
             if wren = '0' and isword and csio = '1' then
                 if reg_int = usartdata_addr then
                     -- Clear the received status bits
+                    -- PE, RC, RF, FE
+                    usartstat_int(3) <= '0';
                     usartstat_int(2) <= '0';
                     usartstat_int(1) <= '0';
                     usartstat_int(0) <= '0';
@@ -181,12 +218,15 @@ begin
                     if txstart = '1' then
                         -- Load the prescaler, set the number of bits (including start bit)
                         txbittimer <= to_integer(unsigned(usartbaud_int));
-                        -- Test for one or two stop bits
-                        if usartctrl_int(0) = '1' then
-                            txshiftcounter <= 10;
+                        if usartctrl_int(3 downto 2) = "10" then
+                            txshiftcounter_var := 10;
+                        elsif usartctrl_int(3 downto 2) = "11" then
+                            txshiftcounter_var := 8;
                         else
-                            txshiftcounter <= 9;
+                            txshiftcounter_var := 9;
                         end if;
+                        -- Add up posibly parity bit and posibly second stop bit
+                        txshiftcounter <= txshiftcounter_var + to_integer(unsigned(usartctrl_int(5 downto 5))) + to_integer(unsigned(usartctrl_int(0 downto 0)));
                         txstate <= tx_iter;
                     else
                         txstate <= tx_idle;
@@ -201,7 +241,8 @@ begin
                     elsif txshiftcounter > 0 then
                         txbittimer <= to_integer(unsigned(usartbaud_int));
                         txshiftcounter <= txshiftcounter - 1;
-                        txbuffer <= '1' & txbuffer(31 downto 1);
+                        -- Shift in stop bit
+                        txbuffer <= '1' & txbuffer(txbuffer'high downto 1);
                     else
                         txstate <= tx_ready;
                     end if;
@@ -239,7 +280,17 @@ begin
                         -- Start bit is still 0, so continue
                         if RxD_sync = '0' then
                             rxbittimer <= to_integer(unsigned(usartbaud_int));
-                            rxshiftcounter <= 8;
+                            -- Set reception size
+                            if usartctrl_int(3 downto 2) = "10" then
+                                -- 9 bits
+                                rxshiftcounter <= 9;
+                            elsif usartctrl_int(3 downto 2) = "11" then
+                                -- 7 bits
+                                rxshiftcounter <= 7;
+                            else
+                                -- 8 bits
+                                rxshiftcounter <= 8;
+                            end if;
                             rxbuffer <= (others => '0');
                             rxstate <= rx_iter;
                         else
@@ -257,7 +308,45 @@ begin
                         -- Bit counter not finished, so restart timer and shift in data bit
                         rxbittimer <= to_integer(unsigned(usartbaud_int));
                         rxshiftcounter <= rxshiftcounter - 1;
-                        rxbuffer(7 downto 0) <= RxD_sync & rxbuffer(7 downto 1);
+                        if usartctrl_int(3 downto 2) = "10" then
+                            -- 9 bits
+                            rxbuffer(8 downto 0) <= RxD_sync & rxbuffer(8 downto 1);
+                        elsif usartctrl_int(3 downto 2) = "11" then
+                            -- 7 bits
+                            rxbuffer(6 downto 0) <= RxD_sync & rxbuffer(6 downto 1);
+                        else
+                            -- 8 bits
+                            rxbuffer(7 downto 0) <= RxD_sync & rxbuffer(7 downto 1);
+                        end if;
+                    else
+                        -- Do we have a parity bit?
+                        if usartctrl_int(5) = '1' then
+                            rxstate <= rx_parity;
+                        else
+                            rxstate <= rx_ready;
+                        end if;
+                    end if;
+                -- Check parity, we already there...
+                when rx_parity =>
+                    if usartctrl_int(3 downto 2) = "10" then
+                        usartstat_int(3) <= rxbuffer(8) xor rxbuffer(7) xor rxbuffer(6) xor rxbuffer(5)
+                                            xor rxbuffer(4) xor rxbuffer(3) xor rxbuffer(2)
+                                            xor rxbuffer(1) xor rxbuffer(0) xor RxD_sync;
+                    elsif usartctrl_int(3 downto 2) = "11" then
+                        usartstat_int(3) <= rxbuffer(6) xor rxbuffer(5)
+                                            xor rxbuffer(4) xor rxbuffer(3) xor rxbuffer(2)
+                                            xor rxbuffer(1) xor rxbuffer(0) xor RxD_sync;
+                    else
+                        usartstat_int(3) <= rxbuffer(7) xor rxbuffer(6) xor rxbuffer(5)
+                                            xor rxbuffer(4) xor rxbuffer(3) xor rxbuffer(2)
+                                            xor rxbuffer(1) xor rxbuffer(0) xor RxD_sync;
+                    end if;
+                    rxbittimer <= to_integer(unsigned(usartbaud_int));
+                    rxstate <= rx_parity2;
+                -- Wait to middle of stop bit
+                when rx_parity2 =>
+                    if rxbittimer > 0 then
+                        rxbittimer <= rxbittimer - 1;
                     else
                         rxstate <= rx_ready;
                     end if;
@@ -266,14 +355,24 @@ begin
                 -- signal reception. This leave some computation time
                 -- before the next reception occurs.
                 when rx_ready =>
-                    -- Test for a stray 0 in position of start bit
+                    -- Test for a stray 0 in position of (first) stop bit
                     if RxD_sync = '0' then
                         -- Signal frame error
                         usartstat_int(0) <= '1';
                     end if;
-                    -- Anyway, copy the received data to the data register
+                    -- Any way, copy the received data to the data register
                     usartdata_int <= (others => '0');
-                    usartdata_int(7 downto 0) <= rxbuffer(7 downto 0);
+                    if usartctrl_int(3 downto 2) = "10" then
+                        -- 9 bits
+                        usartdata_int(8 downto 0) <= rxbuffer(8 downto 0);
+                    elsif usartctrl_int(3 downto 2) = "11" then
+                        -- 7 bits
+                        usartdata_int(6 downto 0) <= rxbuffer(6 downto 0);
+                    else
+                        -- 8 bits
+                        usartdata_int(8 downto 0) <= rxbuffer(8 downto 0);
+                    end if;
+                    -- signal reception
                     usartstat_int(2) <= '1';
                     rxstate <= rx_idle;
                 -- Wrong start bit detected, no data present
@@ -288,4 +387,3 @@ begin
     end process;
     
 end architecture rtl;
-      
