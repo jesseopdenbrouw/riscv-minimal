@@ -39,9 +39,6 @@ entity alu is
         shift: in shift_type;
         pc : in data_type;
         memory : in data_type;
-        csr : in data_type;
-        mul : in data_type;
-        div : in data_type;
         result : out data_type
        );
 end entity alu;
@@ -50,7 +47,7 @@ end entity alu;
 architecture rtl of alu is
 begin
 
-    process (alu_op, dataa, datab, immediate, shift, pc, memory, csr, mul, div) is
+    process (alu_op, dataa, datab, immediate, shift, pc, memory) is
     variable a, b, r, im : unsigned(31 downto 0);
     variable as, bs, ims : signed(31 downto 0);
     variable shamt : integer range 0 to 31;
@@ -228,7 +225,7 @@ end architecture rtl;
 architecture optimized_rtl of alu is
 begin
 
-    process (alu_op, dataa, datab, immediate, shift, pc, memory, csr, mul, div) is
+    process (alu_op, dataa, datab, immediate, shift, pc, memory) is
     variable a, b, r, im : unsigned(31 downto 0);
     variable as, bs, ims : signed(31 downto 0);
     variable shamt : integer range 0 to 31;
