@@ -1,7 +1,7 @@
 --
 -- This file is part of the RISC-V Minimal Project
 --
--- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
+-- (c)2022, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
 -- pc.vhd - The Program Counter, Big Endian
 
@@ -26,7 +26,8 @@ entity pc is
         rs : in data_type;
         offset : in data_type;
         branch : in std_logic;
-        address : out data_type
+        address : out data_type;
+        misaligned_error : out std_logic
        );
 end entity pc;
 
@@ -70,6 +71,11 @@ begin
             end case;
         end if;
         address <= std_logic_vector(pc_int);
+        if pc_int(1 downto 0) /= "00" then
+            misaligned_error <= '1';
+        else
+            misaligned_error <= '0';
+        end if;
     end process;
 end architecture rtl;
        
