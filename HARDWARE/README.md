@@ -11,7 +11,8 @@ executing the current instruction. Then, jumps/branches taken
 require an extra clock cycle. In both processors, a read from
 RAM or ROM requires an extra clock cycle. The pipelined
 processor has a very basic CSR set and has a hardware
-multiply/divide unit.
+multiply/divide unit. Multiplications take three clock cycles,
+divisions take 34 clock cycles.
 
 ## Status
 
