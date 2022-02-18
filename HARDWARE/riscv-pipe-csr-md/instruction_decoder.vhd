@@ -41,7 +41,7 @@ entity instruction_decoder is
           md_start : out std_logic;
           md_ready : in std_logic;
           md_op : out std_logic_vector(2 downto 0);
-          error : out std_logic
+          illegal_instruction_error : out std_logic
          );
 end entity instruction_decoder;
 
@@ -70,8 +70,8 @@ begin
     begin
         if areset = '1' then
             state <= state_fetch;
-            -- Really should be a NOP;
-            instrlast <= (others => '0');
+            -- NOP as default
+            instrlast <= x"00000013";
         elsif rising_edge(clk) then
             case state is
                 -- Just fetch
@@ -145,7 +145,7 @@ begin
         csr_immrs1 <= (others => '-');
         md_op <= (others => '-');
         start <= '0';
-        error <= '0';
+        illegal_instruction_error <= '0';
         
         case state is
         when state_fetch =>
@@ -190,7 +190,7 @@ begin
                         offset(11 downto 0) <= instr(31 downto 20);
                         penalty <= '1';
                     else
-                        error <= '1';
+                        illegal_instruction_error <= '1';
                     end if;
                 -- Branches
                 when "1100011" =>
@@ -215,7 +215,7 @@ begin
                             offset <= (others => '-');
                             pc_op <= pc_incr;
                             penalty <= '0';
-                            error <= '1';
+                            illegal_instruction_error <= '1';
                     end case;
                 -- L{W|H|B|HU|BU}
                 when "0000011" =>
@@ -301,7 +301,7 @@ begin
                                 rd_enable <= '0';
                             end if;
                         when others =>
-                            error <= '1';
+                            illegal_instruction_error <= '1';
                     end case;
                 -- S(W|H|B)
                 when "0100011" =>
@@ -334,7 +334,7 @@ begin
                             offset <= (others => instr(31));
                             offset(11 downto 0) <= instr(31 downto 25) & instr(11 downto 7);
                         when others =>
-                            error <= '1';
+                            illegal_instruction_error <= '1';
                     end case;
                 -- Arithmetic/logic register/immediate
                 when "0010011" =>
@@ -411,7 +411,7 @@ begin
                         rs1 <= rs1_i;
                         rd <= rd_i;
                     else
-                        error <= '1';
+                        illegal_instruction_error <= '1';
                     end if;
                     
                 -- Arithmetic/logic register/register
@@ -496,7 +496,7 @@ begin
                         rs2 <= rs2_i;
                         start<= '1';
                     else
-                        error <= '1';
+                        illegal_instruction_error <= '1';
                     end if;
                     
                 -- CSR{}, {ECALL, EBREAK, ...} (not implemented)
@@ -562,11 +562,11 @@ begin
                     if func3 = "000" then
                         null;
                     else
-                        error <= '1';
+                        illegal_instruction_error <= '1';
                     end if;
 
                 when others =>
-                    error <= '1';
+                    illegal_instruction_error <= '1';
             end case;
         when state_wait =>
             -- We have to wait for the data to be read from ROM or RAM
@@ -628,10 +628,10 @@ begin
                             offset <= (others => instrlast(31));
                             offset(11 downto 0) <= instrlast(31 downto 20);
                         when others =>
-                            error <= '1';
+                            illegal_instruction_error <= '1';
                     end case;
                 when others =>
-                    error <= '1';
+                    illegal_instruction_error <= '1';
             end case;
         -- We have to wait for multiply/divide to complete
         when state_md =>
