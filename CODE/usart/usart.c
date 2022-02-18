@@ -11,7 +11,7 @@ int main(void)
 	/* Set baud rate generator */
 	USART->BAUD = F_CPU/BAUDRATE-1;
 
-	/* Set one stop bits */
+	/* Set two stop bits */
 	USART->CTRL = 0x00;
 
 	/* Read 8 switches from input */
