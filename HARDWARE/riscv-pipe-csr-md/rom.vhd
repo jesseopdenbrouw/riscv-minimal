@@ -32,7 +32,7 @@ entity rom is
         size2 : size_type;
         data1 : out data_type;
         data2: out data_type;
-        error : out std_logic
+        misaligned_error : out std_logic
     );
 end entity rom;
  
@@ -65,14 +65,14 @@ begin
     -- ROM decoder
     process(address1, address2, instr, data, size2, csrom) is
     begin
-        error <= '0';
+        misaligned_error <= '0';
         -- By 4 for instructions
         if address1(1 downto 0) = "00" then
             data1 <= instr(7 downto 0) & instr(15 downto 8) & instr(23 downto 16) & instr(31 downto 24);
             --data1 <= rom(address1_int+0) & rom(address1_int+1) & rom(address1_int+2) & rom(address1_int+3);
         else
             data1 <= x;
-            error <= '1';
+            misaligned_error <= '1';
         end if;
      
         -- By natural size
@@ -89,11 +89,11 @@ begin
                     when "01" => data2 <= x(31 downto 8) & data(23 downto 16);
                     when "10" => data2 <= x(31 downto 8) & data(15 downto 8);
                     when "11" => data2 <= x(31 downto 8) & data(7 downto 0);
-                    when others => data2 <= x; error <= '1';
+                    when others => data2 <= x; misaligned_error <= '1';
                 end case;
             else
                 data2 <= x;
-                error <= '1';
+                misaligned_error <= '1';
             end if;
         else
             data2 <= x;
