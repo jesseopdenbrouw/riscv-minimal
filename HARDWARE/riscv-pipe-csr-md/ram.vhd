@@ -32,7 +32,7 @@ entity ram is
           size : in size_type;
           wren : in std_logic;
           dataout : out data_type;
-          error : out std_logic
+          misaligned_error : out std_logic
          );
 end entity ram;
  
@@ -74,7 +74,7 @@ begin
         address_int(ram_size_bits-3 downto 0) <= address(ram_size_bits-1 downto 2);
         
         -- Clear error, load write enable en set byte enable off
-        error <= '0';
+        misaligned_error <= '0';
         wren_int <= wren;
         byteena_int <= "0000";
          
@@ -100,7 +100,7 @@ begin
                         byteena_int <= "0011";
                     else
                         datain_int <=  x & x & x & x;
-                        error <= '1';
+                        misaligned_error <= '1';
                         wren_int <= '0';
                     end if;
                 -- Word size, on 4-byte boundaries
@@ -110,14 +110,14 @@ begin
                         byteena_int <= "1111";
                     else
                         datain_int <=  x & x & x & x;
-                        error <= '1';
+                        misaligned_error <= '1';
                         wren_int <= '0';
                     end if;
                 when others =>
                     datain_int <= x & x & x & x;
                     -- Do not write the RAM
                     wren_int <= '0';
-                    error <= '1';
+                    misaligned_error <= '1';
             end case;
         else
             -- set write enable to 0 anyway
@@ -146,7 +146,7 @@ begin
                         dataout <= x & x & dataout_int(7 downto 0) & dataout_int(15 downto 8);
                     else
                         dataout <= x & x & x & x;
-                        error <= '1';
+                        misaligned_error <= '1';
                     end if;
                 -- Word size
                 when size_word =>
@@ -154,7 +154,7 @@ begin
                         dataout <= dataout_int(7 downto 0) & dataout_int(15 downto 8) & dataout_int(23 downto 16) & dataout_int(31 downto 24);
                     else
                         dataout <= x & x & x & x;
-                        error <= '1';
+                        misaligned_error <= '1';
                     end if;
                 when others =>
                     dataout <= x & x & x & x;
