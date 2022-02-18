@@ -7,6 +7,6 @@ all: ioadd
 ioadd: ioadd.c io.h
 	$(CC) -O2 -g -o ioadd ioadd.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/minimal.S
 	$(OBJCOPY) -O srec ioadd ioadd.srec
-	$(SREC2VHDL) -wf ioadd.srec ioadd.vhd
+	$(SREC2VHDL) -wf0 ioadd.srec ioadd.vhd
 clean:
 	rm -f ioadd ioadd.srec ioadd.vhd

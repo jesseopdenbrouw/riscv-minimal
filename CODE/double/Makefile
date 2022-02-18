@@ -8,7 +8,7 @@ all: double test_double
 double: double.c
 	$(CC) -O2 -g -o double double.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/startup.c -lm
 	$(OBJCOPY) -O srec double double.srec
-	$(SREC2VHDL) -wf double.srec double.vhd
+	$(SREC2VHDL) -wf0 double.srec double.vhd
 	$(SIZE) double
 
 test_double: test_double.c

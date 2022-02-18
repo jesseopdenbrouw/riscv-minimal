@@ -18,7 +18,7 @@ $(TARGET): $(TARGET).c $(LIBSYS)
 	$(CC) $(CFLAGS) -c $(TARGET).c
 	$(CC) -o $(TARGET) $(LDFLAGS)
 	$(OBJCOPY) -O srec $(TARGET) $(TARGET).srec
-	$(SREC2VHDL) -wf $(TARGET).srec $(TARGET).vhd
+	$(SREC2VHDL) -wf0 $(TARGET).srec $(TARGET).vhd
 
 clean:
 	make -C syscalls clean
