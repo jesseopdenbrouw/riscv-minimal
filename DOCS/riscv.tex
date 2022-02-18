@@ -4,7 +4,7 @@
 \title{A Minimal RISC-V processor in VHDL}
 \date{\today\\[2ex]\normalsize\url{https://github.com/jesseopdenbrouw/riscv-minimal}}
 
-\usepackage[a4paper,inner=1.0in,outer=1.2in,top=1in,bottom=1.5in,footskip=0.4in]{geometry}
+\usepackage[a4paper,inner=1.0in,outer=1.2in,top=1in,bottom=1.5in,footskip=0.4in,showframe]{geometry}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage[charter]{mathdesign}
@@ -13,6 +13,7 @@
 \usepackage{mathtools}
 \usepackage{rotating}
 \usepackage{register}
+\usepackage[english]{babel}
 
 
 %% Making captions nicer...
@@ -32,6 +33,7 @@
 \setlength{\parfillskip}{00\p@ \@plus 1fil}
 \makeatother
 
+\usepackage{textcomp}
 \usepackage{listings}
 \lstset{
     basicstyle = \ttfamily,
@@ -39,6 +41,7 @@
     showspaces=false,
     prebreak = \raisebox{-0.5ex}[0ex][0ex]{\color{red}\ensuremath{\hookleftarrow}},
     postbreak = \raisebox{-0.5ex}[0ex][0ex]{\color{red}\ensuremath{\hookrightarrow}},
+    upquote = true,
 }
 
 \usepackage{tikz}
@@ -276,9 +279,9 @@ Reading the RAM (byte, half word, word) requires an extra clock cycles because t
 
 \subsection{I/O}
 \label{sec/io}
-Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple UART. More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data. Reading and writing I/O requires one clock cycle.
+Currently, the I/O consists of one 32-bit data input and one 32-bit data output, and a simple USART (well, really an UART). More I/O (timers/counter, ...) will be added in the future, but most I/O requires the use of interrupts (timer overflow etc.). Note that the I/O can only be accessed as words and the addresses must be on 4-byte boundaries. If not on a 4-byte boundaries and not word size reads/writes, reads return undefined data whereas writes will not write data. Reading and writing I/O requires one clock cycle. Note that not all I/O addresses are used.
 
-The UART can transmit and receive data at 8 bits, no parity and 1 or 2 stop bits only (8N1, 8N2). Tested speeds are 9600 bps and 115200 bps. Several status flags are implemented to guide transmission. Note: more identical UARTs will be added.
+The USART can transmit and receive data at 7, 8 or 9 bits, no/even/odd parity and 1 or 2 stop bits only. Tested speeds are 9600 bps, 115200 bps and 230400 bps. Several status flags are implemented to guide transmission. Note: more identical USARTs will be added.
 
 \subsection{ALU}
 \label{sec:alu}
@@ -378,7 +381,7 @@ The pipelined processor is equipped with a hardware multiply/divide unit. All mu
 The stack pointer is fully implemented although the ISA does not provide pushes and pops. The stack pointer is used to allocate local variables and is updated with each allocation and deallocation. As usual, the stack grows downwards (to lower addresses) on allocations and upwards (to higher addresses) on deallocations. Therefore the stack pointer is set to the highest RAM address + 1 on startup (which is 0x20008000 by default). The ISA postulates that the stack is aligned on 16-byte boundaries.
 
 \subsection{Implemented instructions}
-All RV32I/RV32IM Unprivileged instructions are implemented with the exception of FENCE, ECALL and EBREAK instructions. These instructions act as a no-operation (NOP). This is because exceptions are not implemented. The pipelined version with CSR and MD-unit (\texttt{riscv-pipe-csr-md}) can handle the RV32 ``Zicsr'' instruction set. Note that not all CSRs are implemented.
+All RV32I/RV32IM Unprivileged instructions are implemented with the exception of FENCE, ECALL and EBREAK instructions. These instructions act as a no-operation (NOP). This is because exceptions are not implemented. The pipelined version with CSR and MD-unit (\texttt{riscv-pipe-csr-md}) can handle part of the RV32 ``Zicsr'' instruction set. Note that not all CSRs are implemented.
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
@@ -407,9 +410,9 @@ In the created directory, you will see the following directories:
 
 Change directory to \texttt{CODE}. Make sure the RISC-V C compiler is available (see Section~\ref{sec:ccompiler}) and is in your path environment variable. Now enter the command \texttt{make}. It will compile all programs and the taylor-made conversion program. To clean up the programs, issue the command \texttt{make clean}.
 
-Next, start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
+If you want, you can compile the processors with the standard program incorporated, which is by default, flashing the onboard leds. Start your Quartus Prime Lite software and open the project in the \texttt{HARDWARE} directory. Now start a build by clicking on the play-symbol. It should compile a standard setting (this takes a long time). When finished, you can download the FPGA contents to the DE0-CV board.
 
-To test one of the programs, change directory to one of the directories and copy the file with \texttt{.vhd} extension to the directory containing the VHDL description under the name \texttt{processor\_common\_rom.vhd}.
+To test one of the programs, change directory to one of the directories in \texttt{CODE} and copy the file with \texttt{.vhd} extension to the directory containing the VHDL description under the name \texttt{processor\_common\_rom.vhd}.
 Now start Quartus and start the compilation. After a successful compilation, you can program the Cyclone V on a DE0-CV board.
 
 \section{Setting up the GNU C compiler for \textit{this} RISC-V}
@@ -496,7 +499,7 @@ Make sure to use \texttt{-march=rv32e} and \texttt{-mabi=ilp32e}.
 
 
 \section{Compiling a C program by hand}
-Note: only very simple C programs can be compiled for the processor at this time. We tested some simple looping (with \texttt{for}) and reading/writing the I/O. We did test the use of the C library (malloc et al, floats and double calculation, some trigonometry  functions from the mathematical library), but more tests are needed.
+Note: only simple C programs can be compiled for the processor at this time. We tested some simple looping (with \texttt{for}) and reading/writing the I/O. We did test the use of the C library (malloc et al, floats and double calculation, some trigonometry functions from the mathematical library), but more tests are needed.
 
 Compiling a program requires the following steps:
 
@@ -554,6 +557,15 @@ This will copy the VHDL file to the RISC-V processor ROM file.
 
 \end{itemize}
 
+\section{Implemented system calls}
+The \texttt{\_sbrk} system call, used for allocating RAM memory, is implemented. Note that there is a limited amount of RAM. Note that \texttt{\_sbrk} is not called by the user. Use \texttt{malloc} et al.
+
+The \texttt{\_gettimeofday} system call is implemented. It returns the seconds and microseconds since the last reset of the processor. You need to call the \texttt{gettimeofday} C function for proper handling. Works with the \texttt{clock} C library function.
+
+The \texttt{\_read} and \texttt{\_write} system calls are implemented but in turn they call the userland functions \texttt{\_\_io\_getchar} and \texttt{\_\_io\_putchar} functions to read or write a character. Normal use is for the latter two to transmit or receive via the USART. When implemented, \texttt{printf} and \texttt{scanf} can be used
+
+Other system calls return an error because they cannot fulfill the requested operation, such as \texttt{\_open}. Note that some system calls are in fact not implemented and return undetermined behavior. 
+
 \section{VHDL files}
 The VHDL description is composed of the following files:
 
@@ -569,7 +581,7 @@ The VHDL description is composed of the following files:
 \item \lstinline|rom_inst.vhd| -- Interface between the ROM contents and the ROM interface. The ROM contents itself is in the file \lstinline|processor_common_rom.vhd|. The ROM contents will be placed in onboard, initialized RAM blocks. 
 \item \lstinline|ram.vhd| -- Description of the RAM interface between the address decoder and data router and the onboard RAM.
 \item \lstinline|ram_inst.vhd| -- Description of the onboard RAM. Quartus detects this and creates the RAM in onboard RAM blocks.
-\item \lstinline|io.vhd| -- Description of the I/O. It contains a 32-bit input register, a 32-bit output register and a simple 8-bit UART.
+\item \lstinline|io.vhd| -- Description of the I/O. It contains a 32-bit input register, a 32-bit output register and a simple 8-bit USART.
 \item \lstinline|csr.vhd| -- Description of the Control and Status registers (only for \texttt{riscv-pipe-csr-md}).
 \item \lstinline|md.vhd| -- Description of the multiply/divide unit (only for \texttt{riscv-pipe-csr-md}).
 \item \lstinline|riscv.vhd| -- Top-level description of the processor. Connects are the building blocks to a viable processor.
@@ -577,6 +589,8 @@ The VHDL description is composed of the following files:
 \item \lstinline|tb_riscv.vhd| -- VHDL testbench to simulate the design.
 \item \lstinline|tb_riscv.do| -- QuestaSim/Modelsim command script.
 \end{itemize}
+
+There are two architectures for the ALU: a non-optimized, easy-to-follow architecture and an optimized architecture. First impression is that the optimized architecture saves about 500 ALMs in respect to the non-optimized architecture.
 
 \section{srec2vhdl}
 This is a homebrew utility to convert a Motorola S-record file into a VHDL file suitable for inclusion of the processor. The program is called with:
@@ -592,13 +606,13 @@ srec2vhdl [-fbwhqv0] [-i <arg>] inputfile [outputfile]
 \item \texttt{-w} ROM contents is in words (32 bits).
 \item \texttt{-h} ROM contents is in half words (16 bits).
 \item \texttt{-b} ROM contents is in bytes (8 bits).
-\item \texttt{-v} Verbose output
-\item \texttt{-0} Output unused data as 0 instead of don't care
+\item \texttt{-v} Verbose output.
+\item \texttt{-0} Output unused ROM data as 0 instead of don't care.
 \item \texttt{-q} Quiet output, only error messages are displayed.
 \item \texttt{-i <arg>} indents each line with \texttt{<arg>} spaces.
 \end{itemize}
 
-Note: uninitialized ROM contents is emitted as don't care, Quartus will set this to 0 by default.
+Note: uninitialized ROM contents is emitted as don't care, except when the \texttt{-0} option is used. Don't cares are set to 0 by Quartus on default.
 
 \section{Software programs}
 In de \texttt{CODE} directory, there are a number of software programs available:
@@ -782,11 +796,11 @@ uint32_t output = 0xff00ff00;
 GPIOA->POUT = output;
 \end{lstlisting}
 
-\section{UART Code}
+\section{USART Code}
 
-The UART can currently send and receive data with one start bit, 8 data bits and 1 or 2 stop bits. No parity is supported. This is called 8N1/8N2. Transmission is tested with a baud rate of 9600 bps and 115200 bps. Send and receive speeds are equal. There are no auxiliary control signals (e.g. RTS and CTS). There is no embedded FIFO to buffer incoming data. The UART is programmable using I/O registers, see Appendix~\ref{sec:ioregisters}.
+The USART can send and receive data with one start bit, 7/8/9 data bits, N/E/O parity and 1 or 2 stop bits. Transmission is tested with a baud rate of 9600 bps, 115200 bps and 230400 bps. Send and receive speeds are equal as is the number of data bits, parity and the number of stop bits. There are no auxiliary control signals (e.g. RTS and CTS). There is no embedded FIFO to buffer incoming data. The USART is programmable using I/O registers, see Appendix~\ref{sec:ioregisters}.
 
-To initialize the UART, use the code in the listing below:
+To initialize the USART, use the code in the listing below:
 
 \begin{lstlisting}[language=C]
 /* Frequency of the DE0-CV board */
@@ -849,7 +863,7 @@ int usart_getc(void)
 }
 \end{lstlisting}
 
-To receive a string from the UART, including some line editing, use the code in the listing below:
+To receive a string from the USART, including some line editing, use the code in the listing below:
 
 \begin{lstlisting}[language=C]
 /* Gets a string terminated by a newline character from usart
@@ -904,6 +918,15 @@ int usart_gets(char buffer[], int size) {
 }
 \end{lstlisting}
 
+For working with the USART on board of the processor, you need an USB-to-USART device with TTL (3.3 V) converter. An example is shown in Figure~\ref{fig:usb-usart-ttl}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[scale=0.1]{usb-usart-ttl}
+\caption{An USB-to-USART converter. Make sure that the voltages do not exceed 3.3 V.}
+\label{fig:usb-usart-ttl}
+\end{figure}
+
 \section{I/O registers}
 \label{sec:ioregisters}
 This is a list of currently supported I/O addresses. 
@@ -930,10 +953,10 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \item[Read] The last entered data is read back.
 \end{reglist}\end{regdesc}
 
-\begin{register}{H}{Usart data register USART\_DATA}{0x20}
+\begin{register}{H}{USART data register USART\_DATA}{0x20}
 \label{usartdata}
-\regfield{Reserved}{24}{8}{{0}}%
-\regfield{Data}{8}{0}{{0}}%
+\regfield{Reserved}{22}{9}{{0}}%
+\regfield{Data}{9}{0}{{0}}%
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[000000000]
@@ -941,6 +964,7 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \item[Write] The data is written to an internal buffer and transmitted.
 \item[Read] The last received data is read.
 \end{reglist}\end{regdesc}
+\hspace*{2cm}Size depends on the Size field in the USART Control Register.
 
 \begin{register}{H}{USART baud rate register USART\_BAUD}{0x24}
 \label{usartbaud}
@@ -955,12 +979,17 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 
 \begin{register}{H}{USART control register USART\_CTRL}{0x28}
 \label{usartctrl}
-\regfield{Reserved}{31}{1}{{0}}%
+\regfield{Reserved}{26}{6}{{0}}%
+\regfield{Parity}{2}{4}{{0}}%
+\regfield{Size}{2}{2}{{0}}%
+\regfield{Reserved}{1}{1}{{0}}%
 \regfield{SP}{1}{0}{{0}}
 \reglabel{Reset}\regnewline%
 \end{register}
 \begin{regdesc}[0.6\textwidth]\begin{reglist}[00000]
 \itemsep-1.5ex
+\item[Parity] 00: none, 10: even, 11: odd.
+\item[Size] 00: 8 bits, 10: 9 bits, 11: 7 bits.
 \item[SP] 0: one stop bit, 1: two stop bits.
 %\item[Stop Bits] Meaning
 %\item[0] 1 Stop bit
@@ -980,9 +1009,9 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 
 \begin{register}{H}{USART status register USART\_STAT}{0x2c}
 \label{usartstat}
-\regfield{reserved}{27}{5}{{0}}%
+\regfield{Reserved}{27}{5}{{0}}%
 \regfield{TC}{1}{4}{{0}}%
-\regfield{Reserved}{1}{3}{{0}}%
+\regfield{PE}{1}{3}{{0}}%
 \regfield{RC}{1}{2}{{0}}%
 \regfield{RF}{1}{1}{{0}}%
 \regfield{FE}{1}{0}{{0}}%
@@ -990,10 +1019,11 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \end{register}
 \begin{regdesc}[0.8\textwidth]\begin{reglist}[0000]
 \itemsep-1.5ex
-\item[TC] Transmit completed. Set directly to 1 when a character was transmitted. Automatically cleared when writing new character to the data register or when writing 0 in the TC bit in USART\_STAT.
+\item[TC] Transmit completed. Set directly to 1 when a character was transmitted. Automatically cleared when writing new character to the data register or when writing 0 in the TC bit in \mbox{USART\_STAT}.
+\item[PE] Parity error. Set to 1 if parity is enabled and there is a parity error while receiving. Automatically cleared when data register is read or when writing 0 in the PE bit in USART\_STAT.
 \item[RC] Receive completed. Set to 1 when a character was received. Automatically cleared when data register is read or when writing 0 in the RC bit in USART\_STAT.
 \item[RF] Receive failed. Set to 1 when failed receiving (invalid start bit). Automatically cleared when data register is read or when writing 0 in the RF bit in USART\_STAT.
-\item [FE] Frame error. Set to 1 when a low is detected at the position of a stop bit. Automatically cleared when data register is read or writing a 0 in the FE bit in USART\_STAT.
+\item [FE] Frame error. Set to 1 when a low is detected at the position of the (first) stop bit. Automatically cleared when data register is read or writing a 0 in the FE bit in USART\_STAT.
 \end{reglist}\end{regdesc}
 
 %\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv/processor_common.vhd}
