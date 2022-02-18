@@ -1,7 +1,7 @@
 --
 -- This file is part of the RISC-V Minimal Project
 --
--- (c)2021, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
+-- (c)2022, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
 -- riscv.vhd - Top level structural file
 
@@ -18,6 +18,8 @@ use ieee.numeric_std.all;
 library work;
 use work.processor_common.all;
 
+-- The processor itself
+-- The processor incorporates ROM, RAM and IO
 entity riscv is
     port (clk : in std_logic;
           areset : in std_logic;
@@ -31,6 +33,7 @@ end entity riscv;
 
 architecture struct of riscv is
 
+-- The registers
 component regs is
     port (clk : in std_logic;
           areset : in std_logic;
@@ -43,6 +46,8 @@ component regs is
           rs2out : out data_type
          );
 end component regs;
+
+-- The ALU
 component alu is
     port (alu_op : in alu_op_type;
           dataa : in data_type;
@@ -57,6 +62,8 @@ component alu is
           result : out data_type
          );
 end component alu;
+
+-- The instruction decoder
 component instruction_decoder is
     port (clk : in std_logic;
           areset : in std_logic;
@@ -81,20 +88,11 @@ component instruction_decoder is
           md_start : out std_logic;
           md_ready : in std_logic;
           md_op : out std_logic_vector(2 downto 0);
-          error : out std_logic
+          illegal_instruction_error : out std_logic
          );
 end component instruction_decoder;
-component rom is
-    port (clk : in std_logic;
-          csrom : in std_logic;
-          address1 : in data_type;
-          address2 : in data_type;
-          size2 : size_type;
-          data1 : out data_type;
-          data2: out data_type;
-          error : out std_logic
-         );
-end component rom;
+
+-- The Program Counter
 component pc is
     port (clk : in std_logic;
           areset : in std_logic;
@@ -102,9 +100,14 @@ component pc is
           rs : in data_type;
           offset : in data_type;
           branch : in std_logic;
-          address : out data_type
+          address : out data_type;
+          misaligned_error : out std_logic
          );
 end component pc;
+
+-- The Address Decoder and Data Router
+-- Decodes addresses and routes data from/to
+-- ROM, RAM and I/O
 component address_decoder_and_data_router is
     port (rs : in data_type;
           offset : in data_type;
@@ -120,9 +123,24 @@ component address_decoder_and_data_router is
           csrom : out std_logic;
           csram : out std_logic;
           csio : out std_logic;
-          addresserror : out std_logic
+          address_error : out std_logic
          );
 end component address_decoder_and_data_router;
+
+-- The ROM
+component rom is
+    port (clk : in std_logic;
+          csrom : in std_logic;
+          address1 : in data_type;
+          address2 : in data_type;
+          size2 : size_type;
+          data1 : out data_type;
+          data2: out data_type;
+          misaligned_error : out std_logic
+         );
+end component rom;
+
+-- The RAM
 component ram is
     port (clk : in std_logic;
           csram : in std_logic;
@@ -131,9 +149,11 @@ component ram is
           size : in size_type;
           wren : in std_logic;
           dataout : out data_type;
-          error : out std_logic
+          misaligned_error : out std_logic
          );
 end component ram;
+
+-- The I/O
 component io is
     port (clk : in std_logic;
           areset : in std_logic;
@@ -143,6 +163,7 @@ component io is
           wren : in std_logic;
           datain : in data_type;
           dataout : out data_type;
+          misaligned_error : out std_logic;
           -- connection with outside world
           pina : in data_type;
           pouta : out data_type;
@@ -150,6 +171,10 @@ component io is
           RxD : in std_logic
          );
 end component io;
+
+-- The Control and Status Registers
+-- Needs system and clock frequency the create
+-- a microsecond clock
 component csr is
     generic (freq_sys : integer := SYSTEM_FREQUENCY;
              freq_count : integer := CLOCK_FREQUENCY
@@ -164,6 +189,8 @@ component csr is
           csr_dataout : out data_type
          );
 end component csr;
+
+-- The integer multiply and divide unit
 component md is
     port (clk : in std_logic;
           areset : in std_logic;
@@ -216,6 +243,8 @@ signal md_div_int : data_type;
 signal md_start_int : std_logic;
 signal md_ready_int : std_logic;
 signal md_op_int : std_logic_vector(2 downto 0);
+signal misaligned_error_int : std_logic;
+signal illegal_instruction_error_int : std_logic;
 begin
 
     -- Input push button is active low
@@ -258,7 +287,8 @@ begin
               rs => rs1data_int,
               offset => offset_int,
               branch => result_int(0),
-              address => pc_int
+              address => pc_int,
+              misaligned_error => misaligned_error_int
     );
 
     -- The Instuction Decoder
@@ -286,20 +316,8 @@ begin
               md_start => md_start_int,
               md_ready => md_ready_int,
               md_op => md_op_int,
-              error => open
+              illegal_instruction_error => illegal_instruction_error_int
              );
-
-    -- The ROM
-    rom0 : rom
-    port map (clk => clk,
-              csrom => csrom_int,
-              address1 => pc_int,
-              address2 => address_int,
-              size2 => size_int,
-              data1 => instr_int,
-              data2 => romdata_int,
-              error => open
-    );
 
     -- The Address Decoder and Data Router
     addecroute0 : address_decoder_and_data_router
@@ -317,7 +335,19 @@ begin
               csram => csram_int,
               csio => csio_int,
               waitfordata => waitfordata_int,
-              addresserror => open
+              address_error => open
+    );
+
+    -- The ROM
+    rom0 : rom
+    port map (clk => clk,
+              csrom => csrom_int,
+              address1 => pc_int,
+              address2 => address_int,
+              size2 => size_int,
+              data1 => instr_int,
+              data2 => romdata_int,
+              misaligned_error => open
     );
 
     -- The RAM
@@ -329,7 +359,7 @@ begin
               size => size_int,
               wren => wrram_int,
               dataout => ramdata_int,
-              error => open
+              misaligned_error => open
     );
    
    -- The I/O
@@ -342,6 +372,7 @@ begin
               wren => wrio_int,
               datain => rs2data_int,
               dataout => iodata_int,
+              misaligned_error => open,
               -- connection with outside world
               pina => pina,
               pouta => pouta,
@@ -364,6 +395,8 @@ begin
               csr_dataout => csr_dataout_int
              );
 
+    -- The multiply and divide unit,
+    -- when instantiated
     genmuldiv: if HAVE_MULDIV generate
     md0 : md
     port map (clk => clk,
@@ -377,6 +410,7 @@ begin
              div_rd => md_div_int
          );
     end generate;
+    -- if not instantiated
     notgenmuldiv: if not HAVE_MULDIV generate
         md_mul_int <= (others => '-');
         md_div_int <= (others => '-');
