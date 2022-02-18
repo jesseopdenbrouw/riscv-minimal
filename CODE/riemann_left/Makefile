@@ -7,6 +7,6 @@ all: riemann_left
 riemann_left: riemann_left.c
 	$(CC) -O0 -g -o riemann_left riemann_left.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/startup.c -lm
 	$(OBJCOPY) -O srec riemann_left riemann_left.srec
-	$(SREC2VHDL) -wf riemann_left.srec riemann_left.vhd
+	$(SREC2VHDL) -wf0 riemann_left.srec riemann_left.vhd
 clean:
 	rm -f riemann_left riemann_left.srec riemann_left.vhd
