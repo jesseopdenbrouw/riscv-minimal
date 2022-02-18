@@ -171,6 +171,13 @@ signal waitfordata_int : std_logic;
 signal csrom_int : std_logic;
 signal csram_int : std_logic;
 signal csio_int : std_logic;
+
+-- Select the architecture of the ALU
+-- The default
+--for alu0 : alu use entity work.alu(rtl);
+-- Optimzed
+for alu0 : alu use entity work.alu(optimized_rtl);
+
 begin
 
     -- Input push button is active low
