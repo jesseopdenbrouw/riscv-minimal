@@ -11,10 +11,10 @@
 #include <stdint.h>
 #include <unistd.h>
 
-extern uint32_t _sbss, _ebss;
-extern uint32_t _sdata, _edata;
-extern uint32_t _start_of_rom_to_copy;
-extern uint32_t _srodata, _erodata;
+extern uint8_t _sbss, _ebss;
+extern uint8_t _sdata, _edata;
+extern uint8_t _start_of_rom_to_copy;
+extern uint8_t _srodata, _erodata;
 
 /* Declare the `main' function */
 int main(void);
@@ -46,20 +46,17 @@ void _start(void)
 	                   "la    gp, __global_pointer$;"
 			   "la    sp, __stack_pointer$;"
 			   ".option pop"
-                      :  /* output: none */
+                      : /* output: none */
                       : /* input: none */
                       : /* clobbers: none */);
 
-//#ifndef __cplusplus
-//	register
-//#endif    
-	volatile uint32_t *pStart = &_sbss;
-	volatile uint32_t *pEnd = &_ebss;
-	volatile uint32_t *pdRom = &_start_of_rom_to_copy;
+	volatile uint8_t *pStart = &_sbss;
+	volatile uint8_t *pEnd = &_ebss;
+	volatile uint8_t *pdRom = &_start_of_rom_to_copy;
 
 	/* Initialize the bss with 0 */
 	while (pStart < pEnd) {
-		*pStart = 0x00000000;
+		*pStart = 0x00;
 		*pStart++;
 	}
 
@@ -75,9 +72,6 @@ void _start(void)
         /* Initialize the C library */
         __libc_init_array();
 
-	/* Just call main */
-	main();
-
-	/* Stop */
-	_exit(0);
+	/* Just call main and stop */
+	_exit(main());
 }
