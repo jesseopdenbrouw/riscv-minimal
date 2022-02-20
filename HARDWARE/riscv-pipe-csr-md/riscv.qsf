@@ -95,8 +95,8 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulati
 set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS COMMAND_MACRO_MODE -section_id eda_simulation
 set_global_assignment -name EDA_SIMULATION_RUN_SCRIPT tb_riscv.do -section_id eda_simulation
 
-set_location_assignment PIN_M21 -to RxD
-set_location_assignment PIN_R22 -to TxD
+set_location_assignment PIN_N19 -to RxD
+set_location_assignment PIN_P19 -to TxD
 set_location_assignment PIN_U21 -to pouta[16]
 set_location_assignment PIN_V21 -to pouta[17]
 set_location_assignment PIN_W22 -to pouta[18]

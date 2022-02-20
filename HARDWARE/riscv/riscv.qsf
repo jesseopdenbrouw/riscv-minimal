@@ -107,8 +107,8 @@ set_global_assignment -name VHDL_FILE riscv.vhd
 set_global_assignment -name SDC_FILE riscv.sdc
 set_global_assignment -name VHDL_TEST_BENCH_FILE tb_riscv.vhd
 set_global_assignment -name COMMAND_MACRO_FILE tb_riscv.do
-set_location_assignment PIN_M21 -to RxD
-set_location_assignment PIN_R22 -to TxD
+set_location_assignment PIN_N19 -to RxD
+set_location_assignment PIN_P19 -to TxD
 set_location_assignment PIN_U21 -to pouta[16]
 set_location_assignment PIN_V21 -to pouta[17]
 set_location_assignment PIN_W22 -to pouta[18]
