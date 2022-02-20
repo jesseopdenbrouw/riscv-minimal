@@ -654,6 +654,8 @@ Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM
 
 Note that the floating point programs loads (huge) functions from the C library and possibly creates a binary that is too large to fit in the ROM. In that case, the linker will issue an error and does not build the binary. You have to update the data sizes in the VHDL description and update the linker script with suitable data sizes.
 
+When using floats and doubles in \texttt{sprintf}/\texttt{printf}, you need to supply the linker with the \lstinline|-u _printf_float| option. When using floats and doubles in \texttt{sscanf}/\texttt{scanf}, you need to supply the linker with the \lstinline|-u _scanf_float| option.
+
 \subsection{Monitor program}
 A simple monitor program is available, see the \texttt{monitor} directory in software examples. It makes use of the USART. You need a terminal program like Putty and a USART to USB device for your computer. Currently the following commands are available:
 
@@ -694,7 +696,7 @@ Change the start locations of the memories by changing the constants. Make sure 
 -- NOTE: rom_size_bits must be <= 16
 constant rom_size_bits : integer := 16;
 constant rom_size : integer := 2**(rom_size_bits-2);
-type rom_type is array(0 to rom_size-1) of std_logic_vector(31 downto 0);
+type rom_type is array(0 to rom_size-1) of data_type;
 -- The contents of the ROM is loaded by processor_common_rom.vhd
 
 -- The RAM
@@ -899,7 +901,7 @@ int usart_gets(char buffer[], int size) {
                         }
                         break;
             /* control-C */
-            case 0x03:   usart_puts("<break>\r\n");
+            case 0x03:  usart_puts("<break>\r\n");
                         index=0;
                         break;
             default:    if (index<size-1) {
