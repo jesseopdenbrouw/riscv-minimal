@@ -30,6 +30,7 @@ all:
 	$(MAKE) -C clock all
 	$(MAKE) -C interval all
 	$(MAKE) -C hex_display all
+	$(MAKE) -C basel_problem all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -58,4 +59,5 @@ clean:
 	$(MAKE) -C clock clean
 	$(MAKE) -C interval clean
 	$(MAKE) -C hex_display clean
+	$(MAKE) -C basel_problem clean
 	rm -rf bin
