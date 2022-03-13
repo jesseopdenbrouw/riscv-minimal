@@ -37,15 +37,17 @@
 \usepackage{listings}
 \lstset{
     basicstyle = \ttfamily,
+    numbers = left,
+    numberstyle=\tiny\color{gray},
     breaklines = true,
-    showspaces=false,
+    showspaces = false,
     prebreak = \raisebox{-0.5ex}[0ex][0ex]{\color{red}\ensuremath{\hookleftarrow}},
     postbreak = \raisebox{-0.5ex}[0ex][0ex]{\color{red}\ensuremath{\hookrightarrow}},
     upquote = true,
 }
 
 \usepackage{tikz}
-\usetikzlibrary{backgrounds,shapes,arrows, automata}
+\usetikzlibrary{backgrounds,shapes,arrows,automata,decorations.pathreplacing}
 
 \usepackage{hyperref}
 \hypersetup{colorlinks}
@@ -295,13 +297,13 @@ The Program Counter contains the address of the currently executed instruction (
 
 \subsection{Instruction Decoder}
 \label{sec:instructiondecoder}
-The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4 bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder, the CSR and the register file.
+The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4 bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, the PC, the Address Decoder, the CSR and the register file. Some signals are directly wired to the ROM, RAM and I/O.
 
-In the standard processor, a simple three-state FSM is used, see Figure~\ref{fsmnonpipe}. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM.
+In the standard processor, a simple three-state FSM is used, see Figure~\ref{fsmnonpipe}. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. See Figures~\ref{fsmnonpipeseq} and~\ref{fsmnonpipeseqwait}.
 
 \begin{figure}[!ht]
 \centering
-\begin{tikzpicture}[node distance=3cm]
+\begin{tikzpicture}[node distance=3cm, line width=1pt]
 \node[state,initial,initial text=reset] (fetch) {fetch};
 \node[state,right of=fetch] (exec) {exec};
 \node[state,right of=exec] (wait) {wait};
@@ -315,7 +317,64 @@ In the standard processor, a simple three-state FSM is used, see Figure~\ref{fsm
 \label{fsmnonpipe}
 \end{figure}
 
-The pipelined processor uses a four-state FSM, see figure~\ref{fsmpipe}. The PC points to +4 of the currently executing instruction. If a jump or branch taken occurs, the FSM inserts a penalty because the PC has to be loaded with the correct value and a new instruction must be fetched. Reading RAM and ROM requires an extra state. When and multiply or divide instruction is encountered, the FSM goes to the \texttt{md} state and waits for the md-unit to complete/ Note that penalty, wait and start cannot occur at the same time.
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=2cm, line width=1pt]
+\draw[-latex,dashed] (-1,-0.5) -- ++(1,0);
+
+\draw (0,0) rectangle node [] {fetch} ++(2,-1);
+\node at (1,0) [above] {PC};
+\draw[-latex] (2,-0.5) -- ++(1,0);
+
+\draw (3,0) rectangle node [] {exec} ++(2,-1);
+\node at (4,0) [above] {PC};
+\draw[-latex] (5,-0.5) -- ++(1,0);
+
+\draw (6,0) rectangle node [] {fetch} ++(2,-1);
+\node at (7,0) [above] {PC+4};
+\draw[-latex] (8,-0.5) -- ++(1,0);
+
+\draw (9,0) rectangle node [] {exec} ++(2,-1);
+\node at (10,0) [above] {PC+4};
+\draw[-latex,dashed] (11,-0.5) -- ++(1,0);
+
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](0,-1) -- (5,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](6,-1) -- (11,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+
+\end{tikzpicture}
+\caption{State sequence for instruction execution (no wait state).}
+\label{fsmnonpipeseq}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=2cm, line width=1pt]
+\draw[-latex,dashed] (-1,-0.5) -- ++(1,0);
+
+\draw (0,0) rectangle node [] {fetch} ++(2,-1);
+\node at (1,0) [above] {PC};
+\draw[-latex] (2,-0.5) -- ++(1,0);
+
+\draw (3,0) rectangle node [] {exec} ++(2,-1);
+\node at (4,0) [above] {PC};
+\draw[-latex] (5,-0.5) -- ++(1,0);
+
+\draw (6,0) rectangle node [] {wait} ++(2,-1);
+\node at (7,0) [above] {PC+4};
+\draw[-latex] (8,-0.5) -- ++(1,0);
+
+\draw (9,0) rectangle node [] {fetch} ++(2,-1);
+\node at (10,0) [above] {PC+4};
+\draw[-latex,dashed] (11,-0.5) -- ++(1,0);
+
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](0,-1) -- (8,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+
+\end{tikzpicture}
+\caption{State sequence for instruction execution (wait state).}
+\label{fsmnonpipeseqwait}
+\end{figure}
+
+The pipelined processor uses a four-state FSM, see figure~\ref{fsmpipe}. The PC points to +4 of the currently executing instruction. If a jump or branch taken occurs, the FSM inserts a penalty because the PC has to be loaded with the correct value and a new instruction must be fetched (Figure~\ref{fsmpipeseqstartup}). Reading RAM and ROM requires an extra state (Figure~\ref{fsmnonpipeseqwait}). When a multiply, divide or remainder instruction is encountered, the FSM goes to the \texttt{md} state and waits for the md-unit to complete. Note that penalty, wait and start cannot occur at the same time.
 
 \begin{figure}[!ht]
 \centering
@@ -335,6 +394,64 @@ The pipelined processor uses a four-state FSM, see figure~\ref{fsmpipe}. The PC 
 \end{tikzpicture}
 \caption{FSM of the instruction decoder of the pipelined processor.}
 \label{fsmpipe}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=2cm, line width=1pt]
+\draw[-latex,dashed] (-1,-0.5) -- ++(1,0);
+
+\draw (0,0) rectangle node [] {fetch} ++(2,-1);
+\node at (1,0) [above] {PC};
+\draw[-latex] (2,-0.5) -- ++(1,0);
+
+\draw (3,0) rectangle node [] {fexec} ++(2,-1);
+\node at (4,0) [above] {PC+4};
+\draw[-latex] (5,-0.5) -- ++(1,0);
+
+\draw (6,0) rectangle node [] {fexec} ++(2,-1);
+\node at (7,0) [above] {PC+8};
+\draw[-latex] (8,-0.5) -- ++(1,0);
+
+\draw (9,0) rectangle node [] {fexec} ++(2,-1);
+\node at (10,0) [above] {PC+12};
+\draw[-latex,dashed] (11,-0.5) -- ++(1,0);
+
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](0,-1) -- (5,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](6,-1) -- (8,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](9,-1) -- (11,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+\end{tikzpicture}
+\caption{State sequence for start up/penalty with instruction execution (no wait state).}
+\label{fsmpipeseqstartup}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=2cm, line width=1pt]
+\draw[-latex,dashed] (-1,-0.5) -- ++(1,0);
+
+\draw (0,0) rectangle node [] {fexec} ++(2,-1);
+\node at (1,0) [above] {PC};
+\draw[-latex] (2,-0.5) -- ++(1,0);
+
+\draw (3,0) rectangle node [] {fexec} ++(2,-1);
+\node at (4,0) [above] {PC+4};
+\draw[-latex] (5,-0.5) -- ++(1,0);
+
+\draw (6,0) rectangle node [] {wait} ++(2,-1);
+\node at (7,0) [above] {PC+4};
+\draw[-latex] (8,-0.5) -- ++(1,0);
+
+\draw (9,0) rectangle node [] {fexec} ++(2,-1);
+\node at (10,0) [above] {PC+8};
+\draw[-latex,dashed] (11,-0.5) -- ++(1,0);
+
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](0,-1) -- (2,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](3,-1) -- (8,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](9,-1) -- (11,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
+\end{tikzpicture}
+\caption{State sequence for instruction execution (wait state).}
+\label{fsmpipeseqwait}
 \end{figure}
 
 %\begin{figure}[!ht]
@@ -374,7 +491,7 @@ Note that these registers are read-only. Writes are ignored. Other registers may
 Note that not all CSRs are implemented. Good synthesizers will remove not-used CSRs.
 
 \subsection{Multiply/Divide Unit}
-The pipelined processor is equipped with a hardware multiply/divide unit. All multiply/divide instructions are supported (\texttt{MUL}, \texttt{MULH}, \texttt{MULHSU}, \texttt{MULHU}, \texttt{DIV}, \texttt{DIVU}, \texttt{REM}, \texttt{REMU}) and the result is fed to the ALU. A multiplication takes three clock cycles (one clock-in, one multiply, one clock-out). A division takes 34 clock cycles (one clock-in, 32 divide, one clock-out). You have to enable the M-standard support in the compiler. The multiplier uses special DSP units in the Cyclone V. Most regular FPGAs have onboard multipliers.
+The pipelined processor is equipped with a hardware multiply/divide unit. All multiply/divide instructions are supported (\texttt{MUL}, \texttt{MULH}, \texttt{MULHSU}, \texttt{MULHU}, \texttt{DIV}, \texttt{DIVU}, \texttt{REM}, \texttt{REMU}) and the result is fed to the ALU. A multiplication takes three clock cycles (one clock-in, one multiply, one clock-out). For division, two versions are available. By default, the divider needs 18 clocks (one clock-in, 16 divide, one clock-out) for a division using a poor man's radix-4 division unit. As an alternative, a simple radix-2 division unit can be selected taking 34 clock cycles (one clock-in, 32 divide, one clock-out) to do the division.  Thus, the radix-4 divider unit is faster, but needs more cells. The radix-2 divider unit is slower, but needs less cells. You have to enable the M-standard support in the compiler. The multiplier uses special DSP units in the Cyclone V. Most regular FPGAs have onboard multipliers.
 
 
 \subsection{Stack pointer}
@@ -1028,8 +1145,9 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \item [FE] Frame error. Set to 1 when a low is detected at the position of the (first) stop bit. Automatically cleared when data register is read or writing a 0 in the FE bit in USART\_STAT.
 \end{reglist}\end{regdesc}
 
-%\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv/processor_common.vhd}
+%\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv-pipe-csr-md-lic/alu.vhd}
+%\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv-pipe-csr-md-lic/processor_common.vhd}
 
-%\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv/processor_common_rom.vhd}
+%\lstinputlisting[language=VHDL,basicstyle=\small\ttfamily]{../HARDWARE/riscv-pipe-csr-md-lic/processor_common_rom.vhd}
 
 \end{document}
