@@ -14,38 +14,16 @@ _start:
 	la gp, __global_pointer$
         la sp, __stack_pointer$ 
 
-	la t0, Universal_Handler
-	csrw mtvec,t0
-	li t0, 0x8 | (0x3<<11)
-	csrw mstatus,t0
+	li x5,4000
+	li x6,33
 
-	la	x4,0x00000000
-	lw	x5,0(x4)
-
-	la	x4,0x20000000
-	sw	x5,0(x4)
+	div x7,x5,x6
 
 	nop
 	nop
-	ecall
-	nop
-	nop
-	ebreak
-	nop
-	nop
-
-	la	x5,0x3
-	jalr	x5
-
 
 einde:	j einde
 
-Universal_Handler:
-	nop
-	nop
-	nop
-	mret
-#	j Universal_Handler
 
 .option pop
 

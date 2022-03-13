@@ -22,6 +22,9 @@ _start:
 	la	x4,0x00000000
 	lw	x5,0(x4)
 
+	la	x4,0x20000000
+	sw	x5,0(x4)
+
 	nop
 	nop
 	ecall
@@ -30,6 +33,9 @@ _start:
 	ebreak
 	nop
 	nop
+
+	la	x5,0x3
+	jalr	x5
 
 
 einde:	j einde
