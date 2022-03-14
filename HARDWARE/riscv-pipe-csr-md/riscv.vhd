@@ -251,6 +251,11 @@ signal illegal_instruction_error_int : std_logic;
 --for alu0 : alu use entity work.alu(rtl);
 -- Optimzed
 for alu0 : alu use entity work.alu(optimized_rtl);
+-- Select the architecture of the MD unit
+-- The default 32+2 clock ticks
+--for md0 : md use entity work.md(rtl);
+-- Enhanced 16+2 clock ticks
+for md0 : md use entity work.md(rtl_div4);
 
 begin
 
