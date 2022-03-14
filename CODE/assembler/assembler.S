@@ -33,6 +33,7 @@ _start:
 	ebreak
 	nop
 	nop
+	.word 0x00000000
 
 	la	x5,0x3
 	jalr	x5
