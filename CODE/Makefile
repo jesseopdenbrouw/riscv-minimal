@@ -31,6 +31,8 @@ all:
 	$(MAKE) -C interval all
 	$(MAKE) -C hex_display all
 	$(MAKE) -C basel_problem all
+	$(MAKE) -C interrupt_direct all
+	$(MAKE) -C interrupt_vectored all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -60,4 +62,6 @@ clean:
 	$(MAKE) -C interval clean
 	$(MAKE) -C hex_display clean
 	$(MAKE) -C basel_problem clean
+	$(MAKE) -C interrupt_direct clean
+	$(MAKE) -C interrupt_vectored clean
 	rm -rf bin
