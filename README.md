@@ -16,7 +16,7 @@ supported as the processor does not have a PLIC. The processor uses
 a simple 2-stage instruction pipeline. Read from ROM and RAM require
 2 clock cycles. Writes require 1 clock cycles. Multiplications require
 3 clock cycles, divisions require 16+2 clock cycles. Jumps/calls/branches
-taken require 2 clock cycles. Interrupts are direct (non-vectored)
+taken require 2 clock cycles. Interrupts are direct or vectored.
 
 Currently the processor uses Machine Mode only.
 
