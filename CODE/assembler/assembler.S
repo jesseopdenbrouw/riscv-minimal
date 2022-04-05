@@ -14,37 +14,40 @@ _start:
 	la gp, __global_pointer$
         la sp, __stack_pointer$ 
 
-	la t0, Universal_Handler
+	la t0, Universal_Handler+1
 	csrw mtvec,t0
 	li t0, 0x8 | (0x3<<11)
 	csrw mstatus,t0
 
-	la	x4,0x00000000
-	lw	x5,0(x4)
+	li	x5,0
 
-	la	x4,0x20000000
-	sw	x5,0(x4)
+1:
+	addi	zero,zero,1
+	addi	zero,zero,2
+	addi	zero,zero,3
+	addi	zero,zero,4
+	addi	zero,zero,5
+	addi	zero,zero,6
+	addi	zero,zero,7
+	addi	zero,zero,8
 
-	nop
-	nop
 	ecall
-	nop
-	nop
-	ebreak
-	nop
-	nop
-	.word 0x00000000
 
-	la	x5,0x3
-	jalr	x5
+	beq	zero,zero,1b
 
+	addi	zero,zero,9
+	addi	zero,zero,10
 
 einde:	j einde
+
+	.word 0xffffffff
+	.word 0xffffffff
 
 Universal_Handler:
 	nop
 	nop
 	nop
+	csrr a0,mip
 	mret
 #	j Universal_Handler
 
