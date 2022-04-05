@@ -1,4 +1,4 @@
-# Riemann left
+# Basel Problem
 
 The basel problem is a classic problem of the summation
 of the inverses of integer squares. Solved by Euler.
