@@ -67,13 +67,11 @@ You need a (free) license for that. The processor uses about
 ## Plans (or not)
 
 We are *not* planning the C standard.
-We will implement vectored interrupt handling.
 Plans to create a hardcoded bootloader to load programs when the processor is loaded in an FPGA.
 We strive to implement SPI and I2C, and PWM.
-Branches backwards are taken (instruction fetches).
 We are considering implementing a 5-stage instruction pipeline (this will take time ;-)).
 Implement Supervisor Mode (this will also take some time ;-).
-Smaller/faster divide unit.
+Smaller (in cells) divide unit.
 
 ## Disclaimer
 
