@@ -1,5 +1,5 @@
 /*
- * RISC-V RV32IM generic trap handler
+ * RISC-V RV32IM generic trap handler (direct)
  *
  * (c) 2022, Jesse E.J. op den Brouw
  *

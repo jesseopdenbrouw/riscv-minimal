@@ -47,6 +47,7 @@
                           ".option pop" \
                           ::: "t0");
 
+/* Get start address of jump table (vectored) or handler (direct) */
 #define get_mtvec() ({ uint32_t __tmp; \
 	__asm__ volatile ("csrr %0, mtvec" : "=r"(__tmp)); \
 	__tmp; })

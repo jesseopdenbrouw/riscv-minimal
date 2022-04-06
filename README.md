@@ -7,18 +7,19 @@ for an FPGA.
 
 The RISV-C processor uses the RV32IM instruction set with the
 exception of the FENCE and WFI instructions. Exceptions and interrupts are
-supported. We successfully tested a complex program with interrupts
+supported. ECALL, EBREAK and MRET are supported. Currently only machine
+mode is supported. We successfully tested a complex program with interrupts
 and exceptions and implemented a basic syscall library usable with
-the ECALL instruction. sbrk, read, write and gettimeofday are basically
+the ECALL instruction as provided by the GNU C compiler for RISC-V.
+sbrk, read, write and gettimeofday are basically
 supported. The External (system) Timer is implemented and
 generates an exception if time >= timecmp. External Interrupt are not
-supported as the processor does not have a PLIC. The processor uses
+supported as the processor does not have a PLIC. Up to 16 fast local
+interrupts are supported. The processor uses
 a simple 2-stage instruction pipeline. Read from ROM and RAM require
 2 clock cycles. Writes require 1 clock cycles. Multiplications require
 3 clock cycles, divisions require 16+2 clock cycles. Jumps/calls/branches
 taken require 2 clock cycles. Interrupts are direct or vectored.
-
-Currently the processor uses Machine Mode only.
 
 Software is written in C (C++ currently not supported) and compiled
 using the RISC-V GNU C compiler.
@@ -45,7 +46,8 @@ A number CSR registers are implemented: time, timeh, cycle, cycleh,
 instret, instreth, mvendorid, marchid, mimpid, mhartid, mstatus,
 mstatush, misa, mie, mtvec, mscratch, mepc, mcause, mip. Some of
 these CSRs are hardwired. Others will be implemented when needed.
-The time and timeh CSRs produces the time since reset in microseconds.
+The time and timeh CSRs produces the time since reset in microseconds,
+shadowed from the External Timer memory mapped registers.
 
 ## Software
 
@@ -62,7 +64,7 @@ The processor is developed on a Cyclone V FPGA with the use
 of the DE0-CV board by Terasic and Quartus Prime Lite 21.1.
 Simulation is possible with QuestaSim Intel Starter Edition.
 You need a (free) license for that. The processor uses about
-2600 ALM (cells) of 18480. Speed is currently 50 MHz max.
+2700 ALM (cells) of 18480. Speed is currently 50 MHz max.
 
 ## Plans (or not)
 

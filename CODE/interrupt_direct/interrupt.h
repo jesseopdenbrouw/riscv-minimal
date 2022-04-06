@@ -38,6 +38,16 @@
                           ".option pop" \
                           ::: "t0");
 
+/* Set the address of the trap handler, vectored */
+#define set_mtvec_vectored(VECTOR) \
+  	__asm__ volatile (".option push;" \
+                          ".option norelax;" \
+                          "la    t0, " #VECTOR "+1;" \
+                          "csrw  mtvec,t0;" \
+                          ".option pop" \
+                          ::: "t0");
+
+/* Get start address of jump table (vectored) or handler (direct) */
 #define get_mtvec() ({ uint32_t __tmp; \
 	__asm__ volatile ("csrr %0, mtvec" : "=r"(__tmp)); \
 	__tmp; })

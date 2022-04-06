@@ -518,6 +518,7 @@ begin
         O_timeh <= timeh_int;
     end process;
     
+    -- Unused local interrupts set to 0
     O_intrio(31 downto 19) <= (others => '0');
     O_intrio(15 downto 8) <= (others => '0');
     O_intrio(6 downto 0) <= (others => '0');

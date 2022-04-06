@@ -13,7 +13,7 @@ all: $(TARGET)
 	$(CC) -c $< -o $@
 
 
-$(TARGET): $(TARGET).o startup.o universal_handler.o handlers.o usart.o usart.h io.h handlers.h
+$(TARGET): $(TARGET).o startup.o universal_handler.o handlers.o usart.o
 	$(CC) -O2 -g -o $(TARGET) $(OBJ) $(LDFLAGS)
 	$(OBJCOPY) -O srec $(TARGET) $(TARGET).srec
 	$(SREC2VHDL) -wf0 $(TARGET).srec $(TARGET).vhd

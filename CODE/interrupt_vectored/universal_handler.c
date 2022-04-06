@@ -1,5 +1,5 @@
 /*
- * RISC-V RV32IM vectored generic trap handler
+ * RISC-V RV32IM generic trap handler (vectored)
  *
  * (c) 2022, Jesse E.J. op den Brouw
  *
