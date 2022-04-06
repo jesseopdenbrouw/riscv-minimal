@@ -618,6 +618,7 @@ begin
                                 O_illegal_instruction_error <= '1';
                             end if;
                         when "001" =>
+                            -- CSRRW
                             O_alu_op <= alu_csr;
                             O_csr_op <= csr_rw;
                             O_rd <= rd_i;
@@ -626,6 +627,7 @@ begin
                             O_csr_addr <= I_instr(31 downto 20);
                             O_csr_immrs1 <= rs1_i; -- rs1
                         when "010" =>
+                            -- CSRRS
                             O_alu_op <= alu_csr;
                             O_csr_op <= csr_rs;
                             O_rd <= rd_i;
@@ -634,6 +636,7 @@ begin
                             O_csr_addr <= I_instr(31 downto 20);
                             O_csr_immrs1 <= rs1_i; -- rs1
                         when "011" =>
+                            -- CSRRC
                             O_alu_op <= alu_csr;
                             O_csr_op <= csr_rc;
                             O_rd <= rd_i;
@@ -642,6 +645,7 @@ begin
                             O_csr_addr <= I_instr(31 downto 20);
                             O_csr_immrs1 <= rs1_i; -- rs1
                         when "101" =>
+                            -- CSRRWI
                             O_alu_op <= alu_csr;
                             O_csr_op <= csr_rwi;
                             O_rd <= rd_i;
@@ -650,6 +654,7 @@ begin
                             O_csr_addr <= I_instr(31 downto 20);
                             O_csr_immrs1 <= rs1_i; -- imm
                         when "110" =>
+                            -- CSRRSI
                             O_alu_op <= alu_csr;
                             O_csr_op <= csr_rsi;
                             O_rd <= rd_i;
@@ -658,6 +663,7 @@ begin
                             O_csr_addr <= I_instr(31 downto 20);
                             O_csr_immrs1 <= rs1_i; -- imm
                         when "111" =>
+                            -- CSRRCI
                             O_alu_op <= alu_csr;
                             O_csr_op <= csr_rci;
                             O_rd <= rd_i;
