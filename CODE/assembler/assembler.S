@@ -14,8 +14,9 @@ _start:
 	la gp, __global_pointer$
         la sp, __stack_pointer$ 
 
-	la t0, Universal_Handler+1
+	la t0, Universal_Handler
 	csrw mtvec,t0
+	csrsi mtvec, 1
 	li t0, 0x8 | (0x3<<11)
 	csrw mstatus,t0
 
