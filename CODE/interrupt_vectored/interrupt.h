@@ -11,6 +11,9 @@
 
 #include <stdint.h>
 
+#define TRAP_DIRECT_MODE (0)
+#define TRAP_VECTORED_MODE (1)
+
 /* Enable the global IRQ */
 #define enable_irq() \
 	__asm__ volatile (".option push;" \
@@ -29,27 +32,25 @@
 			  ".option pop" \
                           ::: "t0");
 
-/* Set the address of the trap handler, direct (non vectored) */
-#define set_mtvec(VECTOR) \
+/* Get start address of jump table (vectored) or handler (direct) */
+#define get_mtvec() ({ uint32_t __tmp; \
+	__asm__ volatile ("csrr %0, mtvec" : "=r"(__tmp)); \
+	__tmp; })
+
+/* Set the mtvec CSR, using mode TRAP_DIRECT_MODE or TRAP_VECTORED_MODE */
+#define set_mtvec(VECTOR, MODE) \
   	__asm__ volatile (".option push;" \
                           ".option norelax;" \
                           "la    t0, " #VECTOR ";" \
                           "csrw  mtvec,t0;" \
                           ".option pop" \
-                          ::: "t0");
-
-/* Set the address of the trap handler, vectored */
-#define set_mtvec_vectored(VECTOR) \
-  	__asm__ volatile (".option push;" \
-                          ".option norelax;" \
-                          "la    t0, " #VECTOR "+1;" \
-                          "csrw  mtvec,t0;" \
-                          ".option pop" \
-                          ::: "t0");
-
-/* Get start address of jump table (vectored) or handler (direct) */
-#define get_mtvec() ({ uint32_t __tmp; \
-	__asm__ volatile ("csrr %0, mtvec" : "=r"(__tmp)); \
-	__tmp; })
+			  ::: "t0"); \
+	if (MODE == 1) { \
+		__asm__ volatile (".option push;" \
+				  ".option norelax;" \
+				  "csrsi mtvec,1;" \
+                          	  ".option pop" \
+			  	  ::: ); \
+	}
 
 #endif
