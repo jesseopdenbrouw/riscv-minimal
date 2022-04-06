@@ -929,6 +929,7 @@ Some future plans:
 \item Smaller (in cells) divide unit.
 \item Test more functions of the standard and mathematical libraries. Now only a few functions are tested.
 \item It is not possible to print \texttt{long long} (i.e. 64-bit) using \texttt{printf} et al. When using the format specifier \texttt{\%lld}, \texttt{printf} just prints \texttt{ld}.
+\item The \texttt{mstatus.MIE} bit disables \emph{all} traps, but only interrupts should be disable.
 \item Further optimize the ALU for size and speed.
 \end{itemize}
 
