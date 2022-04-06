@@ -237,9 +237,9 @@ begin
                     csr_content(31 downto 5) := (others => '0');
                     csr_content(4 downto 0) := I_csr_immrs1;
                 when csr_rsi =>
-                    csr_content(4 downto 0) := csr_content(4 downto 0) or I_csr_datain(4 downto 0);
+                    csr_content(4 downto 0) := csr_content(4 downto 0) or I_csr_immrs1(4 downto 0);
                 when csr_rci =>
-                    csr_content(4 downto 0) := csr_content(4 downto 0) and not I_csr_datain(4 downto 0);
+                    csr_content(4 downto 0) := csr_content(4 downto 0) and not I_csr_immrs1(4 downto 0);
                 when others =>
                     null;
             end case;
