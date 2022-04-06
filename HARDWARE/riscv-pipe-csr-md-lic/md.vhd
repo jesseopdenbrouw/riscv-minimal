@@ -341,12 +341,16 @@ begin
                         -- Load the divisor x1, divisor x2 and divisor x3
                         if I_op(0) = '0' and I_rs2(31) = '1' then
                             divisor1 <= "00" & (unsigned(not I_rs2) + 1);
-                            divisor2 <= ("00" & (unsigned(not I_rs2) + 1)) + ("00" & (unsigned(not I_rs2) + 1));
-                            divisor3 <= ("00" & (unsigned(not I_rs2) + 1)) + ("00" & (unsigned(not I_rs2) + 1)) + ("00" & (unsigned(not I_rs2) + 1));
+                            divisor2 <= ("0" & (unsigned(not I_rs2) + 1) & "0");
+                            divisor3 <= ("0" & (unsigned(not I_rs2) + 1) & "0") + ("00" & (unsigned(not I_rs2) + 1));
+--                            divisor2 <= ("00" & (unsigned(not I_rs2) + 1)) + ("00" & (unsigned(not I_rs2) + 1));
+--                            divisor3 <= ("00" & (unsigned(not I_rs2) + 1)) + ("00" & (unsigned(not I_rs2) + 1)) + ("00" & (unsigned(not I_rs2) + 1));
                         else
                             divisor1 <= ("00" & unsigned(I_rs2));
-                            divisor2 <= ("00" & unsigned(I_rs2)) + ("00" & unsigned(I_rs2));
-                            divisor3 <= ("00" & unsigned(I_rs2)) + ("00" & unsigned(I_rs2)) + ("00" & unsigned(I_rs2));
+                            divisor2 <= ("0" & unsigned(I_rs2) & "0");
+                            divisor3 <= ("0" & unsigned(I_rs2) & "0") + ("00" & unsigned(I_rs2));
+--                            divisor2 <= ("00" & unsigned(I_rs2)) + ("00" & unsigned(I_rs2));
+--                            divisor3 <= ("00" & unsigned(I_rs2)) + ("00" & unsigned(I_rs2)) + ("00" & unsigned(I_rs2));
                         end if;
                         count_int := count_int + 1;
                         div_ready <= '0';
