@@ -101,136 +101,136 @@ The RISC-V processors consist of one \textit{core} and of the following building
 \item The multiply/divide unit adheres the M-standard.
 \end{itemize}
 
-A block diagram of the non-pipelined processor is shown in Figure~\ref{fig:blockdiagram}.
-
-\begin{sidewaysfigure}[!p]
-\centering
-\begin{tikzpicture}[thick,font=\sffamily\footnotesize,>=latex,scale=.75,framed,background rectangle/.style={fill=none}]
-% Demux and regs
-\draw (0,0) rectangle (1,-4) node[midway,rotate=90] {rd};
-\draw (1,0) rectangle (3,-4) node[midway,align=center] {REGS\\(32x32)};
-\draw[->] (0.3,-5) node[below] {rd} -- (0.3,-4);
-\draw[->] (0.7,-5.5) node[below] {rden} -- (0.7,-4);
-\draw (3,0) rectangle (4,-2) node[midway,rotate=90] {rs2};
-\draw[->] (3.0,0.5) node[left] {rs2} -- ++(0.5,0) -- ++(0,-0.5);
-\draw (3,-2) rectangle (4,-4) node[midway,rotate=90] {rs1};
-\draw[->] (3,-4.5) node[left] {rs1} -- ++(0.5,0) -- ++(0,0.5);
-\draw (4,-3) -- (7,-3) node[midway,above] {rs1\_data};
-\draw[->] (7,-3) -- (16,-3) node[above left] {address}; 
-\draw (4,-1) -- (8,-1) node[midway,above] {rs2\_data};
-\draw[->] (8,-1) -- (16,-1) node[above left] {data}; 
-\draw[fill=black] (8,-1) circle (2pt);
-\draw[fill=black] (7,-3) circle (2pt);
-
-% ALU
-\draw (6,-5) -- ++(7,0) node[midway,yshift=-0.8cm,font=\normalsize\sffamily] {ALU} -- ++(-1,-2) -- ++(-5,0) -- cycle;
-\draw[->] (7,-3) -- (7,-5);
-\draw[->] (8,-1) -- (8,-5);
-\draw[->] (5.5,-6) node[left] {alu\_op} -- (6.5,-6);
-\draw[->] (9.5,-7.0) -- (9.5,-8.5) -- ++(-10.5,0) -- ++(0,6.5) -- ++(1,0);
-\draw[->] (11,-4.0) node[above] {pc} -- ++(0,-1);
-\draw[->] (10,-4.0) node[above] {offset} -- ++(0,-1);
-\draw[->] (9,-2.0) node[above,xshift=3mm] {immediate} -- ++(0,-3);
-
-% Address decode and data route
-\draw (16,-0) rectangle ++(2,-17) node[midway,align=center] {Address\\Decode\\\&\\Data\\Router};
-\draw[->] (16,-4) node[above left] {data} -- ++(-4,0) -- ++(0,-1);
-\draw[->] (15,-6) node[left] {size} -- ++(1,0);
-\draw[->] (15,-7) node[left] {offset} -- ++(1,0);
-\draw[->] (15,-8) node[left] {memaccess} -- ++(1,0);
-\draw[<-] (15,-9) node[left] {waitfordata} -- ++(1,0);
-\draw[->] (18,-15.5) -- ++(1,0) node[right] {wrio};
-\draw[->] (18,-16.0) -- ++(1,0) node[right] {wrram};
-\draw[->] (18,-4) -- ++(1,0) node [right] {csrom};
-\draw[->] (18,-4.5) -- ++(1,0) node [right] {csram};
-\draw[->] (18,-5) -- ++(1,0) node [right] {csio};
-
-% Instruction decoder
-\draw (9,-10.5) rectangle ++(3,-6.5) node[midway,align=center] {Instruction\\Decoder};
-\draw[->] (12,-11.0) -- ++(1,0) node[right] {alu\_op};
-\draw[->] (12,-11.5) -- ++(1,0) node[right] {rd};
-\draw[->] (12,-12.0) -- ++(1,0) node[right] {rden};
-\draw[->] (12,-12.5) -- ++(1,0) node[right] {rs1};
-\draw[->] (12,-13.0) -- ++(1,0) node[right] {rs2};
-\draw[->] (12,-13.5) -- ++(1,0) node[right] {shift};
-\draw[->] (12,-14.0) -- ++(1,0) node[right] {immediate};
-\draw[->] (12,-14.5) -- ++(1,0) node[right] {size};
-\draw[->] (12,-15.0) -- ++(1,0) node[right] {offset};
-\draw[->] (12,-15.5) -- ++(1,0) node[right] {pc\_op};
-\draw[->] (12,-16.0) -- ++(1,0) node[right] {memacces};
-%\draw[->,red] (12,-16.5) -- ++(1,0) node[right] {error};
-\draw[->] (8,-12) node[left] {instruction} -- ++(1,0);
-\draw[->] (8,-13) node[left] {waitfordata} -- ++(1,0);
-%\draw[->,red] (8,-15) node[left] {intreq} -- ++(1,0);
-
-% ROM
-\draw (22,-1) rectangle ++(2,-3) node[midway,align=center,yshift=0.4cm] {ROM\\(control)};
-\draw[<-] (24,-2.5) -- ++(1,0) node[right] {PC};
-\draw[->] (24,-3.0) -- ++(1,0) node[right] {instruction};
-\draw[->] (18,-2) -- ++(4,0) node[midway,above] {address+offset};
-\draw (24,-1.5) -- ++(0.5,0) -- ++(0,-3) -- ++(-1,0) -- ++(0,0.5);
-\node at (24.75,-3) [rotate=90] {onboard ROM};
-
-% Address lines to RAM and I/O
-\draw[->] (21,-2) -- ++(0,-5) -- ++(1,0);
-\draw[fill=black] (21,-2) circle (2pt);
-\draw[->] (21,-7) -- ++(0,-5.5) -- ++(1,0);
-\draw[fill=black] (21,-7) circle (2pt);
-% Data lines from ROM, RAM, I/O
-\draw[->] (22,-3) -- ++(-4,0);
-\draw[->] (22,-7.5) -- ++(-4,0);
-\draw[->] (22,-13.5) -- ++(-4,0);
-% Data lines to RAM and I/O
-\draw[->] (18,-8) -- ++(1.5,0) -- ++(2.5,0);
-\draw[->] (19.5,-8) -- ++(0,-5.0) -- ++(2.5,0);
-\draw[fill=black] (19.5,-8) circle (2pt);
-
-% RAM
-\draw (22,-6) rectangle ++(2,-3) node[midway,align=center] {RAM\\(control)};
-\draw[->] (23,-10) node[below] {wrram} -- ++(0,1);
-\draw (24,-6.5) -- ++(0.5,0) -- ++(0,-3) -- ++(-1,0) -- ++(0,0.5);
-\node at (25,-8) [rotate=90] {onboard RAM};
-
-% I/O
-\draw (22,-11.5) rectangle ++(2,-3) node[midway] {I/O};
-\draw[->] (23,-15.5) node[below] {wrio} -- ++(0,1);
-\draw[<->] (24,-12.5) -- ++(1,0) node[right] {I/O lines};
-\draw[->] (24,-13) -- ++(1,0) node[right] {TxD};
-\draw[<-] (24,-13.5) -- ++(1,0) node[right] {RxD};
-%\draw[->] (24,-13.5) -- ++(1,0) node[right] {interrupts};
-
-% PC
-\draw (3,-12) rectangle ++(2,-4) node[midway] {PC};
-\draw (2,-12) rectangle ++(1,-4) node[midway, rotate=90] {mux};
-\draw[->] (5,-14) -- ++(1,0) -- ++(0,-3) -- ++ (-6,0) -- ++(0,4.333) -- ++(1,0);
-\draw[->] (6,-14) -- ++(1,0) node[right] {pc};
-\draw[fill=black] (6,-14) circle (2pt);
-\draw[->] (0,-13.5) -- ++(1,0);
-\draw[fill=black] (0,-13.5) circle (2pt);
-
-\draw (1,-12) rectangle ++(1,-1) node[midway] {+};
-\draw (1,-13) rectangle ++(1,-1) node[midway] {+4};
-\draw (1,-14) rectangle ++(1,-1) node[midway] {+};
-\draw (1,-15) rectangle ++(1,-1) node[midway] {+};
-\draw[->] (2.5,-11) node[above] {pc\_op}-- ++(0,-1);
-
-\draw[->] (1.5,-8.5) -- ++ (0,-3.5) node[xshift=-3mm,midway,rotate=90] {result(0)};
-\draw[fill=black] (1.5,-8.5) circle (2pt);
-
-\draw[->] (0,-14.6667) -- ++(1,0);
-\draw[fill=black] (0,-14.6667) circle (2pt);
-
-\draw[->] (-0.5,-11.333) node[above] {offset} -- ++(0,-1) -- ++(1.5,0);
-\draw[->] (-0.5,-12.333) -- ++(0,-2) -- ++(1.5,0);
-\draw[fill=black] (-0.5,-12.333) circle (2pt);
-\draw[->] (-0.5,-14.333) -- ++(0,-1) -- ++(1.5,0);
-\draw[fill=black] (-0.5,-14.333) circle (2pt);
-
-\draw[->] (-0.5,-17.6667) node[below] {rs1\_data} -- ++(0,2) -- ++(1.5,0);
-\end{tikzpicture}
-\caption{The complete, non-pipelined RISC-V MCU.}
-\label{fig:blockdiagram}
-\end{sidewaysfigure}
+%A block diagram of the non-pipelined processor is shown in Figure~\ref{fig:blockdiagram}.
+%
+%\begin{sidewaysfigure}[!p]
+%\centering
+%\begin{tikzpicture}[thick,font=\sffamily\footnotesize,>=latex,scale=.75,framed,background rectangle/.style={fill=none}]
+%% Demux and regs
+%\draw (0,0) rectangle (1,-4) node[midway,rotate=90] {rd};
+%\draw (1,0) rectangle (3,-4) node[midway,align=center] {REGS\\(32x32)};
+%\draw[->] (0.3,-5) node[below] {rd} -- (0.3,-4);
+%\draw[->] (0.7,-5.5) node[below] {rden} -- (0.7,-4);
+%\draw (3,0) rectangle (4,-2) node[midway,rotate=90] {rs2};
+%\draw[->] (3.0,0.5) node[left] {rs2} -- ++(0.5,0) -- ++(0,-0.5);
+%\draw (3,-2) rectangle (4,-4) node[midway,rotate=90] {rs1};
+%\draw[->] (3,-4.5) node[left] {rs1} -- ++(0.5,0) -- ++(0,0.5);
+%\draw (4,-3) -- (7,-3) node[midway,above] {rs1\_data};
+%\draw[->] (7,-3) -- (16,-3) node[above left] {address}; 
+%\draw (4,-1) -- (8,-1) node[midway,above] {rs2\_data};
+%\draw[->] (8,-1) -- (16,-1) node[above left] {data}; 
+%\draw[fill=black] (8,-1) circle (2pt);
+%\draw[fill=black] (7,-3) circle (2pt);
+%
+%% ALU
+%\draw (6,-5) -- ++(7,0) node[midway,yshift=-0.8cm,font=\normalsize\sffamily] {ALU} -- ++(-1,-2) -- ++(-5,0) -- cycle;
+%\draw[->] (7,-3) -- (7,-5);
+%\draw[->] (8,-1) -- (8,-5);
+%\draw[->] (5.5,-6) node[left] {alu\_op} -- (6.5,-6);
+%\draw[->] (9.5,-7.0) -- (9.5,-8.5) -- ++(-10.5,0) -- ++(0,6.5) -- ++(1,0);
+%\draw[->] (11,-4.0) node[above] {pc} -- ++(0,-1);
+%\draw[->] (10,-4.0) node[above] {offset} -- ++(0,-1);
+%\draw[->] (9,-2.0) node[above,xshift=3mm] {immediate} -- ++(0,-3);
+%
+%% Address decode and data route
+%\draw (16,-0) rectangle ++(2,-17) node[midway,align=center] {Address\\Decode\\\&\\Data\\Router};
+%\draw[->] (16,-4) node[above left] {data} -- ++(-4,0) -- ++(0,-1);
+%\draw[->] (15,-6) node[left] {size} -- ++(1,0);
+%\draw[->] (15,-7) node[left] {offset} -- ++(1,0);
+%\draw[->] (15,-8) node[left] {memaccess} -- ++(1,0);
+%\draw[<-] (15,-9) node[left] {waitfordata} -- ++(1,0);
+%\draw[->] (18,-15.5) -- ++(1,0) node[right] {wrio};
+%\draw[->] (18,-16.0) -- ++(1,0) node[right] {wrram};
+%\draw[->] (18,-4) -- ++(1,0) node [right] {csrom};
+%\draw[->] (18,-4.5) -- ++(1,0) node [right] {csram};
+%\draw[->] (18,-5) -- ++(1,0) node [right] {csio};
+%
+%% Instruction decoder
+%\draw (9,-10.5) rectangle ++(3,-6.5) node[midway,align=center] {Instruction\\Decoder};
+%\draw[->] (12,-11.0) -- ++(1,0) node[right] {alu\_op};
+%\draw[->] (12,-11.5) -- ++(1,0) node[right] {rd};
+%\draw[->] (12,-12.0) -- ++(1,0) node[right] {rden};
+%\draw[->] (12,-12.5) -- ++(1,0) node[right] {rs1};
+%\draw[->] (12,-13.0) -- ++(1,0) node[right] {rs2};
+%\draw[->] (12,-13.5) -- ++(1,0) node[right] {shift};
+%\draw[->] (12,-14.0) -- ++(1,0) node[right] {immediate};
+%\draw[->] (12,-14.5) -- ++(1,0) node[right] {size};
+%\draw[->] (12,-15.0) -- ++(1,0) node[right] {offset};
+%\draw[->] (12,-15.5) -- ++(1,0) node[right] {pc\_op};
+%\draw[->] (12,-16.0) -- ++(1,0) node[right] {memacces};
+%%\draw[->,red] (12,-16.5) -- ++(1,0) node[right] {error};
+%\draw[->] (8,-12) node[left] {instruction} -- ++(1,0);
+%\draw[->] (8,-13) node[left] {waitfordata} -- ++(1,0);
+%%\draw[->,red] (8,-15) node[left] {intreq} -- ++(1,0);
+%
+%% ROM
+%\draw (22,-1) rectangle ++(2,-3) node[midway,align=center,yshift=0.4cm] {ROM\\(control)};
+%\draw[<-] (24,-2.5) -- ++(1,0) node[right] {PC};
+%\draw[->] (24,-3.0) -- ++(1,0) node[right] {instruction};
+%\draw[->] (18,-2) -- ++(4,0) node[midway,above] {address+offset};
+%\draw (24,-1.5) -- ++(0.5,0) -- ++(0,-3) -- ++(-1,0) -- ++(0,0.5);
+%\node at (24.75,-3) [rotate=90] {onboard ROM};
+%
+%% Address lines to RAM and I/O
+%\draw[->] (21,-2) -- ++(0,-5) -- ++(1,0);
+%\draw[fill=black] (21,-2) circle (2pt);
+%\draw[->] (21,-7) -- ++(0,-5.5) -- ++(1,0);
+%\draw[fill=black] (21,-7) circle (2pt);
+%% Data lines from ROM, RAM, I/O
+%\draw[->] (22,-3) -- ++(-4,0);
+%\draw[->] (22,-7.5) -- ++(-4,0);
+%\draw[->] (22,-13.5) -- ++(-4,0);
+%% Data lines to RAM and I/O
+%\draw[->] (18,-8) -- ++(1.5,0) -- ++(2.5,0);
+%\draw[->] (19.5,-8) -- ++(0,-5.0) -- ++(2.5,0);
+%\draw[fill=black] (19.5,-8) circle (2pt);
+%
+%% RAM
+%\draw (22,-6) rectangle ++(2,-3) node[midway,align=center] {RAM\\(control)};
+%\draw[->] (23,-10) node[below] {wrram} -- ++(0,1);
+%\draw (24,-6.5) -- ++(0.5,0) -- ++(0,-3) -- ++(-1,0) -- ++(0,0.5);
+%\node at (25,-8) [rotate=90] {onboard RAM};
+%
+%% I/O
+%\draw (22,-11.5) rectangle ++(2,-3) node[midway] {I/O};
+%\draw[->] (23,-15.5) node[below] {wrio} -- ++(0,1);
+%\draw[<->] (24,-12.5) -- ++(1,0) node[right] {I/O lines};
+%\draw[->] (24,-13) -- ++(1,0) node[right] {TxD};
+%\draw[<-] (24,-13.5) -- ++(1,0) node[right] {RxD};
+%%\draw[->] (24,-13.5) -- ++(1,0) node[right] {interrupts};
+%
+%% PC
+%\draw (3,-12) rectangle ++(2,-4) node[midway] {PC};
+%\draw (2,-12) rectangle ++(1,-4) node[midway, rotate=90] {mux};
+%\draw[->] (5,-14) -- ++(1,0) -- ++(0,-3) -- ++ (-6,0) -- ++(0,4.333) -- ++(1,0);
+%\draw[->] (6,-14) -- ++(1,0) node[right] {pc};
+%\draw[fill=black] (6,-14) circle (2pt);
+%\draw[->] (0,-13.5) -- ++(1,0);
+%\draw[fill=black] (0,-13.5) circle (2pt);
+%
+%\draw (1,-12) rectangle ++(1,-1) node[midway] {+};
+%\draw (1,-13) rectangle ++(1,-1) node[midway] {+4};
+%\draw (1,-14) rectangle ++(1,-1) node[midway] {+};
+%\draw (1,-15) rectangle ++(1,-1) node[midway] {+};
+%\draw[->] (2.5,-11) node[above] {pc\_op}-- ++(0,-1);
+%
+%\draw[->] (1.5,-8.5) -- ++ (0,-3.5) node[xshift=-3mm,midway,rotate=90] {result(0)};
+%\draw[fill=black] (1.5,-8.5) circle (2pt);
+%
+%\draw[->] (0,-14.6667) -- ++(1,0);
+%\draw[fill=black] (0,-14.6667) circle (2pt);
+%
+%\draw[->] (-0.5,-11.333) node[above] {offset} -- ++(0,-1) -- ++(1.5,0);
+%\draw[->] (-0.5,-12.333) -- ++(0,-2) -- ++(1.5,0);
+%\draw[fill=black] (-0.5,-12.333) circle (2pt);
+%\draw[->] (-0.5,-14.333) -- ++(0,-1) -- ++(1.5,0);
+%\draw[fill=black] (-0.5,-14.333) circle (2pt);
+%
+%\draw[->] (-0.5,-17.6667) node[below] {rs1\_data} -- ++(0,2) -- ++(1.5,0);
+%\end{tikzpicture}
+%\caption{The complete, non-pipelined RISC-V MCU.}
+%\label{fig:blockdiagram}
+%\end{sidewaysfigure}
 
 
 
