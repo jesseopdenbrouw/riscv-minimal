@@ -25,7 +25,7 @@ int main(int argc, char *argv[], char *envp[])
 #endif
 
 	/* Set the trap handler vector */
-	set_mtvec(universal_handler);
+	set_mtvec(universal_handler, TRAP_DIRECT_MODE);
 
 	/* Enable interrupts */
 	enable_irq();
