@@ -24,8 +24,8 @@ int main(int argc, char *argv[], char *envp[])
 	char buffer[40] = {0};
 #endif
 
-	/* Set the trap handler vector */
-	set_mtvec_vectored(handler_jump_table);
+	/* Set the trap handler vector + mode */
+	set_mtvec(handler_jump_table, TRAP_VECTORED_MODE);
 
 	/* Enable interrupts */
 	enable_irq();
