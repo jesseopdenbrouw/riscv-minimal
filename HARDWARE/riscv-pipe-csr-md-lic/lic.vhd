@@ -70,6 +70,7 @@ begin
         O_interrupt_release <= '0';
         O_mcause <= (others => '0');
         
+        -- Currently, mstatus.MIE enables all traps, should be interrupts only.
         if I_mstatus_mie = '1' then
             -- Priority as of Table 3.7 of "Volume II: RISC-V Privileged Architectures V20211203"
             -- Hardware interrupts take priority over exceptions, also the RISC-V system timer
@@ -94,6 +95,7 @@ begin
                 interrupt_request_int := irq_hard;
                 O_mcause <= std_logic_vector(to_unsigned(16, O_mcause'length));
                 O_mcause(31) <= '1';
+            -- Traps from here.
             elsif I_illegal_instruction_error_request = '1' then
                 interrupt_request_int := irq_hard;
                 O_mcause <= std_logic_vector(to_unsigned(2, O_mcause'length));
@@ -121,7 +123,8 @@ begin
             end if;
         end if;    
         
-        -- Check if a hardware interrupt and ECALL/EBREAK occur at the same time
+        -- Check if a hard trap and ECALL/EBREAK occur at the same time.
+        -- If so, ECALL/EBREAK must not be executed.
         if interrupt_request_int = irq_hard and (I_ecall_request = '1' or I_ebreak_request = '1') then
             interrupt_request_int := irq_hard_soft;
         end if;
