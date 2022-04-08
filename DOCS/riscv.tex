@@ -300,81 +300,6 @@ The Program Counter contains the address of the currently fetched instruction. T
 \label{sec:instructiondecoder}
 The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4 bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, RAM, ROM, I/O, the PC, the Address Decoder, the CSR, the register file and the md unit. Some signals are directly wired to the ROM, RAM and I/O.
 
-%In the standard processor, a simple three-state FSM is used, see Figure~\ref{fsmnonpipe}. All instructions require two clock cycles to be fetched and executed, and an extra clock cycle is needed when reading RAM or ROM. See Figures~\ref{fsmnonpipeseq} and~\ref{fsmnonpipeseqwait}.
-%
-%\begin{figure}[!ht]
-%\centering
-%\begin{tikzpicture}[node distance=3cm, line width=1pt]
-%\node[state,initial,initial text=reset] (fetch) {fetch};
-%\node[state,right of=fetch] (exec) {exec};
-%\node[state,right of=exec] (wait) {wait};
-%\path[-latex] (fetch) edge [bend left] node[above] {--} (exec)
-%          (exec)  edge [bend left] node[below] {!wait} (fetch)
-%          (exec)  edge             node[above] {wait} (wait)
-%          (wait)  edge [bend right=45] node[above] {--} (fetch)
-%;
-%\end{tikzpicture}
-%\caption{FSM of the instruction decoder of the non-pipelined processor.}
-%\label{fsmnonpipe}
-%\end{figure}
-%
-%\begin{figure}[!ht]
-%\centering
-%\begin{tikzpicture}[node distance=2cm, line width=1pt]
-%\draw[-latex,dashed] (-1,-0.5) -- ++(1,0);
-%
-%\draw (0,0) rectangle node [] {fetch} ++(2,-1);
-%\node at (1,0) [above] {PC};
-%\draw[-latex] (2,-0.5) -- ++(1,0);
-%
-%\draw (3,0) rectangle node [] {exec} ++(2,-1);
-%\node at (4,0) [above] {PC};
-%\draw[-latex] (5,-0.5) -- ++(1,0);
-%
-%\draw (6,0) rectangle node [] {fetch} ++(2,-1);
-%\node at (7,0) [above] {PC+4};
-%\draw[-latex] (8,-0.5) -- ++(1,0);
-%
-%\draw (9,0) rectangle node [] {exec} ++(2,-1);
-%\node at (10,0) [above] {PC+4};
-%\draw[-latex,dashed] (11,-0.5) -- ++(1,0);
-%
-%\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](0,-1) -- (5,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
-%\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](6,-1) -- (11,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
-%
-%\end{tikzpicture}
-%\caption{State sequence for instruction execution (no wait state).}
-%\label{fsmnonpipeseq}
-%\end{figure}
-%
-%\begin{figure}[!ht]
-%\centering
-%\begin{tikzpicture}[node distance=2cm, line width=1pt]
-%\draw[-latex,dashed] (-1,-0.5) -- ++(1,0);
-%
-%\draw (0,0) rectangle node [] {fetch} ++(2,-1);
-%\node at (1,0) [above] {PC};
-%\draw[-latex] (2,-0.5) -- ++(1,0);
-%
-%\draw (3,0) rectangle node [] {exec} ++(2,-1);
-%\node at (4,0) [above] {PC};
-%\draw[-latex] (5,-0.5) -- ++(1,0);
-%
-%\draw (6,0) rectangle node [] {wait} ++(2,-1);
-%\node at (7,0) [above] {PC+4};
-%\draw[-latex] (8,-0.5) -- ++(1,0);
-%
-%\draw (9,0) rectangle node [] {fetch} ++(2,-1);
-%\node at (10,0) [above] {PC+4};
-%\draw[-latex,dashed] (11,-0.5) -- ++(1,0);
-%
-%\draw [thick,decorate,decoration={brace,amplitude=10pt,mirror},xshift=0.4pt,yshift=-10pt](0,-1) -- (8,-1) node[black,midway,yshift=-0.6cm] {\footnotesize one instruction};
-%
-%\end{tikzpicture}
-%\caption{State sequence for instruction execution (wait state).}
-%\label{fsmnonpipeseqwait}
-%\end{figure}
-
 The processor uses a five-state FSM, see figure~\ref{fsmpipe}. The PC points to +4 of the currently executing instruction, in a sequential instruction stream. If a jump or branch taken occurs, the FSM inserts a penalty because the PC has to be loaded with the correct value and a new instruction must be fetched (Figure~\ref{fsmpipeseqstartup}). Reading RAM and ROM requires an extra state (Figure~\ref{fsmpipeseqwait}). When a multiply, divide or remainder instruction is encountered, the FSM enters the \texttt{md} state and waits for the md-unit to complete (32+2 or 16+2 clock cycles). Note that penalty, wait and start cannot occur at the same time.
 
 \begin{figure}[!ht]
@@ -462,28 +387,12 @@ The processor uses a five-state FSM, see figure~\ref{fsmpipe}. The PC points to 
 \end{figure}
 
 \subsubsection{Trap handling in the instruction decoder}
-When an interrupt occurs, the FSM enters the \texttt{intr} state for fetching the trap vector. An interrupt can occur any time and is called asynchronous. When an interrupt occurs in the \texttt{fetch} state, the current instruction is discarded. When an interrupt occurs in the \texttt{fexec} state, the current instruction is either retired or discarded. In the latter case the instruction must be restarted. When occurring in the \texttt{wait} state, the instruction (load) is retired. When occurring in the \texttt{md} state \emph{and} the md unit is ready, the instruction (mul, div, rem) is retired. When occurring in the \texttt{md} state and the md unit is \emph{not} ready the instruction is discarded and must be restarted. After loading the trap vector, the FSM enters the \texttt{fetch} state.
+When an interrupt occurs, the FSM enters the \texttt{intr} state for fetching the trap vector. An interrupt can occur any time and is called asynchronous. When an interrupt occurs in the \texttt{fetch} state, the current instruction is discarded. When an interrupt occurs in the \texttt{fexec} state, the current instruction is either retired or discarded (load, mul, div, rem). In the latter case the instruction must be restarted. When occurring in the \texttt{wait} state, the instruction (load) is retired. When occurring in the \texttt{md} state \emph{and} the md unit is ready, the instruction (mul, div, rem) is retired. When occurring in the \texttt{md} state and the md unit is \emph{not} ready the instruction is discarded and must be restarted. After loading the trap vector, the FSM enters the \texttt{fetch} state.
 
-Exceptions are synchronous to executing instructions. When occurring in the \texttt{fetch} state, the instruction is discarded and the FSM enters the \texttt{intr} state. When occurring in the \texttt{fexec} state, the instruction is either retired or discarded (load, mul, div, rem). In this case the instruction must be restarted. Note that exceptions cannot occur in the \texttt{wait} and \texttt{md} states.
+Exceptions are synchronous to executing instructions. When occurring in the \texttt{fetch} state, the instruction is discarded and the FSM enters the \texttt{intr} state. When occurring in the \texttt{fexec} state, the instruction is either retired or discarded (load, mul, div, rem). In this case the instruction must be restarted. Note that exceptions cannot occur in the \texttt{wait} (load already started) and \texttt{md} states (not executing instructions).
 
 When a trap request is asserted, the trap vector is loaded in the next clock cycle. Then, in the second clock cycle, the instruction is fetched and in the third clock cycle the instruction is executed. On return from a trap handler, the original contents of the PC is restored and the FSM enters the \texttt{fetch} state.
 
-%\begin{figure}[!ht]
-%\centering
-%\begin{tikzpicture}[node distance=3cm]
-%\node[state,initial,initial text=reset] (fetch) {fetch};
-%\node[state,right of=fetch] (fexec) {fexec};
-%\node[state,right of=fexec] (wait) {wait};
-%\path[-latex] (fetch) edge [bend left] node[above] {--} (fexec)
-%          (fexec) edge [bend left] node[below] {penalty} (fetch)
-%          (fexec) edge [bend right] node[below] {wait} (wait)
-%          (wait)  edge [bend right] node[above] {--} (fexec)
-%          (fexec) edge [loop below] node[below] {!wait$\,\cdot\,$!penalty} (fexec)
-%;
-%\end{tikzpicture}
-%\caption{FSM of the instruction decoder of the pipelined processor.}
-%\label{fsmpipe}
-%\end{figure}
 
 \subsection{Address Decoder and Data Router}
 \label{sec:addressdecoderanddatarouter}
@@ -553,7 +462,7 @@ For the processor, all RV32IM Unprivileged instructions are implemented with the
 
 \section{The FPGA}
 For this project, we use the Cyclone V FPGA from Intel (formerly Altera). See \url{https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html}.
-The used Cyclone V is the 5CEFA4F23C7 which has 18480 ALMs available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2700 ALMs (about 15\,\%) and 786,432 bits of internal memory (25\,\%). The clock frequency is 50\,MHz which is sufficient for all program examples. This FPGA is mounted on a Terasic DE0-CV board. The board has 10 switches, 4 push buttons, 1 reset push button, 10 leds, and 6 seven-segment displays. See \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
+The used Cyclone V is the 5CEFA4F23C7 which has 18480 ALMs available. It has 3080 kb of onboard RAM bits available which are used for RAM and ROM. Depending on the program and used resources, the compiled RISC-V processor uses about 2700 ALMs (about 15\,\%) and 786,432 bits of internal memory (25\,\%). The clock frequency is 50\,MHz which is sufficient for all program examples. This FPGA is mounted on a Terasic DE0-CV board. The board has 10 switches, 4 push buttons, 1 reset push button, 10 leds, and 6 seven-segment displays. It also has two 2x20-pin headers to connect off-board devices. See \url{http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=921}. For downloading the program file, the onboard USB-Blaster is used.
 
 It is possible to add the Quartus' Signal Tap (embedded) Logic Analyzer. Follow the instructions on \url{https://people.ece.cornell.edu/land/courses/ece5760/Quartus/Signal_tap.html}. Note that the Signal Tap uses onboard memory.
 
@@ -667,7 +576,7 @@ Make sure to use \texttt{-march=rv32e} and \texttt{-mabi=ilp32e}.
 
 
 \section{Compiling a C program by hand}
-We tested a large amount of programs with and without trap handling. We tested all I/O. We did test the use of the C library (malloc et al, floats and double calculation, some trigonometry functions from the mathematical library), but more tests are needed.
+We tested a large amount of programs with and without trap handling. We tested all I/O. We did test the use of the C library (\texttt{malloc} et al, floats and double calculation, some trigonometry functions from the mathematical library), but more tests are needed.
 
 Compiling a program requires the following steps:
 
@@ -755,7 +664,7 @@ The VHDL description is composed of the following files:
 \item \lstinline|rom_inst.vhd| -- Interface between the ROM contents and the ROM interface. The ROM contents itself is in the file \lstinline|processor_common_rom.vhd|. The ROM contents will be placed in onboard, initialized RAM blocks. 
 \item \lstinline|ram.vhd| -- Description of the RAM interface between the address decoder and data router and the onboard RAM.
 \item \lstinline|ram_inst.vhd| -- Description of the onboard RAM. Quartus detects this and creates the RAM in onboard, uninitialized RAM blocks.
-\item \lstinline|io.vhd| -- Description of the I/O. It contains a 32-bit input register, a 32-bit output register, an USART, a simple timer and the TIME and TIMECMP memory mapped registers
+\item \lstinline|io.vhd| -- Description of the I/O. It contains a 32-bit input register, a 32-bit output register, an USART, a simple timer and the TIME and TIMECMP memory mapped registers.
 \item \lstinline|csr.vhd| -- Description of the Control and Status registers.
 \item \lstinline|md.vhd| -- Description of the multiply/divide unit.
 \item \lstinline|riscv.vhd| -- Top-level description of the processor. Connects all the building blocks to a viable processor.
@@ -794,7 +703,7 @@ Note: uninitialized ROM contents is emitted as don't care, except when the \text
 In de \texttt{CODE} directory, there are a number of software programs available:
 
 \begin{itemize}
-\item \texttt{ldfiles} -- contains the linker scripts. There is one script:
+\item \texttt{ldfiles} -- contains the linker script. There is one script:
 \begin{itemize}
 \item \texttt{riscv.ld} -- default linker script: ROM = 64 kB, RAM = 32 kB, I/O = 16 kB.
 \end{itemize}
@@ -802,7 +711,7 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{bin} -- contains the binary of \texttt{srec2vhdl}.
 \item \texttt{add64} -- simple 64-bit addition. For use in the simulator.
 \item \texttt{assembler} -- a simple assembler program. For use in the simulator.
-\item \texttt{basel\_problem} -- a program that calculates the sum of the inverses of the squares of natural numbers, up to 1000. For use in the simulator. Used to test de divider.
+\item \texttt{basel\_problem} -- a program that calculates the sum of the inverses of the squares of natural numbers, up to 1000. For use in the simulator. Used to test the divider.
 \item \texttt{clock} -- a simple clock using the CSR TIME and TIMEH registers to fetch the time since last reset. Works on the board.
 \item \texttt{double} -- some floating point double computations (seems to work).
 \item \texttt{flash} -- flash the DE0-CV board leds (works on the board)
@@ -813,18 +722,18 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \item \texttt{interrupt\_vectored} -- program to test the interrupt handling using vectored mode. Works on the board.
 %\item \texttt{interval} -- program that uses the \texttt{clock} C library function to time 5 seconds since last read. Works only on the pipelined processor. Uses the USART. Works on the board.
 \item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
-\item \texttt{malloc} -- example to test \texttt{malloc} and friends (seems to work).
+\item \texttt{malloc} -- example to test \texttt{malloc} and friends . Works. Used in simulations.
 \item \texttt{monitor} -- simple monitor program. Works on the board. Uses strings, USART, RAM, ROM, I/O and \texttt{sprintf} (and therefore \texttt{malloc} et al.).
-\item \texttt{mult} -- integer multiplication using the C library (works).
-\item \texttt{qsort\_int} -- sorts an integer array using the \texttt{qsort} C library function (seems to work).
+\item \texttt{mult} -- integer multiplication the hardware md unit. For simulations.
+\item \texttt{qsort\_int} -- sorts an integer array using the \texttt{qsort} C library function. Works in simulation.
 \item \texttt{riemann\_left} -- calculates the Riemann Left Sum of $\sin^2 x$ from $0$ to $2\pi$. For use in the simulator. The  result must be $\pi$.
-\item \texttt{shift} -- shifts (works)
-\item \texttt{sprintf} -- prints integers, floats/doubles to a string. This is a big binary (seems to work).
-\item \texttt{string} -- some string functions (seems to work).
+\item \texttt{shift} -- shifts. For use in simulations.
+\item \texttt{sprintf} -- prints integers, floats/doubles to a string. This is a big binary (seems to work). For simulations.
+\item \texttt{string} -- some string functions (seems to work). For simulations.
 \item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
 \item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
-\item \texttt{trig} -- some float trigonometry functions (seems to work).
-\item \texttt{usart} -- simple USART program (works on the board).
+\item \texttt{trig} -- some float trigonometry functions (seems to work). For simulations.
+\item \texttt{usart} -- simple USART program. Works on the board.
 \item \texttt{usart\_printf} -- simple program that prints an integer, a pointer, a float and a double to the terminal using \texttt{printf}, this is a big binary (works on the board).
 \item \texttt{usart\_sprintf} -- simple program that prints an integer, a pointer, a float and a double to the terminal, this is a big binary (works on the board).
 \end{itemize} 
@@ -929,8 +838,10 @@ Some future plans:
 \item Smaller (in cells) divide unit.
 \item Test more functions of the standard and mathematical libraries. Now only a few functions are tested.
 \item It is not possible to print \texttt{long long} (i.e. 64-bit) using \texttt{printf} et al. When using the format specifier \texttt{\%lld}, \texttt{printf} just prints \texttt{ld}.
-\item The \texttt{mstatus.MIE} bit disables \emph{all} traps, but only interrupts should be disable.
+\item The \texttt{mstatus.MIE} bit disables \emph{all} traps, but only interrupts should be disabled.
 \item Further optimize the ALU for size and speed.
+\item The \texttt{time} (TIMEH:TIME) registers are currently read only.
+
 \end{itemize}
 
 %\section{Author's note}
@@ -1159,6 +1070,14 @@ int usart_gets(char buffer[], int size) {
 }
 \end{lstlisting}
 
+When printing a C newline, you have to use:
+
+\begin{lstlisting}[language=C]
+usart_puts("\r\n");
+\end{lstlisting}
+
+This will set the cursor to the beginning of a new line. Here, \lstinline|\r| returns the cursor to the beginning of the current line and \lstinline|\n| advances the cursor to the next line. Some terminal emulation programs can be instructed to move to the beginning of a new line with only \lstinline|\n|.
+
 For working with the USART on board of the processor, you need an USB-to-USART device with TTL (3.3 V) converter. An example is shown in Figure~\ref{fig:usb-usart-ttl}.
 
 \begin{figure}[!ht]
@@ -1184,20 +1103,32 @@ TIMER1->CTRL = (1<<4)|(1<<0);
 The \texttt{time} registers (TIME, TIMEH, TIMEMCP and TIMECMPH) can be accessed via the I/O and are therefore memory mapped. The following code reads in the current time and increments the compare registers with a certain \emph{delta}. Whenever TIMEH:TIME is greater than or equal to TIMEH:TIME, an interrupt request is asserted. Negating the interrupt request is accomplished by writing a value greater than the time registers to the compare registers.
 
 \begin{lstlisting}[language=C]
+register uint32_t time;
+register uint32_t timeh;
+
+/* Fetch current time */
+do {
+        timeh = TIMEH;
+        time  = TIME;
+} while (timeh != TIMEH);
+
 /* Fetch current time */
 register uint64_t cur_time;
-cur_time = ((uint64_t)TIMEH << 32) | (uint64_t)TIME;
+cur_time = ((uint64_t)timeh << 32) | (uint64_t)time;
+
 /* Add delta */
-cur_time += DELTA;
+cur_time += external_timer_delta;
+
 /* Set TIMECMP to maximum */
 TIMECMPH = -1;
 TIMECMP = -1;
+
 /* Store new TIMECMP */
 TIMECMP = (uint32_t)(cur_time & 0xffffffff);
 TIMECMPH = (uint32_t)(cur_time>>32);
 \end{lstlisting}
 
-Normally, this code is placed in the interrupt handler. These registers are read-only shadowed by the CSR time registers.
+Normally, this code is placed in the interrupt handler. These registers are read-only shadowed to the CSR time registers.
 
 \section{I/O registers}
 \label{sec:ioregisters}
