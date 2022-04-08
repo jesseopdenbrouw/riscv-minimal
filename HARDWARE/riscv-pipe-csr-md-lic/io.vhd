@@ -15,9 +15,11 @@
 -- single 32 bit output register. There is no data direction
 -- register. Furthermore the I/O has one UART with 7/8/9 data
 -- bits, N/E/O parity and 1/2 stop bits. Several UART flags
--- are available
+-- are available. A simple timer TIMER1 is provided, has no
+-- prescaler and generates an interrupt when the CMPT register
+-- is equal to or greater than the TCNT register. The TIME and
+-- TIMECMP registers are provided. 
 
--- Note TIME/TIMECMP will be moved to a separate memory
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
