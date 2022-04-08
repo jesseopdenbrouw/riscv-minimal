@@ -57,8 +57,18 @@ void default_hander(void)
  * interrupt is negated. */
 void external_timer_handler(void)
 {
+	register uint32_t time;
+	register uint32_t timeh;
+
 	/* Fetch current time */
-	register uint64_t cur_time = ((uint64_t)TIMEH << 32) | (uint64_t)TIME;
+	do {
+		timeh = TIMEH;
+		time  = TIME;
+	} while (timeh != TIMEH);
+
+	/* Fetch current time */
+	register uint64_t cur_time = ((uint64_t)timeh << 32) | (uint64_t)time;
+
 	/* Add delta */
 	cur_time += external_timer_delta;
 	/* Set TIMECMP to maximum */
