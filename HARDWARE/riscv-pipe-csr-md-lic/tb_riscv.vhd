@@ -40,7 +40,7 @@ signal pouta : data_type;
 signal TxD, RxD : std_logic;
 
 -- Set the bit time
-constant bittime : time := (1000000000/115200) * 1 ns;
+constant bittime : time := (1000000000/9600) * 1 ns;
 -- Select 7, 8 or 9 bits
 constant chartosend : std_logic_vector := "1000001";
 
@@ -71,7 +71,7 @@ begin
         areset <= '1';
         --wait for 2090 ns;
         wait for 55*20 ns;
-        pina <= x"ffffff41";
+        --pina <= x"ffffff41";
         wait for 20 ns;
         pina <= x"ffffff40";
         
