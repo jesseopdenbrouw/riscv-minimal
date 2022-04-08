@@ -101,7 +101,7 @@ begin
     -- Fetch CSR address
     csr_addr_int <= to_integer(unsigned(I_csr_addr));
     
-    -- Output the pointed CSR
+    -- Output the pointed CSR.
     process (csr_addr_int, I_csr_op, csr) is
     begin
         case csr_addr_int is
@@ -147,25 +147,8 @@ begin
     end process;
     
     -- TIME and TIMEH are memory mapped
-    
---    -- TIME --- count the number of microseconds
---    -- These are read-only registers
---    process (I_clk, I_areset) is
---    variable time_reg : unsigned(63 downto 0);
---    begin
---        if I_areset = '1' then
---            time_reg := (others => '0');
---        elsif rising_edge(I_clk) then
---            if prescaler = freq_sys/freq_count-1 then
---                prescaler := 0;
---                time_reg := time_reg + 1;
---            else
---                prescaler := prescaler + 1;
---            end if;
---        end if;
---        csr(time_addr) <= std_logic_vector(time_reg(31 downto 0));
---        csr(timeh_addr) <= std_logic_vector(time_reg(63 downto 32));
---    end process;
+    -- csr(time_addr) and csr(timeh_addr) are shadowed
+    -- read-only copies.
     
     -- INSTRET --- instructions retired
     -- These are read-only registers
