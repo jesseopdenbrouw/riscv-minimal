@@ -11,12 +11,17 @@ _start:
 .option push
 .option norelax
 
+	# Load global pointer and stack pointer
 	la gp, __global_pointer$
         la sp, __stack_pointer$ 
 
+	# set mtvec
 	la t0, Universal_Handler
 	csrw mtvec,t0
-	csrsi mtvec, 1
+	# Next, set vectored mode
+	#csrsi mtvec, 1
+
+	# Enable interrupts
 	li t0, 0x8 | (0x3<<11)
 	csrw mstatus,t0
 
