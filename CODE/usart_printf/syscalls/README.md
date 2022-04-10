@@ -23,8 +23,9 @@ The `_gettimeofday` system call is implemented.
 It returns the time in microseconds since last
 reset.
 
-The `_times` system call is currently not implemented.
+The `_times` system returns the time in clock ticks
+which is 1 us based.
 
 ## Status
 
-Tested. 
+Tested. Works.
