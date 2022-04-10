@@ -14,7 +14,7 @@ all: lib $(TARGET)
 lib:
 	make -C syscalls
 
-$(TARGET): $(TARGET).c $(LIBSYS)
+$(TARGET): $(TARGET).c syscalls/libsyscalls.a
 	$(CC) $(CFLAGS) -c crt/startup.c
 	$(CC) $(CFLAGS) -c $(TARGET).c
 	$(CC) -o $(TARGET) $(LDFLAGS)
