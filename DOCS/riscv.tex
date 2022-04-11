@@ -700,7 +700,7 @@ srec2vhdl [-fbwhqv0] [-i <arg>] inputfile [outputfile]
 Note: uninitialized ROM contents is emitted as don't care, except when the \texttt{-0} option is used. Don't cares are set to 0 by Quartus on default.
 
 \section{Software programs}
-In de \texttt{CODE} directory, there are a number of software programs available:
+In de \texttt{CODE} directory, there are a number of software programs available. First, the common files:
 
 \begin{itemize}
 \item \texttt{ldfiles} -- contains the linker script. There is one script:
@@ -709,33 +709,38 @@ In de \texttt{CODE} directory, there are a number of software programs available
 \end{itemize}
 \item \texttt{crt} -- contains the startup files.
 \item \texttt{bin} -- contains the binary of \texttt{srec2vhdl}.
+\end{itemize}
+
+Some examples are to be used in de simulator only, mainly to test functionality on clock cycle accuracy. Some examples work on the DE0-CV board, but without testing traps. Two examples work on the board and use traps.
+
+\begin{itemize}
 \item \texttt{add64} -- simple 64-bit addition. For use in the simulator.
 \item \texttt{assembler} -- a simple assembler program. For use in the simulator.
 \item \texttt{basel\_problem} -- a program that calculates the sum of the inverses of the squares of natural numbers, up to 1000. For use in the simulator. Used to test the divider.
 \item \texttt{clock} -- a simple clock using the CSR TIME and TIMEH registers to fetch the time since last reset. Works on the board.
-\item \texttt{double} -- some floating point double computations (seems to work).
-\item \texttt{flash} -- flash the DE0-CV board leds (works on the board)
-\item \texttt{float} -- some floating point float computations (seems to work).
-\item \texttt{global} -- test for globals and local statics with initialization (seems to works).
+\item \texttt{double} -- some floating point double computations. For simulation.
+\item \texttt{flash} -- flash the DE0-CV board leds, works on the board.
+\item \texttt{float} -- some floating point float computations. For simulation.
+\item \texttt{global} -- test for globals and local statics with initialization. For simulation
 \item \texttt{hex\_display} -- program that reads 8 switches from the board and display them as a 2-digit hexadecimal value on the 7-segment display. Works on the board.
 \item \texttt{interrupt\_direct} -- program to test the interrupt handling using direct mode. Works on the board.
 \item \texttt{interrupt\_vectored} -- program to test the interrupt handling using vectored mode. Works on the board.
-%\item \texttt{interval} -- program that uses the \texttt{clock} C library function to time 5 seconds since last read. Works only on the pipelined processor. Uses the USART. Works on the board.
-\item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O (works on the board).
-\item \texttt{malloc} -- example to test \texttt{malloc} and friends . Works. Used in simulations.
+\item \texttt{interval} -- program that uses the \texttt{clock} C library function to time 5 seconds since last read. Uses the USART. Works on the board.
+\item \texttt{ioadd} -- adds the lower 5 switches to the upper 5 switches and displays the result on the leds. Tests addition, shifting and I/O. Works on the board.
+\item \texttt{malloc} -- example to test \texttt{malloc} and friends. Works. Used in simulations.
 \item \texttt{monitor} -- simple monitor program. Works on the board. Uses strings, USART, RAM, ROM, I/O and \texttt{sprintf} (and therefore \texttt{malloc} et al.).
-\item \texttt{mult} -- integer multiplication the hardware md unit. For simulations.
+\item \texttt{mult} -- integer multiplication with the hardware md unit or by C library. Sepends on the compiler settings. For simulations.
 \item \texttt{qsort\_int} -- sorts an integer array using the \texttt{qsort} C library function. Works in simulation.
 \item \texttt{riemann\_left} -- calculates the Riemann Left Sum of $\sin^2 x$ from $0$ to $2\pi$. For use in the simulator. The  result must be $\pi$.
 \item \texttt{shift} -- shifts. For use in simulations.
-\item \texttt{sprintf} -- prints integers, floats/doubles to a string. This is a big binary (seems to work). For simulations.
-\item \texttt{string} -- some string functions (seems to work). For simulations.
-\item \texttt{syscalls} -- implementing stubs for common system calls (seems to work). Note: \texttt{sbrk} works for \texttt{malloc}, needs more testing.
+\item \texttt{sprintf} -- prints integers, floats/doubles to a string. This is a big binary. For simulations.
+\item \texttt{string} -- some string functions. For simulations.
+\item \texttt{syscalls} -- implementing common system calls without traps.
 \item \texttt{testio} -- simple program that copies the input (switches) to the output (leds) (works on the board).
-\item \texttt{trig} -- some float trigonometry functions (seems to work). For simulations.
+\item \texttt{trig} -- some float trigonometry functions. For simulations.
 \item \texttt{usart} -- simple USART program. Works on the board.
-\item \texttt{usart\_printf} -- simple program that prints an integer, a pointer, a float and a double to the terminal using \texttt{printf}, this is a big binary (works on the board).
-\item \texttt{usart\_sprintf} -- simple program that prints an integer, a pointer, a float and a double to the terminal, this is a big binary (works on the board).
+\item \texttt{usart\_printf} -- simple program that prints an integer, a pointer, a float and a double to the terminal using \texttt{printf}, this is a big binary. Works on the board.
+\item \texttt{usart\_sprintf} -- simple program that prints an integer, a pointer, a float and a double to the terminal, this is a big binary. Works on the board.
 \end{itemize} 
 
 Note: we use a lot of the \texttt{volatile} keyword to emit the variables to RAM for easy inspection. You will see compiler warnings from C library functions.
@@ -1103,6 +1108,8 @@ TIMER1->CTRL = (1<<4)|(1<<0);
 The \texttt{time} registers (TIME, TIMEH, TIMEMCP and TIMECMPH) can be accessed via the I/O and are therefore memory mapped. The following code reads in the current time and increments the compare registers with a certain \emph{delta}. Whenever TIMEH:TIME is greater than or equal to TIMEH:TIME, an interrupt request is asserted. Negating the interrupt request is accomplished by writing a value greater than the time registers to the compare registers.
 
 \begin{lstlisting}[language=C]
+include "io.h"
+
 register uint32_t time;
 register uint32_t timeh;
 
@@ -1270,7 +1277,7 @@ The default start address is 0xF0000000. The offset is given in bytes. Note that
 \end{register}
 \begin{regdesc}[0.8\textwidth]\begin{reglist}[0000]
 \itemsep-1.5ex
-\item[CNTR] This register holds the counted clock pulses on the timer. This register may be written by software. Rolls over every $2^{32}/f_{clk}$ seconds.
+\item[CNTR] This register holds the counted clock pulses on the timer. This register may be written by software. Rolls over at maximum every $2^{32}/f_{clk}$ seconds.
 \end{reglist}\end{regdesc}
 
 \begin{register}{H}{TIMER1 compare timer register TIMER1\_CMPT}{0x8c}
