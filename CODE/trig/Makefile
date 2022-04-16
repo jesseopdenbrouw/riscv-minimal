@@ -6,7 +6,7 @@ SIZE = riscv32-unknown-elf-size
 all: trig test_double
 
 trig: trig.c
-	$(CC) -O2 -g -o trig trig.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/startup.c -lm
+	$(CC) -O2 -g -o trig trig.c -Wall -T ../ldfiles/riscv.ld -march=rv32im -mabi=ilp32 -nostartfiles --specs=nano.specs ../crt/startup.c -lm
 	$(OBJCOPY) -O srec trig trig.srec
 	$(SREC2VHDL) -wf0 trig.srec trig.vhd
 	$(SIZE) trig

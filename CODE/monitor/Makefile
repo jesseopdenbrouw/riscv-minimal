@@ -5,8 +5,8 @@ AR = riscv32-unknown-elf-ar
 
 TARGET = monitor
 
-CFLAGS = -Wall -O2 -g -march=rv32i -mabi=ilp32 -Isyscalls
-LDFLAGS = startup.o $(TARGET).o -static -g -lm -Lsyscalls -T ../ldfiles/riscv.ld -march=rv32i -mabi=ilp32 -nostartfiles --specs=syscalls/libsys.specs --specs=syscalls/nano.specs
+CFLAGS = -Wall -O2 -g -march=rv32im -mabi=ilp32 -Isyscalls
+LDFLAGS = startup.o $(TARGET).o -static -g -lm -Lsyscalls -T ../ldfiles/riscv.ld -march=rv32im -mabi=ilp32 -nostartfiles --specs=syscalls/libsys.specs --specs=syscalls/nano.specs
 
 
 all: lib $(TARGET)

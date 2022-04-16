@@ -5,7 +5,7 @@ SREC2VHDL = ../bin/srec2vhdl
 all: testio
 
 testio: testio.c io.h
-	$(CC) -O2 -g -o testio testio.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/minimal.S
+	$(CC) -O2 -g -o testio testio.c -Wall -T ../ldfiles/riscv.ld -march=rv32im -mabi=ilp32 -nostartfiles --specs=nano.specs ../crt/minimal.S
 	$(OBJCOPY) -O srec testio testio.srec
 	$(SREC2VHDL) -wf0 testio.srec testio.vhd
 clean:
