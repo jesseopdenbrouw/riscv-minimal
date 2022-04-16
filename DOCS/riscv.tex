@@ -529,14 +529,9 @@ mkdir build; cd build
 The toolchain is currently configured for 64-bit RISC-V. That is not what we want.
 \item Enter:
 \begin{lstlisting}[language=]
-../configure --prefix=/opt/riscv32 --with-arch=rv32i --with-abi=ilp32 --with-multilib-generator="rv32i-ilp32--;rv32e-ilp32e--"
+../configure --prefix=/opt/riscv32 --with-arch=rv32im --with-abi=ilp32 --with-multilib-generator="rv32i-ilp32--;rv32e-ilp32e--"
 \end{lstlisting}
-This will set the architecture to RV32I and RV32E (reduced registers), and the ABI to ilp32 and ilp32e (reduced registers). This means that integers, long integers and pointers use 32-bit entities. The destination directory is \lstinline|/opt/riscv32|.
-
-If you wish to enable the multiply/divide instructions, issue:
-\begin{lstlisting}[language=]
-../configure ../configure --prefix=/opt/riscv32 --with-arch=rv32im --with-abi=ilp32
-\end{lstlisting}
+This will set the default architecture to RV32IM, with options for RV32I and RV32E (reduced registers), and the ABI to ilp32 and ilp32e (reduced registers). This means that integers, long integers and pointers use 32-bit entities. The destination directory is \lstinline|/opt/riscv32|.
 
 \item Now enter the make command as root: \lstinline|make|\\
 MAKE SURE TO ENTER THIS COMMAND AS root, because the toolchain is put in \lstinline|/opt/riscv32|. This takes a long time (about 45 minutes on a Zbook G5). At some points the compilation seems to hang, but it is just compiling complicated C-files. By the way, you will see a lot of warnings.
