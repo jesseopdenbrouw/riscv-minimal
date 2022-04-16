@@ -11,6 +11,9 @@
 -- implied warranty of MERCHANTABILITY or FITNESS FOR A
 -- PARTICULAR PURPOSE.
 
+-- Top level structural description that connects all the
+-- building blocks.
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -19,7 +22,8 @@ library work;
 use work.processor_common.all;
 
 -- The processor itself
--- The processor incorporates ROM, RAM and IO,
+-- The processor incorporates registers,
+-- instruction decoder, ROM, RAM and IO,
 -- has a multiply/divide unit, CSR and a LIC
 entity riscv is
     port (clk : in std_logic;
@@ -178,12 +182,19 @@ end component address_decoder_and_data_router;
 -- The ROM, read only, provides instruction and data
 component rom is
     port (I_clk : in std_logic;
+          -- ROM chip select for data
           I_csrom : in std_logic;
+          -- ROM instruction address
           I_address1 : in data_type;
+          -- ROM data address
           I_address2 : in data_type;
+          -- Data size
           I_size2 : in size_type;
+          -- Instruction
           O_data1 : out data_type;
+          -- Data
           O_data2: out data_type;
+          -- ROM can only give load misaligned
           O_load_misaligned_error : out std_logic
          );
 end component rom;
@@ -191,12 +202,19 @@ end component rom;
 -- The RAM, read/write, provides data only
 component ram is
     port (I_clk : in std_logic;
+          -- RAM chip select
           I_csram : in std_logic;
+          -- The address for read and write
           I_address : in data_type;
+          -- Data to write
           I_datain : in data_type;
+          -- Size of the data
           I_size : in size_type;
+          -- Write enable
           I_wren : in std_logic;
+          -- Data on read
           O_dataout : out data_type;
+          -- RAM can have load or store misaligned
           O_load_misaligned_error : out std_logic;
           O_store_misaligned_error : out std_logic
          );
@@ -236,12 +254,18 @@ end component io;
 component md is
     port (I_clk : in std_logic;
           I_areset : in std_logic;
+          -- Start the operation
           I_start : in std_logic;
+          -- The operation
           I_op : in std_logic_vector(2 downto 0);
+          -- Register RS1 and RS2
           I_rs1 : in data_type;
           I_rs2 : in data_type;
+          -- Operation is ready
           O_ready : out std_logic;
+          -- Output of multiplier
           O_mul_rd : out data_type;
+          -- Output of divider (also remainder)
           O_div_rd : out data_type
          );
 end component md;
@@ -276,7 +300,7 @@ component csr is
           I_pc_to_save : in data_type;
           -- Address on address bus
           I_address : in data_type;
-          -- TIME and TIMEH
+          -- TIME and TIMEH from I/O
           I_time : in data_type;
           I_timeh : in data_type
          );
@@ -385,7 +409,7 @@ signal time_int, timeh_int : data_type;
 for alu0 : alu use entity work.alu(optimized_rtl);
 
 -- Select the architecture of the MD unit
--- The default 32+2 clock ticks
+-- The slow 32+2 clock ticks
 --for md0 : md use entity work.md(rtl);
 -- Enhanced 16+2 clock ticks
 for md0 : md use entity work.md(rtl_div4);
