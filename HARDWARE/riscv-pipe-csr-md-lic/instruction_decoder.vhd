@@ -162,7 +162,7 @@ begin
         end if;
     end process;
     
-    -- Signal that we have to restart the instruction
+    -- Signal that we may have to restart the instruction.
     process (state, I_waitfordata, start, I_md_ready, penalty, I_interrupt_request) is
     begin
         if state = state_fexecute and I_waitfordata = '1' then
