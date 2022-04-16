@@ -7,7 +7,7 @@
 CC = riscv32-unknown-elf-gcc
 AR = riscv32-unknown-elf-ar
 
-CFLAGS = -Wall -O2 -g -march=rv32i -mabi=ilp32
+CFLAGS = -Wall -O2 -g -march=rv32im -mabi=ilp32
 
 LIBSYS = libsyscalls.a
 OBJ = syscalls.o sys_gettimeofday.o sys_sbrk.o sys_exit.o sys_read_write.o sys_times.o sys_env.o

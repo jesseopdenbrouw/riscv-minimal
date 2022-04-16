@@ -6,7 +6,7 @@ SIZE = riscv32-unknown-elf-size
 all: double test_double
 
 double: double.c
-	$(CC) -O2 -g -o double double.c -Wall -T ../ldfiles/riscv.ld -march=rv32i -nostartfiles --specs=nano.specs ../crt/startup.c -lm
+	$(CC) -O2 -g -o double double.c -Wall -T ../ldfiles/riscv.ld -march=rv32im -mabi=ilp32 -nostartfiles --specs=nano.specs ../crt/startup.c -lm
 	$(OBJCOPY) -O srec double double.srec
 	$(SREC2VHDL) -wf0 double.srec double.vhd
 	$(SIZE) double
