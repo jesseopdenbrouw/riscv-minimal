@@ -9,9 +9,10 @@
 #include "usart.h"
 #include "interrupt.h"
 
-/* Set to 1 to use printf(), uses system calls.
+/* Set to 1 to use printf(), uses system calls
+ * for read and write.
  * Set to 0 to use sprintf()/usart_puts(), doesn't
- * use system calls */
+ * use system calls for read and write. */
 #define USE_PRINTF (0)
 
 int main(int argc, char *argv[], char *envp[])
@@ -27,17 +28,18 @@ int main(int argc, char *argv[], char *envp[])
 	/* Set the trap handler vector + mode */
 	set_mtvec(handler_jump_table, TRAP_VECTORED_MODE);
 
-	/* Enable interrupts */
-	enable_irq();
-
 	/* Initialize the USART*/
 	usart_init();
 
 	/* Activate TIMER1 with a cycle of 1 Hz */
 	/* for a 50 MHz clock. */
-	TIMER1->CMPT = 24999999;
+	//TIMER1->CMPT = 24999999;
+	TIMER1->CMPT = 50000000UL/100UL - 1;
 	/* Bit 0 is enable, bit 4 is interrupt enable */
 	TIMER1->CTRL = (1<<4)|(1<<0);
+
+	/* Enable interrupts */
+	enable_irq();
 
 #if USEPRINTF == 1
 	printf("\r\n");
