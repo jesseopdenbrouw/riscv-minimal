@@ -117,6 +117,7 @@ void handler_jump_table(void)
 /* This is the universal handler. We use a lot of register
  * qualifiers in the hope that the compiler will catch
  * the hint ;-) */
+__attribute__ ((naked))
 void universal_handler(void)
 {
 	/* Save registers. We need to save all the registers
@@ -329,7 +330,7 @@ void universal_handler(void)
 			__asm__ volatile ("mv a0,%0" : : "r"(return_value));
 		}
 	} else if (__mcause == EBREAK_IN_MCAUSE) {
-		/* Calls the debugger. Currently a stub.
+		/* Calls the debugger. Currently calls a stub.
 		 * Currently only restores a0. */
 		debugger(stack_pointer);
 		__asm__ volatile ("lw      x10,10*4(sp);" :::);
