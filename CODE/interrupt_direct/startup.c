@@ -31,7 +31,7 @@ void __libc_init_array(void);
 void pre_init_universal_handler(void);
 
 /* argv array for main */
-char *argv[] = {"interrupt",
+char *argv[] = {"interrupt_direct",
 		"RISC-V RV32IM bare metal processor",
 		"The Hague University of Applied Sciences",
 		"Department of Electrical Engineering",
