@@ -33,6 +33,9 @@ all:
 	$(MAKE) -C basel_problem all
 	$(MAKE) -C interrupt_direct all
 	$(MAKE) -C interrupt_vectored all
+	$(MAKE) -C exp all
+	$(MAKE) -C usart_cpp all
+	$(MAKE) -C linked_list all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
@@ -64,4 +67,7 @@ clean:
 	$(MAKE) -C basel_problem clean
 	$(MAKE) -C interrupt_direct clean
 	$(MAKE) -C interrupt_vectored clean
+	$(MAKE) -C exp clean
+	$(MAKE) -C usart_cpp clean
+	$(MAKE) -C linked_list clean
 	rm -rf bin
