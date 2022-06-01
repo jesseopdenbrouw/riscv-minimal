@@ -14,7 +14,7 @@
 #define CLOCK_FREQUENCY (1000000ULL)
 #endif
 #ifndef INTERRUPT_FREQUENCY
-#define INTERRUPT_FREQUENCY (10ULL)
+#define INTERRUPT_FREQUENCY (1000ULL)
 #endif
 
 /* Set TIMECMP delta to some reasonable value */
@@ -47,13 +47,14 @@ void timer1_cmpt_handler(void)
 	/* Remove CMPT interrupt flag */
 	TIMER1->STAT &= ~(1<<4);
 	/* Flip output bit 0 (led) */
-	GPIOA->POUT ^= 0x1;
+	GPIOA->POUT ^= (1<<0);
 }
 
 /* The default handler, which holds the processor */
 __attribute__ ((interrupt))
 void default_handler(void)
 {
+	GPIOA->POUT |= (1 << 9);
 	while(1);
 }
 
@@ -84,7 +85,7 @@ void external_timer_handler(void)
 	TIMECMP = (uint32_t)(cur_time & 0xffffffff);
 	TIMECMPH = (uint32_t)(cur_time>>32);
 	/* Flip output bit 1 (led) */
-	GPIOA->POUT ^= 0x2;
+	GPIOA->POUT ^= (1<<1);
 }
 
 /* USART receive and/or transmit handler */
