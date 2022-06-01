@@ -8,7 +8,10 @@
  */
 
 
-float result = -1.0f;
+/* View in RAM */
+volatile float result = -1.0f;
+volatile float sum = 0.0f;
+volatile float deltax;
 
 #include <math.h>
 
@@ -25,10 +28,8 @@ int main() {
     float a = 0.0f;
     float b = 6.28318530717958647692f;
 
-    float deltax = (b - a) / n;
+    deltax = (b - a) / n;
 
-    /* View in RAM */
-    volatile float sum = 0.0f;
 
     for (k = 0; k < n; k++) {
         sum = sum + f(a + k*deltax) * deltax;
