@@ -45,7 +45,7 @@
                           "csrw  mtvec,t0;" \
                           ".option pop" \
 			  ::: "t0"); \
-	if (MODE == 1) { \
+	if (MODE == TRAP_VECTORED_MODE) { \
 		__asm__ volatile (".option push;" \
 				  ".option norelax;" \
 				  "csrsi mtvec,1;" \
