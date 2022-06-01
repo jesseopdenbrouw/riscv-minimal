@@ -11,18 +11,24 @@ supported. ECALL, EBREAK and MRET are supported. Currently only machine
 mode is supported. We successfully tested a complex program with interrupts
 and exceptions and implemented a basic syscall library usable with
 the ECALL instruction as provided by the GNU C compiler for RISC-V.
-sbrk, read, write and gettimeofday are basically
+sbrk, read, write, times and gettimeofday are basically
 supported. The External (system) Timer is implemented and
 generates an exception if time >= timecmp. External Interrupt are not
 supported as the processor does not have a PLIC. Up to 16 fast local
-interrupts are supported. The processor uses
-a simple 2-stage instruction pipeline. Read from ROM and RAM require
+interrupts are supported. Read from ROM, RAM and I/O require
 2 clock cycles. Writes require 1 clock cycles. Multiplications require
-3 clock cycles, divisions require 16+2 clock cycles. Jumps/calls/branches
-taken require 2 clock cycles. Interrupts are direct or vectored.
+3 clock cycles, divisions require 16+2 or 3 clock cycles. Jumps/calls/branches
+taken require 2 or 3 clock cycles. Interrupts are direct or vectored.
 
-Software is written in C (C++ currently not supported) and compiled
-using the RISC-V GNU C compiler.
+Software is written in C, (C++ is supported but there are some limitations)
+and compiled using the RISC-V GNU C compiler.
+
+## Flavors
+
+There are two flavors available: a simple two-stage pipelined
+processor and a three-stage pipelined processor. The two-stage
+processor runs at a speed of 50 MHz, the three-stage pipelined
+processor runs at a speed of 80 MHz.
  
 ## Memory
 
@@ -51,12 +57,14 @@ shadowed from the External Timer memory mapped registers.
 
 ## Software
 
-Software support is still limited as can be expected with microcontrollers.
+Software support is limited as can be expected with microcontrollers.
 A number of C programs have been tested, created by the GNU C Compiler for
 RISC-V. We tested the use of (software) floating point operations (both
 float and double) and tested the mathematical library (sin, cos, et al.).
 Assembler programs can be compiled by the C compiler. We provide a CRT
-(C startup) and linker file.
+(C startup) and linker file. C++ is supported but many language concepts
+(e.g. cout with iostream) create a binary that is too big to fit in the
+ROM.
 
 ## FPGA
 
@@ -64,7 +72,8 @@ The processor is developed on a Cyclone V FPGA with the use
 of the DE0-CV board by Terasic and Quartus Prime Lite 21.1.
 Simulation is possible with QuestaSim Intel Starter Edition.
 You need a (free) license for that. The processor uses about
-2700 ALM (cells) of 18480. Speed is currently 50 MHz max.
+2700 ALM (cells) of 18480. In the default settings, ROM and
+RAM uses 25% of the available RAM blocks.
 
 ## Plans (or not)
 
