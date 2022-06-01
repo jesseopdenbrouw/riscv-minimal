@@ -47,6 +47,7 @@ void timer1_cmpt_handler(void)
 /* The default handler, which holds the processor */
 void default_hander(void)
 {
+	GPIOA->POUT |= (1 << 9);
 	while(1);
 }
 
