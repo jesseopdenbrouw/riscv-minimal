@@ -31,7 +31,7 @@ void __libc_init_array(void);
 void pre_init_universal_handler(void);
 
 /* argv array for main */
-char *argv[] = {"interrupt",
+char *argv[] = {"interrupt_vectored",
 		"RISC-V RV32IM bare metal processor",
 		"The Hague University of Applied Sciences",
 		"Department of Electrical Engineering",
@@ -51,7 +51,7 @@ void _start(void)
 
 	/* These assembler instructions set up the Global Pointer
 	 * and the Stack Pointer and set the mtvec to the start
-	 * address of the pre-int interrupt handler. This will
+	 * address of the pre-init interrupt handler. This will
 	 * catch pre-init traps. Mostly because of a bug. */
         __asm__ volatile (".option push;"
 			  ".option norelax;"
