@@ -27,9 +27,6 @@ int main(int argc, char *argv[], char *envp[])
 	/* Set the trap handler vector */
 	set_mtvec(universal_handler, TRAP_DIRECT_MODE);
 
-	/* Enable interrupts */
-	enable_irq();
-
 	/* Initialize the USART*/
 	usart_init();
 
@@ -38,6 +35,9 @@ int main(int argc, char *argv[], char *envp[])
 	TIMER1->CMPT = 24999999;
 	/* Bit 0 = enable, bit 4 is interrupt enable */
 	TIMER1->CTRL = (1<<4)|(1<<0);
+
+	/* Enable interrupts */
+	enable_irq();
 
 #if USEPRINTF == 1
 	printf("\r\n");
