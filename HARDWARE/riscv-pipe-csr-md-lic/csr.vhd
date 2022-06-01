@@ -149,6 +149,7 @@ begin
     -- TIME and TIMEH are memory mapped
     -- csr(time_addr) and csr(timeh_addr) are shadowed
     -- read-only copies.
+    -- see bottom of this file
     
     -- INSTRET --- instructions retired
     -- These are read-only registers
@@ -278,9 +279,10 @@ begin
                 csr(mtval_addr) <= (others => '0');
             end if;
 
-            -- Set all bits hard to 0 except MTIE
+            -- Set all bits hard to 0 except MTIE (7), MSIE (3)
             csr(mie_addr)(31 downto 8) <= (others => '0');
-            csr(mie_addr)(6 downto 0) <= (others => '0');
+            csr(mie_addr)(6 downto 4) <= (others => '0');
+            csr(mie_addr)(2 downto 0) <= (others => '0');
             
             -- Set most bits of mstatus, and mstatush to 0
             csr(mstatus_addr)(31 downto 13) <= (others => '0');

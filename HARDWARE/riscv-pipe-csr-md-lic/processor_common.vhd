@@ -37,7 +37,7 @@ package processor_common is
     -- Fast divide (needs more area)?
     constant FAST_DIVIDE : boolean := TRUE;
     
-    -- Do we support vectored mode for mtvec?
+    -- Do we enable vectored mode for mtvec?
     constant VECTORED_MTVEC : boolean := TRUE;
     
     -- The common data type is 32 bits wide
