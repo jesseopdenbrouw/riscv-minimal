@@ -1,18 +1,31 @@
 CC = riscv32-unknown-elf-gcc
+CXX = riscv32-unknown-elf-g++
 OBJCOPY = riscv32-unknown-elf-objcopy
 SREC2VHDL = ../bin/srec2vhdl
-SIZE = riscv32-unknown-elf-size
+AR = riscv32-unknown-elf-ar
 
-all: trig test_double
+TARGET = trig
+STARTUP = crt/startup
 
-trig: trig.c
-	$(CC) -O2 -g -o trig trig.c -Wall -T ../ldfiles/riscv.ld -march=rv32im -mabi=ilp32 -nostartfiles --specs=nano.specs ../crt/startup.c -lm
-	$(OBJCOPY) -O srec trig trig.srec
-	$(SREC2VHDL) -wf0 trig.srec trig.vhd
-	$(SIZE) trig
+CFLAGS = -Wall -O2 -g -march=rv32im -mabi=ilp32 -Isyscalls
+LDFLAGS = $(STARTUP).o $(TARGET).o -static -g -lm -Lsyscalls -T ../ldfiles/riscv.ld -march=rv32im -mabi=ilp32 -nostartfiles --specs=syscalls/libsys.specs --specs=syscalls/nano.specs -u _printf_float
 
-test_double: test_double.c
-	gcc -o test_double test_double.c -lm
+
+all: lib crt $(TARGET)
+
+crt: $(TARGET).o
+	make -C crt
+
+lib: $(TARGET).o
+	make -C syscalls
+
+$(TARGET): $(TARGET).c
+	$(CC) $(CFLAGS) -c $(TARGET).c
+	$(CC) -o $(TARGET) $(LDFLAGS)
+	$(OBJCOPY) -O srec $(TARGET) $(TARGET).srec
+	$(SREC2VHDL) -wf0 $(TARGET).srec $(TARGET).vhd
 
 clean:
-	rm -f trig trig.srec trig.vhd test_double
+	make -C syscalls clean
+	make -C crt clean
+	rm -f $(TARGET) $(TARGET).srec $(TARGET).vhd *.o
