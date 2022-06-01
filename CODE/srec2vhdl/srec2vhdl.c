@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 	char buffer[LEN_BUFFER];
 	int line = 0;
 	unsigned long int val;
-	unsigned long int address;
+	unsigned long int address = 0;
 	unsigned long int byte;
 	int i;
 	//int doindent = 1;
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 	/* Check for 0 extra arguments */
 	if (argc == 1) {
 		printf("srec2vhdl -- an S-record to VHDL table converter\n");
-		printf("Usage: srec2vhdl [-vqf -i <arg>] inputfile [outputfile]\n");
+		printf("Usage: srec2vhdl [-vqfbhw0 -i <arg>] inputfile [outputfile]\n");
 		printf("   -f        Full table output\n");
 		printf("   -i <arg>  Indent by <arg> spaces\n");
 		printf("   -v        Verbose\n");
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
 
 	if (argv[optind+1] == NULL) {
 		if (verbose) {
-			printf("Using stdout\n");
+			fprintf(stderr, "Using stdout\n");
 		}
 		fout = stdout;
 	} else {
