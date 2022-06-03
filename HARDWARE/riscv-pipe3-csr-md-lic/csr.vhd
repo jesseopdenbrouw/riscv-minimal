@@ -13,6 +13,8 @@
 
 -- Implementation of the Control and Status Registers.
 -- Only a basic implementation is supported: TIME, CYCLE, INSTRET,
+-- Hardwired registers are mvendorid, marchid, mimpid, mhartid_addr
+-- and misa. There are more registers to offer trap processing.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -38,6 +40,8 @@ entity csr is
           I_intrio : in data_type;
           -- Global interrupt enable status
           O_mstatus_mie : out std_logic;
+          -- mie.MTIE external timer interrupt enable
+          O_mie_mtie : out std_logic;
           -- mcause reported by LIC
           I_mcause : in data_type;
           -- The trap vector
@@ -286,7 +290,10 @@ begin
     
     -- Advertise the interrupt enable status
     O_mstatus_mie <= csr(mstatus_addr)(3);
-
+    
+    -- Advertise the M mode timer interrupt enable
+    O_mie_mtie <= csr(mie_addr)(7);
+    
     -- The interrupt/exception vector address
     -- Vectored mode only for interrupts. You need to
     -- create a jump table at the indicated mtvec address
