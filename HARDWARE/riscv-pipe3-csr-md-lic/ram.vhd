@@ -3,7 +3,7 @@
 --
 -- (c)2022, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
--- processor_common.vhd - Common types and constants
+-- ram.vhd - Description of the RAM
 
 -- This hardware description is for educational purposes only. 
 -- This hardware description is distributed in the hope that it
