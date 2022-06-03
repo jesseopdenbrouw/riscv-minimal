@@ -3,7 +3,7 @@
 --
 -- (c)2022, Jesse E.J. op den Brouw <J.E.J.opdenBrouw@hhs.nl>
 --
--- processor_common.vhd - Common types and constants
+-- rom.vhd - Description of the ROM decoding unit
 
 -- This hardware description is for educational purposes only. 
 -- This hardware description is distributed in the hope that it
@@ -13,7 +13,8 @@
 
 -- This file contains the description of the ROM. The ROM
 -- is placed in immutable onboard RAM blocks. A read takes two
--- clock cycles, for both instruction and data.
+-- clock cycles, for both instruction and data. The ROM
+-- contents is placed in file processor_common_rom.vhd
 
 library ieee;
 use ieee.std_logic_1164.all;
