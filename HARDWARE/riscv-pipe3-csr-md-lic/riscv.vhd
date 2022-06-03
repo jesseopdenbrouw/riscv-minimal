@@ -11,9 +11,9 @@
 -- implied warranty of MERCHANTABILITY or FITNESS FOR A
 -- PARTICULAR PURPOSE.
 
--- This file contains the description of a RISC-V RV32I core,
--- using a three-stage pipeline, includig RAM, ROM and some
--- simple I/O.
+-- This file contains the description of a RISC-V RV32IM core,
+-- using a three-stage pipeline, includig address decoding unit,
+-- RAM, ROM, I/O, CSR and LIC.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -158,6 +158,8 @@ component csr is
           I_intrio : in data_type;
           -- Global interrupt enable status
           O_mstatus_mie : out std_logic;
+          -- mie.MTIE external timer interrupt enable
+          O_mie_mtie : out std_logic;
           -- mcause reported by LIC
           I_mcause : in data_type;
           -- The trap vector
@@ -178,6 +180,8 @@ component lic is
           I_areset : in std_logic;
           -- mstatus.MIE Interrupt Enable bit
           I_mstatus_mie : in std_logic;
+          -- mie.MTIE external timer interrupt enable
+          I_mie_mtie : in std_logic;
           -- Max 16 external/hardware interrupts
           I_intrio : in data_type;
           -- Synchronous exceptions
@@ -251,7 +255,7 @@ signal store_access_error_int : std_logic;
 signal restart_instruction_int : std_logic;
 signal timer_compare_request_int : std_logic;
 signal pc_to_mepc_int : data_type;
-
+signal mie_mtie_int : std_logic;
 begin
 
     clk_int <= I_clk;
@@ -368,6 +372,7 @@ begin
               I_interrupt_release => interrupt_release_int,
               I_intrio => intrio_int,
               O_mstatus_mie => mstatus_mie_int,
+              O_mie_mtie => mie_mtie_int,
               I_mcause => mcause_int,
               O_mtvec => mtvec2mtvec,
               O_mepc => mepc2mepc,
@@ -382,6 +387,7 @@ begin
     port map (I_clk => clk_int,
               I_areset => areset_int,
               I_mstatus_mie => mstatus_mie_int,
+              I_mie_mtie => mie_mtie_int,
               I_ecall_request => ecall_request_int,
               I_ebreak_request => ebreak_request_int,
               I_illegal_instruction_error_request => illegal_instruction_error_int,
