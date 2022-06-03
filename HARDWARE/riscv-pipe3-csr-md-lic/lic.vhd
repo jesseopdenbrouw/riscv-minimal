@@ -31,6 +31,8 @@ entity lic is
           I_areset : in std_logic;
           -- mstatus.MIE Interrupt Enable bit
           I_mstatus_mie : in std_logic;
+          -- mie.MTIE external timer interrupt enable
+          I_mie_mtie : in std_logic;
           -- Max 16 external/hardware interrupts + System Timer
           I_intrio : in data_type;
           -- Synchronous exceptions
@@ -66,7 +68,7 @@ begin
                  I_store_access_error_request,
                  I_load_misaligned_error_request,
                  I_store_misaligned_error_request,
-                 I_mret_request) is
+                 I_mret_request, I_mie_mtie) is
         variable interrupt_request_int : interrupt_request_type;
         begin
             interrupt_request_int := irq_none;
@@ -77,7 +79,7 @@ begin
             -- Hardware interrupts take priority over exceptions, also the RISC-V system timer
             -- Not all exceptions are implemented
             -- External timer interrupt
-            if I_intrio(7) = '1' and I_mstatus_mie = '1' then
+            if I_intrio(7) = '1' and I_mstatus_mie = '1' and I_mie_mtie = '1' then
                 interrupt_request_int := irq_hard;
                 O_mcause <= std_logic_vector(to_unsigned(7, O_mcause'length));
                 O_mcause(31) <= '1';
@@ -141,7 +143,7 @@ begin
                  I_store_access_error_request,
                  I_load_misaligned_error_request,
                  I_store_misaligned_error_request,
-                 I_mret_request) is
+                 I_mret_request, I_mie_mtie) is
         variable interrupt_request_int : interrupt_request_type;
         begin
             interrupt_request_int := irq_none;
@@ -153,7 +155,7 @@ begin
                 -- Hardware interrupts take priority over exceptions, also the RISC-V system timer
                 -- Not all exceptions are implemented
                 -- External timer interrupt
-                if I_intrio(7) = '1' then
+                if I_intrio(7) = '1' and I_mie_mtie = '1' then
                     interrupt_request_int := irq_hard;
                     O_mcause <= std_logic_vector(to_unsigned(7, O_mcause'length));
                     O_mcause(31) <= '1';
