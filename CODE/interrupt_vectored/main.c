@@ -38,6 +38,9 @@ int main(int argc, char *argv[], char *envp[])
 	/* Bit 0 is enable, bit 4 is interrupt enable */
 	TIMER1->CTRL = (1<<4)|(1<<0);
 
+	/* Enable external timer interrupt */
+	enable_external_timer_irq();
+
 	/* Enable interrupts */
 	enable_irq();
 
