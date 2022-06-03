@@ -34,8 +34,8 @@ package processor_common is
     
     -- Do we have the integer multiply/divide unit?
     constant HAVE_MULDIV : boolean := TRUE;
-    constant FAST_DIVIDE : boolean := TRUE;
     -- Fast divide (needs more area)?
+    constant FAST_DIVIDE : boolean := TRUE;
     
     -- Do we enable vectored mode for mtvec?
     constant VECTORED_MTVEC : boolean := TRUE;
@@ -99,7 +99,6 @@ package processor_common is
     -- NOTE: data is in Little Endian format (as by the toolchain)
     --       for half word and word entities
     --       Set rom_size_bits as if it were bytes
-    -- NOTE: rom_size_bits must be <= 16
     --       default is 64 kB data
     constant rom_size_bits : integer := 16;
     constant rom_size : integer := 2**(rom_size_bits-2);
@@ -111,7 +110,6 @@ package processor_common is
     --       32-bit Big Endian storage,
     --       so we have to recode to support Little Endian.
     --       Set ram_size_bits as if it were bytes
-    -- NOTE: ram_size_bits must be <= 16
     -- Default is 32 kB data
     constant ram_size_bits : integer := 15;
     constant ram_size : integer := 2**(ram_size_bits-2);
@@ -123,7 +121,7 @@ package processor_common is
     --       there is no need to recode the data
     --       The I/O can only handle word size access
     --       Set io_size_bits as if it were bytes
-    -- Default 128 B data
+    -- Default 128 bytes data
     constant io_size_bits : integer := 8;
     constant io_size : integer := 2**(io_size_bits-2);
     type io_type is array (0 to io_size-1) of data_type;
