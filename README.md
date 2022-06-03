@@ -1,11 +1,11 @@
 # riscv-minimal
 
-A (not so) minimalistic RISC-V 32-bit processor written in VHDL targeted
+A (not so) minimalistic RISC-V 32-bit microcontroller written in VHDL targeted
 for an FPGA.
 
 ## Description
 
-The RISV-C processor uses the RV32IM instruction set with the
+The RISV-C microcontroller uses the RV32IM instruction set with the
 exception of the FENCE and WFI instructions. Exceptions and interrupts are
 supported. ECALL, EBREAK and MRET are supported. Currently only machine
 mode is supported. We successfully tested a complex program with interrupts
@@ -32,7 +32,7 @@ processor runs at a speed of 80 MHz.
  
 ## Memory
 
-The processor uses FPGA onboard RAM blocks to emulate RAM and program ROM.
+The microcontroller uses FPGA onboard RAM blocks to emulate RAM and program ROM.
 Programs are compiled with the GNU C compiler for RISC-V and the resulting
 executable is transformed to a VHDL synthesizable ROM table.
 
@@ -68,24 +68,23 @@ ROM.
 
 ## FPGA
 
-The processor is developed on a Cyclone V FPGA with the use
+The microcontroller is developed on a Cyclone V FPGA with the use
 of the DE0-CV board by Terasic and Quartus Prime Lite 21.1.
 Simulation is possible with QuestaSim Intel Starter Edition.
 You need a (free) license for that. The processor uses about
-2700 ALM (cells) of 18480. In the default settings, ROM and
+2800 ALM (cells) of 18480. In the default settings, ROM and
 RAM uses 25% of the available RAM blocks.
 
 ## Plans (or not)
 
-We are *not* planning the C standard.
-Plans to create a hardcoded bootloader to load programs when the processor is loaded in an FPGA.
-We strive to implement SPI and I2C, and PWM.
-We are considering implementing a 5-stage instruction pipeline (this will take time ;-)).
-Implement Supervisor Mode (this will also take some time ;-).
-Smaller (in cells) divide unit.
+- We are *not* planning the C standard.
+- Plans to create a hardcoded bootloader to load programs when the processor is loaded in an FPGA.
+- We strive to implement SPI and I2C, and PWM.
+- Implement Supervisor Mode (this will also take some time ;-).
+- Smaller (in cells) divide unit.
 
 ## Disclaimer
 
-This processor is for educational purposes only.
+This microcontroller is for educational purposes only.
 Work in progress. Things might change. Use with care.
 
