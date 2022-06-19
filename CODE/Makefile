@@ -6,6 +6,8 @@ all:
 	cp srec2vhdl/srec2vhdl bin
 	$(MAKE) -C srec2mif all
 	cp srec2mif/srec2mif bin
+	$(MAKE) -C upload all
+	cp upload/upload bin
 	$(MAKE) -C add64 all
 	$(MAKE) -C mult all
 	$(MAKE) -C assembler all
@@ -36,10 +38,12 @@ all:
 	$(MAKE) -C exp all
 	$(MAKE) -C usart_cpp all
 	$(MAKE) -C linked_list all
+	$(MAKE) -C bootloader all
 
 clean:
 	$(MAKE) -C srec2vhdl clean
 	$(MAKE) -C srec2mif clean
+	$(MAKE) -C upload clean
 	$(MAKE) -C add64 clean
 	$(MAKE) -C mult clean
 	$(MAKE) -C assembler clean
@@ -70,4 +74,5 @@ clean:
 	$(MAKE) -C exp clean
 	$(MAKE) -C usart_cpp clean
 	$(MAKE) -C linked_list clean
+	$(MAKE) -C bootloader clean
 	rm -rf bin
