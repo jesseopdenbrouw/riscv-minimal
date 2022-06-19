@@ -21,6 +21,9 @@
  *      -h         Output as half words (16 bits, Little Endian)
  *      -w         Output as words (32 bits, Little Endian)
  *
+ * The address of the first record is used as an offset
+ * so that the first records starts at vector element 0.
+ *
  * */
 
 #include <stdio.h>
@@ -29,11 +32,13 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#define VERSION "v0.2"
+
 /* 1000 should be enough */
 #define LEN_BUFFER (1000)
 
 /* This should really be enough */
-#define LEN_CODE (1000000)
+#define LEN_CODE (10000000)
 
 #define BYTE (1)
 #define HALFWORD (2)
@@ -101,6 +106,8 @@ int main(int argc, char *argv[]) {
 	unsigned long int address = 0;
 	unsigned long int byte;
 	int i;
+	int first = 1;
+	unsigned long int offset = 0;
 	//int doindent = 1;
 
 	/* Options */
@@ -118,7 +125,7 @@ int main(int argc, char *argv[]) {
 
 	/* Check for 0 extra arguments */
 	if (argc == 1) {
-		printf("srec2vhdl -- an S-record to VHDL table converter\n");
+		printf("srec2vhdl " VERSION " -- an S-record to VHDL table converter\n");
 		printf("Usage: srec2vhdl [-vqfbhw0 -i <arg>] inputfile [outputfile]\n");
 		printf("   -f        Full table output\n");
 		printf("   -i <arg>  Indent by <arg> spaces\n");
@@ -129,7 +136,9 @@ int main(int argc, char *argv[]) {
 		printf("   -w        Word output (32 bits, Little Endian)\n");
 		printf("   -0        Output unused data as 0's (default is - (don't care))\n");
 		printf("If outputfile is omitted, stdout is used\n");
-		printf("Program size must be less then 1 MB\n");
+		printf("Program size must be less then 1 MB\n\n");
+		printf("The address of the first record is used as an offset\n"
+                       "so that the first record starts at vector element 0.\n");
 		exit(EXIT_SUCCESS);
 	}
 
@@ -169,6 +178,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (verbose) {
+		fprintf(stderr, "srec2vhdl " VERSION " \n");
 		fprintf(stderr, "S-record to VHDL converter\n");
 	}
 
@@ -236,27 +246,48 @@ int main(int argc, char *argv[]) {
 			case '1': val = hex2(buffer+2);
 				  val = val-3;
 				  address = hex4(buffer+4);
+				  if (first) {
+					  offset = address;
+					  if (verbose) {
+					  	  fprintf(stderr, "Offset: 0x%08lx\n", offset);
+					  }
+					  first = 0;
+				  }
 				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+8+i*2);
-					code[address] = byte;
+					code[address-offset] = byte;
 					address++;
 				  }
 				  break;
 			case '2': val = hex2(buffer+2);
 				  val = val-4;
 				  address = hex6(buffer+4);
+				  if (first) {
+					  offset = address;
+					  if (verbose) {
+					  	  fprintf(stderr, "Offset: 0x%08lx\n", offset);
+					  }
+					  first = 0;
+				  }
 				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+10+i*2);
-					code[address] = byte;
+					code[address-offset] = byte;
 					address++;
 				  }
 				  break;
 			case '3': val = hex2(buffer+2);
 				  val = val-5;
 				  address = hex8(buffer+4);
+				  if (first) {
+					  offset = address;
+					  if (verbose) {
+					  	  fprintf(stderr, "Offset: 0x%08lx\n", offset);
+					  }
+					  first = 0;
+				  }
 				  for (i = 0; i < val; i++) {
 					byte = hex2(buffer+12+i*2);
-					code[address] = byte;
+					code[address-offset] = byte;
 					address++;
 				  }
 				  break;
@@ -292,6 +323,9 @@ int main(int argc, char *argv[]) {
 
 	}
 
+	/* Shift to length of data in array */
+	address -= offset;
+
 	if (address > LEN_CODE) {
 		fprintf(stderr, "Warning: internal buffer too small, not exporting all data!\n");
 		address = LEN_CODE;
@@ -326,7 +360,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (verbose) {
-		fprintf(stderr, "Written %lu of bytes.\n", address);
+		fprintf(stderr, "Transformed %lu bytes.\n", address);
 	}
 
 	fclose(fp);
