@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # ser.py - simple serial printing script
 #
@@ -24,7 +25,9 @@ except:
     print("Error reading from device!")
     sys.exit("Bailing out!")
 
-sys.stdout.buffer.write(line)
+#sys.stdout.buffer.write(line)
+line = line.decode()
+print(line)
 
 try:
     ser.write(b'hello\r\n')     # write a string
@@ -42,6 +45,8 @@ except:
     ser.close()             # close port
     sys.exit("Bailing out!")
 
-sys.stdout.buffer.write(line)
+#sys.stdout.buffer.write(line)
+line = line.decode()
+print(line);
 ser.close()             # close port
 
