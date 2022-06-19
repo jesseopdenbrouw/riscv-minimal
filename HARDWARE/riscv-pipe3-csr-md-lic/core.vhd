@@ -89,16 +89,10 @@ signal memaccess_decode : memaccess_type;
 signal size_decode : size_type;
 signal csr_op_decode : csr_op_type;
 
--- The retired data, not all used
+-- The retired data
 signal rd_ex : reg_type;
 signal rd_en_ex : std_logic;
 signal rddata_ex : data_type;
-signal rs1_ex : reg_type;
-signal rs2_ex : reg_type;
-signal alu_op_ex : alu_op_type;
-signal imm_ex : data_type;
-signal md_op_ex : func3_type;
-signal md_start_ex : std_logic;
 
 -- The registers
 type regs_array_type is array (0 to NUMBER_OF_REGISTERS-1) of data_type;
@@ -760,7 +754,6 @@ begin
                                     csr_op_decode <= csr_rw;
                                     rd <= rd_i;
                                     rd_en <= '1';
-                                    rs1 <= rs1_i;
                                     O_csr_addr <= imm_i(11 downto 0);
                                     O_csr_immrs1 <= rs1_i; -- RS1
                                 when "010" =>
@@ -768,7 +761,6 @@ begin
                                     csr_op_decode <= csr_rs;
                                     rd <= rd_i;
                                     rd_en <= '1';
-                                    rs1 <= rs1_i;
                                     O_csr_addr <= imm_i(11 downto 0);
                                     O_csr_immrs1 <= rs1_i; -- RS1
                                 when "011" =>
@@ -776,7 +768,6 @@ begin
                                     csr_op_decode <= csr_rc;
                                     rd <= rd_i;
                                     rd_en <= '1';
-                                    rs1 <= rs1_i;
                                     O_csr_addr <= imm_i(11 downto 0);
                                     O_csr_immrs1 <= rs1_i; -- RS1
                                 when "101" =>
@@ -784,7 +775,6 @@ begin
                                     csr_op_decode <= csr_rwi;
                                     rd <= rd_i;
                                     rd_en <= '1';
-                                    rs1 <= rs1_i;
                                     O_csr_addr <= imm_i(11 downto 0);
                                     O_csr_immrs1 <= rs1_i; -- imm
                                 when "110" =>
@@ -1265,7 +1255,6 @@ begin
         
         fast_div_not: if not FAST_DIVIDE generate
         -- Division unit, retires one bit at a time
-        -- Check start of division and load registers
         process (I_clk, I_areset, forwarda, forwardb, rddata_ex, rs1data, rs2data) is
         variable a, b : data_type;
         variable div_running : std_logic;  
