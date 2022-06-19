@@ -713,8 +713,6 @@ Note: when using traps, the system calls are handled by a trap handler (by using
 \section{Using trap handlers in software}
 We provide (see software examples \texttt{interrupt\_direct} and \texttt{interrupt\_vectored}) a basic implementation of trap handlers. The \texttt{universal\_handler} handles all traps (interrupts and exceptions) in direct mode. The entry point (the address loaded in the \texttt{mtvec} CSR) must be set in the \texttt{main} function, as is enabling traps. In vectored mode, interrupts are redirected to their own handlers via a jump table. The start address of the jump table must be set in the \texttt{main} function, and traps must be enabled. The external timer has its own handler called \texttt{external\_timer\_handler}. TIMER1 has its own handler called \texttt{timer1\_cmpt\_handler}. The USART has its own handler called \texttt{usart\_handler}. This handler is used for both receive and transmit interrupts. Note that negating the interrupt request must be done by software in the respective handlers. The interrupt requests are \emph{not} negated by hardware. Note: the external timer interrupt has to be enabled by writing a 1 to \texttt{mie.MTIE}.
 
-
-
 \section{Software programs}
 In de \texttt{CODE} directory, there are a number of software programs available. First, the common files:
 
