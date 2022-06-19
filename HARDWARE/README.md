@@ -30,6 +30,26 @@ A number of software programs have been tested using the
 GNU C compiler for RISC-V 32 bit. C++ is supported but may
 create a binary that is too big to fit in ROM.
 
+## riscv-pipe3-csr-md-lic.bootloader
+
+This is an extended version of the three-stage pipelined
+processor and incorporates a hardcoded bootloader. The
+bootloader is located at address 0x10000000. The bootloader
+is able to load an S-record file into the ROM at address
+0x00000000.
+
+When the processor starts, the bootloader waits for about
+5 seconds for a keboard press (using the USART). If not
+within this 5 seconds, the bootloader starts the main
+program at address 0x00000000. If pressed, the bootloader
+enters a simple monitor program. Type 'h' for help.
+
+A S-record file can be uploaded by the `upload` program.
+If `upload` contacts the bootloader within the 5 second
+delay, the S-record file is transmitted to the processorr
+and the instructions are placed in the ROM (or RAM). Make
+sure that NO terminal connection (e.g. Putty) is active.
+
 ## Status
 
 Works on the DE0-CV board.
