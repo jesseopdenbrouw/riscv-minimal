@@ -32,7 +32,7 @@ void pre_init_universal_handler(void);
 
 /* argv array for main */
 char *argv[] = {"interrupt_vectored",
-		"RISC-V RV32IM bare metal processor",
+		"THUAS RISC-V RV32IM bare metal processor",
 		"The Hague University of Applied Sciences",
 		"Department of Electrical Engineering",
 		"J.E.J. op den Brouw",
