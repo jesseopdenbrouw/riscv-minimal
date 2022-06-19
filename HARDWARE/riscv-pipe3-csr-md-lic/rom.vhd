@@ -33,7 +33,7 @@ entity rom is
           I_size : in size_type;
           I_stall : in std_logic;
           O_instr : out data_type;
-          O_data : out data_type;
+          O_data_out : out data_type;
           --
           O_instruction_misaligned_error : out std_logic;
           O_load_misaligned_error : out std_logic
@@ -79,27 +79,27 @@ begin
         -- By natural size, for data
         if I_csrom = '1' then
             if I_size = size_word and I_address(1 downto 0) = "00" then
-                O_data <= romdata_var(7 downto 0) & romdata_var(15 downto 8) & romdata_var(23 downto 16) & romdata_var(31 downto 24);
+                O_data_out <= romdata_var(7 downto 0) & romdata_var(15 downto 8) & romdata_var(23 downto 16) & romdata_var(31 downto 24);
             elsif I_size = size_halfword and I_address(1 downto 0) = "00" then
-                O_data <= x(31 downto 16) & romdata_var(23 downto 16) & romdata_var(31 downto 24);
+                O_data_out <= x(31 downto 16) & romdata_var(23 downto 16) & romdata_var(31 downto 24);
             elsif I_size = size_halfword and I_address(1 downto 0) = "10" then
-                O_data <= x(31 downto 16) & romdata_var(7 downto 0) & romdata_var(15 downto 8);
+                O_data_out <= x(31 downto 16) & romdata_var(7 downto 0) & romdata_var(15 downto 8);
             elsif I_size = size_byte then
                 case I_address(1 downto 0) is
-                    when "00" => O_data <= x(31 downto 8) & romdata_var(31 downto 24);
-                    when "01" => O_data <= x(31 downto 8) & romdata_var(23 downto 16);
-                    when "10" => O_data <= x(31 downto 8) & romdata_var(15 downto 8);
-                    when "11" => O_data <= x(31 downto 8) & romdata_var(7 downto 0);
-                    when others => O_data <= x; O_load_misaligned_error <= '1';
+                    when "00" => O_data_out <= x(31 downto 8) & romdata_var(31 downto 24);
+                    when "01" => O_data_out <= x(31 downto 8) & romdata_var(23 downto 16);
+                    when "10" => O_data_out <= x(31 downto 8) & romdata_var(15 downto 8);
+                    when "11" => O_data_out <= x(31 downto 8) & romdata_var(7 downto 0);
+                    when others => O_data_out <= x; O_load_misaligned_error <= '1';
                 end case;
             else
                 -- Chip select, but not aligned
-                O_data <= x;
+                O_data_out <= x;
                 O_load_misaligned_error <= '1';
             end if;
         else
             -- No chip select, so no data
-            O_data <= x;
+            O_data_out <= x;
         end if;
     end process;
 
