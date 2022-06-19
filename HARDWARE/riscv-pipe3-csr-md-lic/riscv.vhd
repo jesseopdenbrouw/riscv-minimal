@@ -97,7 +97,7 @@ component rom is
           I_size : in size_type;
           I_stall : in std_logic;
           O_instr : out data_type;
-          O_data : out data_type;
+          O_data_out : out data_type;
           O_instruction_misaligned_error : out std_logic;
           O_load_misaligned_error : out std_logic
          );
@@ -251,8 +251,6 @@ signal mstatus_mie_int : std_logic;
 signal intrio_int : data_type;
 signal load_access_error_int : std_logic;
 signal store_access_error_int : std_logic;
--- Should we restart the instruction
-signal restart_instruction_int : std_logic;
 signal timer_compare_request_int : std_logic;
 signal pc_to_mepc_int : data_type;
 signal mie_mtie_int : std_logic;
@@ -319,7 +317,7 @@ begin
               I_size => size_int,
               I_stall => stall_int,
               O_instr => instr_int,
-              O_data => romdatain_int,
+              O_data_out => romdatain_int,
               O_instruction_misaligned_error => instruction_misaligned_error_int,
               O_load_misaligned_error => load_misaligned_error_int(2)
              );
