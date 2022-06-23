@@ -812,8 +812,9 @@ begin
                     
                     -- Do not write if rd is x0 on compute instructions, CSR.
                     -- LUI AUIPC JAL JALR FENCE (they all have xxxx111 as opcode)
-                    if (opcode = "0010011" or opcode = "0110011" or opcode(2 downto 0) = "111" or
-                        opcode = "0111011" or opcode = "1110011") and rd_i = "00000" then
+--                    if (opcode = "0010011" or opcode = "0110011" or opcode(2 downto 0) = "111" or
+--                        opcode = "0111011" or opcode = "1110011") and rd_i = "00000" then
+                    if rd_i = "00000" then
                         rd_en <= '0';
                     end if;
                 end if; -- flush
@@ -861,7 +862,7 @@ begin
         
         case alu_op is
             -- No operation
-            when alu_nop =>
+            when alu_nop | alu_unknown =>
                 null;
             when alu_sw | alu_sh | alu_sb | alu_trap =>
                 select_pc <= '1';
@@ -1075,8 +1076,8 @@ begin
                 r := unsigned(div);
                 select_pc <= '1';
                 
-            when others =>
-                r := (others => '0');
+            --when others =>
+            --    r := (others => '0');
         end case;
         
         result <= std_logic_vector(r);
