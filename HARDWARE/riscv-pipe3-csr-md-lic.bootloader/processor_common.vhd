@@ -113,8 +113,8 @@ package processor_common is
     -- NOTE: data is in Little Endian format (as by the toolchain)
     --       for half word and word entities
     --       Set bootloader rom_size_bits as if it were bytes
-    --       default is 8 kB data
-    constant bootloader_size_bits : integer := 13;
+    --       default is 4 kB data
+    constant bootloader_size_bits : integer := 12;
     constant bootloader_size : integer := 2**(bootloader_size_bits-2);
     type bootloader_type is array(0 to bootloader_size-1) of data_type;
     -- The contents of the bootloader ROM is loaded by bootloader.vhd
