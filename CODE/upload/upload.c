@@ -8,8 +8,6 @@
 
 #define error_message printf
 
-#define BUFLEN (1000)
-
 int set_interface_attribs(int fd, int speed, int parity)
 {
         struct termios tty;
@@ -94,8 +92,10 @@ int main(int argc, char *argv[]) {
 		printf("upload -v -d <device> -t <timeout> filename\n");
 		printf("Upload S-record file to THUAS RISC-V processor\n");
 		printf("-v           -- verbose\n");
+		printf("-j           -- run application after upload\n");
 		printf("-d <device>  -- serial device\n");
 		printf("-t <timeout> -- timeout in deci seconds\n");
+		printf("-s <sleep>   -- sleep micro seconds after each character\n");
 		exit(EXIT_SUCCESS);
 	}
 
