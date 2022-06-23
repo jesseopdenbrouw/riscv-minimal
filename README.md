@@ -11,9 +11,9 @@ supported. ECALL, EBREAK and MRET are supported. Currently only machine
 mode is supported. We successfully tested a complex program with interrupts
 and exceptions and implemented a basic syscall library usable with
 the ECALL instruction as provided by the GNU C compiler for RISC-V.
-sbrk, read, write, times and gettimeofday are basically
+sbrk, read, write, times and gettimeofday are
 supported. The External (system) Timer is implemented and
-generates an exception if time >= timecmp. External Interrupt are not
+generates an interrupt if time >= timecmp. External Interrupt are not
 supported as the processor does not have a PLIC. Up to 16 fast local
 interrupts are supported. Read from ROM, RAM and I/O require
 2 clock cycles. Writes require 1 clock cycles. Multiplications require
