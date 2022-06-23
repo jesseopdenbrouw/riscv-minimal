@@ -5,7 +5,7 @@ for an FPGA.
 
 ## Description
 
-The RISV-C microcontroller uses the RV32IM instruction set with the
+The RISC-V microcontroller uses the RV32IM instruction set with the
 exception of the FENCE and WFI instructions. Exceptions and interrupts are
 supported. ECALL, EBREAK and MRET are supported. Currently only machine
 mode is supported. We successfully tested a complex program with interrupts
