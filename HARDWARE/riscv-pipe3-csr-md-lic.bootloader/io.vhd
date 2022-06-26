@@ -490,7 +490,7 @@ begin
     
     -- RISC-V system timer TIME and TIMECMP
     -- These registers are memory mapped
-    process (I_clk, I_areset) is
+    process (I_clk, I_areset, io) is
     variable time_reg : unsigned(63 downto 0);
     variable timecmp_reg : unsigned(63 downto 0);
     variable prescaler : integer range 0 to freq_sys/freq_count-1;
