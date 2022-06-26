@@ -425,7 +425,7 @@ begin
                         usartdata_int(6 downto 0) <= rxbuffer(6 downto 0);
                     else
                         -- 8 bits
-                        usartdata_int(8 downto 0) <= rxbuffer(8 downto 0);
+                        usartdata_int(7 downto 0) <= rxbuffer(7 downto 0);
                     end if;
                     -- signal reception
                     usartstat_int(2) <= '1';
