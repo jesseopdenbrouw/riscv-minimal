@@ -14,14 +14,14 @@ the ECALL instruction as provided by the GNU C compiler for RISC-V.
 sbrk, read, write, times and gettimeofday are
 supported. The External (system) Timer is implemented and
 generates an interrupt if time >= timecmp. External Interrupt are not
-supported as the processor does not have a PLIC. Up to 16 fast local
+supported as the processor does not have a PLIC but up to 16 fast local
 interrupts are supported. Read from ROM, RAM and I/O require
 2 clock cycles. Writes require 1 clock cycles. Multiplications require
 3 clock cycles, divisions require 16+2 or 3 clock cycles. Jumps/calls/branches
 taken require 2 or 3 clock cycles. Interrupts are direct or vectored.
 
 Software is written in C, (C++ is supported but there are some limitations)
-and compiled using the RISC-V GNU C compiler.
+and compiled using the RISC-V GNU C/C++ compiler.
 
 ## Flavors
 
@@ -58,10 +58,11 @@ shadowed from the External Timer memory mapped registers.
 ## Software
 
 Software support is limited as can be expected with microcontrollers.
-A number of C programs have been tested, created by the GNU C Compiler for
+A number of C programs have been tested, created by the GNU C/C++ Compiler for
 RISC-V. We tested the use of (software) floating point operations (both
 float and double) and tested the mathematical library (sin, cos, et al.).
-Assembler programs can be compiled by the C compiler. We provide a CRT
+Traps (interrupts and exceptions) are tested and work.
+Assembler programs can be compiled by the C/C++ compiler. We provide a CRT
 (C startup) and linker file. C++ is supported but many language concepts
 (e.g. cout with iostream) create a binary that is too big to fit in the
 ROM.
@@ -69,7 +70,7 @@ ROM.
 ## FPGA
 
 The microcontroller is developed on a Cyclone V FPGA with the use
-of the DE0-CV board by Terasic and Quartus Prime Lite 21.1.
+of the DE0-CV board by Terasic and Intel Quartus Prime Lite 21.1.
 Simulation is possible with QuestaSim Intel Starter Edition.
 You need a (free) license for that. The processor uses about
 2800 ALM (cells) of 18480. In the default settings, ROM and
