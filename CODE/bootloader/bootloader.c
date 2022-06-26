@@ -65,6 +65,7 @@ int main(void) {
 	/* If no key was hit with the time frame,
 	 * start the application */
 	if (!keyhit) {
+		USART->BAUD = 0;
 		(*app_start)();
 	}
 
@@ -98,9 +99,9 @@ int main(void) {
 					/* Process bytes */
 					for (unsigned long i = 0; i < count; i++) {
 						/* Set address, get byte and word data */
-						volatile unsigned long *boun = (unsigned long *) (v & ~3);
-						volatile unsigned long byte = gethex(2);
-						volatile unsigned long word = *boun;
+						unsigned long *boun = (unsigned long *) (v & ~3);
+						unsigned long byte = gethex(2);
+						unsigned long word = *boun;
 
 						/* Patch the byte in the word */
 						switch (v & 3) {
@@ -139,7 +140,7 @@ int main(void) {
 					/* Set start address */
 					app_start = (void *) v;
 				} else {
-					/* Eat up line */
+					/* Skip other records, eat up line */
 					while ((c = usart_getc()) != '\n');
 				}
 			} else if (c == 'J') {
