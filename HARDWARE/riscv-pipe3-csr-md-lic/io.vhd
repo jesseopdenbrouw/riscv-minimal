@@ -425,7 +425,7 @@ begin
                         usartdata_int(6 downto 0) <= rxbuffer(6 downto 0);
                     else
                         -- 8 bits
-                        usartdata_int(8 downto 0) <= rxbuffer(8 downto 0);
+                        usartdata_int(7 downto 0) <= rxbuffer(7 downto 0);
                     end if;
                     -- signal reception
                     usartstat_int(2) <= '1';
@@ -490,7 +490,7 @@ begin
     
     -- RISC-V system timer TIME and TIMECMP
     -- These registers are memory mapped
-    process (I_clk, I_areset) is
+    process (I_clk, I_areset, io) is
     variable time_reg : unsigned(63 downto 0);
     variable timecmp_reg : unsigned(63 downto 0);
     variable prescaler : integer range 0 to freq_sys/freq_count-1;
