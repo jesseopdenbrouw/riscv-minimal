@@ -1,9 +1,9 @@
-# THUAS RISC-V sample bootloader
+# THUAS RISC-V simple bootloader
 
-Sample bootloader for the THUAS RISC-V microcontroller
+Simple bootloader for the THUAS RISC-V microcontroller
 on a FPGA.
 
-## What is this?
+## Description
 
 The bootloader is loaded at address 0x10000000 of the
 address space and is executed at startup. It waits for
@@ -18,8 +18,9 @@ An S-record file can be uploaded using the `upload`
 program. If the bootloader is contacted within the
 5 second grace period, the S-record file is uploaded
 to the ROM (or RAM, but programs can only be started
-from ROM).
+from ROM). Do not use any terminal program (e.g. Putty)
+when uploading.
 
 ## Status
 
-Works on the board.
+Works on the board. Use design riscv-pipe3-csr-md-lic.bootloader
