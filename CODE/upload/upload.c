@@ -179,11 +179,12 @@ int main(int argc, char *argv[]) {
 		printf("OK\n");
 	}
 
-
+	/* Write the data to the bootloader */
 	while (fgets(line, sizeof line - 2, fin)) {
 		linenr++;
 		printf("Write ");
 		fflush(stdout);
+		/* Send data one character at a time */
 		for (int i=0; i < strlen(line); i++) {
 			n = write(fd, line+i, 1);
 			if (line[i] != '\n' && line[i] != '\r') {
@@ -213,10 +214,13 @@ int main(int argc, char *argv[]) {
 
 	usleep(1000);
 
+	/* Write end of transmission marker */
 	if (jump) {
+		/* Start application */
 		printf("Write 'J' ");
 		n = write(fd, "J", 1);
 	} else {
+		/* Break to bootloader monitor */
 		printf("Write '#' ");
 		n = write(fd, "#", 1);
 	}
