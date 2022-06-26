@@ -10,7 +10,15 @@ at 9600 bps.
 
 Usage:
 
-    upload -d <device> -t <timeout> srec-file
+    upload -v -d <device> -t <timeout> -s <sleep> -j srec-file
 
-Default device is /dev/ttyUSB0
-timeout in deci seconds (0.1 sec)
+-v: verbose
+
+-j: run application after upload
+
+device: set device, default is /dev/ttyUSB0
+
+timeout: set timeout for device input, in deci seconds (0.1 sec), default is 5
+
+sleep: sleep after character transmission, in microseconds, default is 0
+
