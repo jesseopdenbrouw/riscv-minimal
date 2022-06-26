@@ -6,65 +6,63 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define error_message printf
-
 int set_interface_attribs(int fd, int speed, int parity)
 {
-        struct termios tty;
+	struct termios tty;
 
-        memset (&tty, 0, sizeof tty);
+	memset (&tty, 0, sizeof tty);
 
-        if (tcgetattr (fd, &tty) != 0) {
-                error_message ("error %d from tcgetattr\n", errno);
-                return -1;
-        }
+	if (tcgetattr(fd, &tty) != 0) {
+	        printf("error %d from tcgetattr\n", errno);
+	        return -1;
+	}
 
-        cfsetospeed (&tty, speed);
-        cfsetispeed (&tty, speed);
+	cfsetospeed(&tty, speed);
+	cfsetispeed(&tty, speed);
 
-        tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-        // disable IGNBRK for mismatched speed tests; otherwise receive break
-        // as \000 chars
-        tty.c_iflag &= ~IGNBRK;         // disable break processing
-        tty.c_lflag = 0;                // no signaling chars, no echo,
-                                        // no canonical processing
-        tty.c_oflag = 0;                // no remapping, no delays
-        tty.c_cc[VMIN]  = 0;            // read doesn't block
-        tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+	tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
+	// disable IGNBRK for mismatched speed tests; otherwise receive break
+	// as \000 chars
+	tty.c_iflag &= ~IGNBRK;         // disable break processing
+	tty.c_lflag = 0;                // no signaling chars, no echo,
+	                                // no canonical processing
+	tty.c_oflag = 0;                // no remapping, no delays
+	tty.c_cc[VMIN]  = 0;            // read doesn't block
+	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
 
-        tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+	tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
 
-        tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
-                                        // enable reading
-        tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
-        tty.c_cflag |= parity;
-        tty.c_cflag &= ~CSTOPB;
-        tty.c_cflag &= ~CRTSCTS;
+	tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
+	                                // enable reading
+	tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
+	tty.c_cflag |= parity;
+	tty.c_cflag &= ~CSTOPB;
+	tty.c_cflag &= ~CRTSCTS;
 
-        if (tcsetattr (fd, TCSANOW, &tty) != 0) {
-                error_message ("error %d from tcsetattr\n", errno);
-                return -1;
-        }
+	if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+	        printf("error %d from tcsetattr\n", errno);
+	        return -1;
+	}
 
-        return 0;
+	return 0;
 }
 
 void set_blocking(int fd, int should_block, int timeout)
 {
-        struct termios tty;
+	struct termios tty;
 
-        memset (&tty, 0, sizeof tty);
+	memset(&tty, 0, sizeof tty);
 
-        if (tcgetattr (fd, &tty) != 0) {
-                error_message ("error %d from tggetattr\n", errno);
-                return;
-        }
+	if (tcgetattr(fd, &tty) != 0) {
+	        printf("error %d from tggetattr\n", errno);
+	        return;
+	}
 
-        tty.c_cc[VMIN]  = should_block ? 1 : 0;
-        tty.c_cc[VTIME] = timeout;            // 0.5 seconds read timeout
+	tty.c_cc[VMIN]  = should_block ? 1 : 0;
+	tty.c_cc[VTIME] = timeout;            // 0.5 seconds read timeout
 
-        if (tcsetattr (fd, TCSANOW, &tty) != 0)
-                error_message ("error %d setting term attributes\n", errno);
+	if (tcsetattr(fd, TCSANOW, &tty) != 0)
+	        printf("error %d setting term attributes\n", errno);
 }
 
 int main(int argc, char *argv[]) {
@@ -145,27 +143,27 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* Open the device */	
-	int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
+	int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
 
 	/* Check if device is open */
 	if (fd < 0) {
-	        error_message ("error %d opening %s: %s\n", errno, portname, strerror (errno));
-        	return -1;
+	        printf("error %d opening %s: %s\n", errno, portname, strerror (errno));
+		return -1;
 	}
 
 	/* Set transmission parameters */
-	set_interface_attribs (fd, B9600, 0);
+	set_interface_attribs(fd, B9600, 0);
 	/* Set non-blocking */
-	set_blocking (fd, 0, timeout);
+	set_blocking(fd, 0, timeout);
 
 	/* Write the ! to start uploading */
 	printf("Sending '!'... ");
 	fflush(stdout);
-	n = write (fd, "!", 1);
+	n = write(fd, "!", 1);
 
 	/* Read in data from device */
 	while (1) {
-		n = read (fd, line, 1);
+		n = read(fd, line, 1);
 		if (n == 0) {
 			break;
 		}
@@ -175,7 +173,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (n == 0) {
-		printf("Nothing read 0?\n");
+		printf("Cannot contact bootloader!\n");
 		exit(-2);
 	} else {
 		printf("OK\n");
@@ -197,7 +195,7 @@ int main(int argc, char *argv[]) {
 		memset(line, 0, sizeof line);
 		/* Read in data from device */
 		while (1) {
-			n = read (fd, line, 1);
+			n = read(fd, line, 1);
 			if (n == 0) {
 				break;
 			}
@@ -206,7 +204,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		if (n == 0) {
-			printf("Nothing read 1!\n");
+			printf("Nothing read while sending data!\n");
 			exit(-3);
 		} else {
 			printf("  OK\n");
@@ -225,7 +223,7 @@ int main(int argc, char *argv[]) {
 
 	/* Read in data from device */
 	while (1) {
-		n = read (fd, line, 1);
+		n = read(fd, line, 1);
 		if (n == 0) {
 			break;
 		}
@@ -234,7 +232,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	if (n == 0) {
-		printf("Nothing read 2!\n");
+		printf("Nothing read while sending end of transmission!\n");
 		exit(-3);
 	} else {
 		printf("  OK\n");
