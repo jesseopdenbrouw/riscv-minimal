@@ -3,7 +3,7 @@
 This is an implementation of common system calls
 for RISC-V bare metal processors.
 
-# Supported system calls
+## Supported system calls
 
 `_sbrk` - get dynamic memory, used by `malloc` et al.
 
