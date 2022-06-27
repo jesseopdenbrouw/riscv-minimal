@@ -86,9 +86,9 @@ int main(void)
 	sprintf(buffer, "asin(%f) = %.20f\r\n", w, z);
 	usart_puts(buffer);
 
-	x = tan(w);
+	z = tan(w);
 
-	sprintf(buffer, "tan(%f) = %.20f\r\n", w, x);
+	sprintf(buffer, "tan(%f) = %.20f\r\n", w, z);
 	usart_puts(buffer);
 
 	z = log(y);
