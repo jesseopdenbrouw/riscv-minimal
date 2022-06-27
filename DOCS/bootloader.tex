@@ -81,7 +81,7 @@ Design \texttt{riscv-pipe3-csr-md-lic.bootloader} incorporates a hard-coded boot
 The S-record standard is invented by Motorola in the 1980's. It consists of formatted lines, called records. Each line can be seen as a record. A record starts with \lstinline|S| followed by a single digit. \lstinline|S0| is used as header record. This record is ignored by the bootloader (skipped). \lstinline|S1|,  \lstinline|S2| and \lstinline|S3| are data record using a 2-byte, 3-byte and 4-byte start address respectively. \lstinline|S4| is reserved and skipped by the bootloader. \lstinline|S5| and \lstinline|S6| are count records and are ignored. \lstinline|S7|, \lstinline|S8| and \lstinline|S9| are termination records with a start address incorporated, with 4-byte, 3-byte and 2-byte address respectively. This start address is used by the bootloader to start the application. Records have a checksum at the end, this checksum is ignored by the bootloader.
 
 \section{Startup sequence}
-After loading the design in the FPGA, or after resetting the FPGA, the bootloader starts. It presents itself with a welcome string printed via the USART at default 9600 bps. Then the bootloader waits for about 5 seconds before starting the application at address 0x00000000. During these 5 seconds, at half second interval, a \lstinline|*| is printed via the USART. At the same time, the 10 red leds on the DE0-CV board are lit and dimmed on half second interval from left (high led) to right (low led). If a character is received within the five seconds, either a S-record file can be uploaded or the bootloader falls to a simple monitor program.
+After loading the design in the FPGA, or after resetting the FPGA, the bootloader starts. It presents itself with a welcome string printed via the USART at default 9600 bps. Then the bootloader waits for about 5 seconds before starting the application at address 0x00000000. During these 5 seconds, at half second intervals, a \lstinline|*| is printed via the USART. At the same time, the 10 red leds on the DE0-CV board are lit and dimmed on half second intervals from left (high led) to right (low led). If a character is received within the five seconds, either a S-record file can be uploaded or the bootloader falls to a simple monitor program.
 
 \section{Uploading an S-record file}
 A Motorola S-record file can be uploaded with the \lstinline|upload| program found in the \lstinline|CODE| directory. It is tested on Linux, Windows is currently not supported. S-record files for all RISC-V programs are generated as part of the \lstinline|make| process by the RISC-V \lstinline|objcopy| program. The \lstinline|upload| program is invoked with:
@@ -99,15 +99,15 @@ If within the 5 seconds grace period a character is received by the bootloader, 
 
 \lstinline|r|
 
-Run the program a address 0x00000000.
+Run the program at address 0x00000000.
 
-\lstinline|rw <address|
+\lstinline|rw <address>|
 
-Read and print word af address. Address must be on a 4-byte interval. Data is presented in big endian.
+Read and print word at address. Address must be on a 4-byte boundary. Data is presented in big endian.
 
 \lstinline|dw <address>|
 
-Dump 16 words from memory to the terminal. Address must be on a 4-byte interval. After each word, 4 ASCII characters are printed, if printable. If not printable, a dot is printed. Useful for finding strings in memory. Data is presented in big endian.
+Dump 16 words from memory to the terminal. Address must be on a 4-byte boundary. After each word, 4 ASCII characters are printed, if printable. If not printable, a dot is printed. Useful for finding strings in memory. Data is presented in big endian.
 
 \lstinline|n|
 
@@ -115,7 +115,7 @@ Dump next 16 words from memory to the terminal, and ASCII characters.
 
 \lstinline|rw <address> <data>|
 
-Write 4-byte data at address. Address must be on a 4-byte interval.  Data must be in big endian.
+Write 4-byte data at address. Address must be on a 4-byte boundary.  Data must be in big endian.
 
 \lstinline|h|
 
@@ -127,7 +127,7 @@ Note: the capabilities of the monitor may be extended.
 Uploading an S-record file uses a simple handshake protocol. The \lstinline|upload| program sends a single exclamation mark (\lstinline|!|). The bootloader responds with an question mark (\lstinline|?|) and a newline (\lstinline|\n|). Now each S-record line is transmitted character by character, including the end-of-line termination character (\lstinline|\r| and/or \lstinline|\n|). After a line is processed, the bootloader responds with a question mark and a newline. After all S-record lines are transmitted, the \lstinline|upload| program either sends a \lstinline|J| to start the application, or a \lstinline|#| to start the monitor.
 
 \section{Implications on the hardware design}
-The design has a separate ROM that incorporates the bootloader. The original ROM, at address 0x00000000 is extended with a write port, together with the instruction read port and the data read port. In fact, the ROM has become a (program) RAM. Because the FPGA ROMs (and RAMs) can only have two ports (out/out or in/out), the original ROM hardware is duplicated (by the synthesizer). This takes up some onboard RAM blocks, but very few ALMs (cells). The speed decrements by a few MHz.
+The design has a separate ROM that incorporates the bootloader. The original ROM, at address 0x00000000 is extended with a write port, together with the instruction read port and the data read port. In fact, the ROM has become a (program) RAM. Because the Cyclone FPGA ROMs (and RAMs) can only have two ports (out/out or in/out), the original ROM hardware is duplicated (by the synthesizer). This takes up some onboard RAM blocks, but very few ALMs (cells). The speed decrements by a few MHz.
 
 Note that the ROM can only be (over)written with words on a 4-byte boundary.
 
