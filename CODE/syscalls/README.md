@@ -1,7 +1,7 @@
 # syscalls
 
 This is an implementation of common system calls
-for RISC-V bare metal processors.
+for RISC-V bare metal processors, using functions.
 
 ## Supported system calls
 
