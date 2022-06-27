@@ -23,6 +23,8 @@ taken require 2 or 3 clock cycles. Interrupts are direct or vectored.
 Software is written in C, (C++ is supported but there are some limitations)
 and compiled using the RISC-V GNU C/C++ compiler.
 
+Only M-mode (machine mode) is supported.
+
 ## Flavors
 
 There are two flavors available: a simple two-stage pipelined
@@ -66,6 +68,10 @@ Assembler programs can be compiled by the C/C++ compiler. We provide a CRT
 (C startup) and linker file. C++ is supported but many language concepts
 (e.g. cout with iostream) create a binary that is too big to fit in the
 ROM.
+
+We provide a basic set of systems call, trapped (ECALL) and non-trapped
+(functions overriding the C library functions). Trapped system calls
+are set up by the RISC-V C/C++ compiler, so no extra handling is needed.
 
 ## FPGA
 
