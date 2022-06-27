@@ -84,15 +84,21 @@ The processor requires three clock cycles to complete an instruction, but the ne
 The processor executes at top 1 CPI (clocks per instruction) with a sequential flow of instructions.
 
 \section{The processor}
-The RISC-V processors consist of one \textit{core} and of the following building blocks:
+The RISC-V processors consist of one \textit{core} and some building blocks:
 
+The core:
 \begin{itemize}
 \item The registers contain intermediate data for calculations.
 \item The ALU is responsible for almost all computations in the processor.
 \item The PC is used to point to the currently fetched instruction (not the instruction that is currently being executed).
 \item The Address Decoder and Data Router is an interface between the memory (ROM, RAM, I/O) and the ALU and registers.
 \item The Instruction Decoder decodes the fetched instruction and provides control signals to other building blocks.
-\item The multiply/divide unit adheres the M-standard.
+\item The multiply/divide unit calculates integer multiplications, divisions and remainder.
+\item The control unit regulates the data flow and control flow in the core.
+\end{itemize}
+
+The remaining building blocks:
+\begin{itemize}
 \item The ROM contains the program instructions and constant (read-only) data.
 \item The RAM contains read-write data (mutable data).
 \item The I/O is an interface with the outside world.
@@ -232,6 +238,7 @@ The Program Counter contains the address of the currently fetched instruction. T
 \label{sec:instructiondecoder}
 The instruction decoder decodes the instruction supplied by the ROM as pointed by the PC. An instruction is 4 bytes wide and in Little Endian order. The instruction decoder provides all control signals for the ALU, RAM, ROM, I/O, the PC, the Address Decoder, the CSR, the register file and the MD unit. Some signals are directly wired to the ROM, RAM and I/O.
 
+\subsection{Control Unit}
 The processor uses a ten-state FSM, see figure~\ref{fsmpipe}. The PC points to +8 of the currently executing instruction, in a sequential instruction stream. If a jump or branch taken occurs, the FSM inserts a penalty because the PC has to be loaded with the correct value and a new instruction must be fetched (Figure~\ref{fsmpipeseqstartup}). Reading RAM, ROM and I/O requires an extra state (Figure~\ref{fsmpipeseqwait}). When a multiply, divide or remainder instruction is encountered, the FSM enters the \texttt{md} state and waits for the md-unit to complete (32+3 or 16+3 clock cycles). Note that penalty, wait and md\_start cannot occur at the same time.
 
 \begin{figure}[!ht]
@@ -708,10 +715,10 @@ The \texttt{read} and \texttt{write} system calls are implemented but in turn th
 
 Other system calls return an error because they cannot fulfill the requested operation, such as \texttt{open}. Note that some system calls are in fact not implemented and return undetermined behavior. 
 
-Note: when using traps, the system calls are handled by a trap handler (by using ECALL). This is the default behavior of the tool chain. When not using traps, the system calls are rerouted to functions in a library. You need to set up your software properly. See the software examples.
+Note: when using traps, the system calls are handled by a trap handler (by using ECALL). This is the default behavior of the tool chain. When not using traps, the system calls are rerouted to functions in a library. You need to set up your software properly, in essence provide functions that override the standard C library functions. See the software examples.
 
 \section{Using trap handlers in software}
-We provide (see software examples \texttt{interrupt\_direct} and \texttt{interrupt\_vectored}) a basic implementation of trap handlers. The \texttt{universal\_handler} handles all traps (interrupts and exceptions) in direct mode. The entry point (the address loaded in the \texttt{mtvec} CSR) must be set in the \texttt{main} function, as is enabling traps. In vectored mode, interrupts are redirected to their own handlers via a jump table. The start address of the jump table must be set in the \texttt{main} function, and traps must be enabled. The external timer has its own handler called \texttt{external\_timer\_handler}. TIMER1 has its own handler called \texttt{timer1\_cmpt\_handler}. The USART has its own handler called \texttt{usart\_handler}. This handler is used for both receive and transmit interrupts. Note that negating the interrupt request must be done by software in the respective handlers. The interrupt requests are \emph{not} negated by hardware. Note: the external timer interrupt has to be enabled by writing a 1 to \texttt{mie.MTIE}.
+We provide (see software examples \texttt{interrupt\_direct} and \texttt{interrupt\_vectored}) a basic implementation of trap handlers. The \texttt{universal\_handler} handles all traps (interrupts and exceptions) in direct mode. The entry point (the address loaded in the \texttt{mtvec} CSR) must be set in the \texttt{main} function, as is enabling traps. In vectored mode, interrupts are redirected to their own handlers via a jump table. The start address of the jump table must be set in the \texttt{main} function, and traps must be enabled. The first entry of the jump table points the universal handler that only handles exceptions. The external timer has its own handler called \texttt{external\_timer\_handler}. TIMER1 has its own handler called \texttt{timer1\_cmpt\_handler}. The USART has its own handler called \texttt{usart\_handler}. This handler is used for both receive and transmit interrupts. Note that negating the interrupt request must be done by software in the respective handlers. The interrupt requests are \emph{not} negated by hardware. Note: the external timer interrupt has to be enabled by writing a 1 to \texttt{mie.MTIE}.
 
 \section{Software programs}
 In de \texttt{CODE} directory, there are a number of software programs available. First, the common files:
