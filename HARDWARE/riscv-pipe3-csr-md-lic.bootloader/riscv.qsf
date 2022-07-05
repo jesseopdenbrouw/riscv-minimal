@@ -129,7 +129,7 @@ set_global_assignment -name VHDL_FILE riscv.vhd
 set_global_assignment -name COMMAND_MACRO_FILE tb_riscv.do
 set_global_assignment -name VHDL_FILE tb_riscv.vhd
 set_global_assignment -name SDC_FILE riscv.sdc
-set_global_assignment -name SEED 1
+set_global_assignment -name SEED 40
 set_global_assignment -name FITTER_EFFORT "AUTO FIT"
 set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 1.0
 set_global_assignment -name OPTIMIZATION_TECHNIQUE BALANCED
