@@ -263,7 +263,7 @@ signal csr_immrs1_int : reg_type;
 signal time_int : data_type;
 signal timeh_int : data_type;
 
-signal load_misaligned_error_int : std_logic_vector(2 downto 0);
+signal load_misaligned_error_int : std_logic_vector(3 downto 0);
 signal store_misaligned_error_int : std_logic_vector(1 downto 0);
 signal load_misaligned_error_merge_int : std_logic;
 signal store_misaligned_error_merge_int : std_logic;
@@ -370,7 +370,7 @@ begin
               I_datain => dataout_int,
               O_data_out => romdatain_int,
               O_instruction_misaligned_error => instruction_misaligned_error_int,
-              O_load_misaligned_error => load_misaligned_error_int(2),
+              O_load_misaligned_error => load_misaligned_error_int(3),
               O_store_misaligned_error => open
              );
 
@@ -385,9 +385,8 @@ begin
               O_instr => bootinstr_int,
               O_data_out => bootdatain_int,
               --O_instruction_misaligned_error => instruction_misaligned_error_int,
-              --O_load_misaligned_error => load_misaligned_error_int(2)
-              O_instruction_misaligned_error => open,
-              O_load_misaligned_error => open
+              O_load_misaligned_error => load_misaligned_error_int(2),
+              O_instruction_misaligned_error => open
              );
 
     ram0: ram
@@ -469,7 +468,7 @@ begin
               O_interrupt_release => interrupt_release_int
              );
     -- Merge all load and store misaligned errors to one signal
-    load_misaligned_error_merge_int <= load_misaligned_error_int(2) or load_misaligned_error_int(1) or load_misaligned_error_int(0);
+    load_misaligned_error_merge_int <= load_misaligned_error_int(3) or load_misaligned_error_int(2) or load_misaligned_error_int(1) or load_misaligned_error_int(0);
     store_misaligned_error_merge_int <= store_misaligned_error_int(1) or store_misaligned_error_int(0);
 
 end architecture rtl;

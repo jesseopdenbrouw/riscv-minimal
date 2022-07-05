@@ -66,8 +66,12 @@ begin
         address_instr := to_integer(unsigned(I_pc(rom_size_bits-1 downto 2)));
         address_data := to_integer(unsigned(I_address(rom_size_bits-1 downto 2)));
  
-        -- Reset store misaligned
-        O_store_misaligned_error <= '0';
+        -- Set store misaligned error
+        if I_csrom = '1' and I_wren = '1' and I_size /= size_word then
+            O_store_misaligned_error <= '1';
+        else
+            O_store_misaligned_error <= '0';
+        end if;
         
         -- Quartus will detect ROM table and uses onboard RAM
         if rising_edge(I_clk) then
@@ -78,7 +82,7 @@ begin
             -- Read the data
             romdata_var := rom(address_data);
             -- Write the ROM
-            if I_wren = '1' then
+            if I_wren = '1' and I_size = size_word then
                 rom(address_data) <= I_datain(7 downto 0) & I_datain(15 downto 8) & I_datain(23 downto 16) & I_datain(31 downto 24);
             end if;
         end if;
