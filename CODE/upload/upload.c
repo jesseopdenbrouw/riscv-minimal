@@ -75,7 +75,10 @@ int main(int argc, char *argv[]) {
 	int n;
 
 
-	FILE *fin;
+	/* Input file */
+	FILE *fin = NULL;
+	/* Device file descriptor */
+	int fd = 0;
 	int linenr = 0;
 
 	/* Options */
@@ -84,12 +87,14 @@ int main(int argc, char *argv[]) {
 	int timeout = 10;
 	int jump = 0;
 	int slepe = 0;
+	int quiet = 0;
 
 	/* Check for 0 extra arguments */
 	if (argc == 1) {
 		printf("upload -v -d <device> -t <timeout> filename\n");
 		printf("Upload S-record file to THUAS RISC-V processor\n");
 		printf("-v           -- verbose\n");
+		printf("-q           -- quiet, only errors\n");
 		printf("-j           -- run application after upload\n");
 		printf("-d <device>  -- serial device\n");
 		printf("-t <timeout> -- timeout in deci seconds\n");
@@ -98,7 +103,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* Parse options */
-	while ((opt = getopt(argc, argv, "vd:t:js:")) != -1) {
+	while ((opt = getopt(argc, argv, "vd:t:js:q")) != -1) {
 	        switch (opt) {
 	        case 'd':
 	            portname = optarg;
@@ -108,6 +113,8 @@ int main(int argc, char *argv[]) {
 	            break;
 	        case 'v':
 	            verbose = 1;
+	        case 'q':
+	            quiet = 1;
 	            break;
 		case 't':
 		    timeout = atoi(optarg);
@@ -143,11 +150,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* Open the device */	
-	int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
+	fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
 
 	/* Check if device is open */
 	if (fd < 0) {
 	        printf("error %d opening %s: %s\n", errno, portname, strerror (errno));
+		fclose(fin);
 		return -1;
 	}
 
@@ -157,8 +165,10 @@ int main(int argc, char *argv[]) {
 	set_blocking(fd, 0, timeout);
 
 	/* Write the ! to start uploading */
-	printf("Sending '!'... ");
-	fflush(stdout);
+	if (verbose) {
+		printf("Sending '!'... ");
+		fflush(stdout);
+	}
 	n = write(fd, "!", 1);
 
 	/* Read in data from device */
@@ -174,21 +184,29 @@ int main(int argc, char *argv[]) {
 
 	if (n == 0) {
 		printf("Cannot contact bootloader!\n");
+		close(fd);
+		fclose(fin);
 		exit(-2);
 	} else {
-		printf("OK\n");
+		if (verbose) {
+			printf("OK\n");
+		}
 	}
 
 	/* Write the data to the bootloader */
 	while (fgets(line, sizeof line - 2, fin)) {
 		linenr++;
-		printf("Write ");
-		fflush(stdout);
+		if (verbose) {
+			printf("Write ");
+			fflush(stdout);
+		}
 		/* Send data one character at a time */
 		for (int i=0; i < strlen(line); i++) {
 			n = write(fd, line+i, 1);
-			if (line[i] != '\n' && line[i] != '\r') {
-				printf("%c", line[i]);
+			if (verbose) {
+				if (line[i] != '\n' && line[i] != '\r') {
+					printf("%c", line[i]);
+				}
 			}
 			fflush(stdout);
 			usleep(slepe);
@@ -206,22 +224,38 @@ int main(int argc, char *argv[]) {
 		}
 		if (n == 0) {
 			printf("Nothing read while sending data!\n");
+			close(fd);
+			fclose(fin);
 			exit(-3);
 		} else {
-			printf("  OK\n");
+			if (verbose) {
+				printf("  OK\n");
+			} else if (!quiet) {
+				printf("*");
+			}
 		}
 	}
 
 	usleep(1000);
 
+	if (!quiet && !verbose) {
+		printf("\n");
+	}
+
 	/* Write end of transmission marker */
 	if (jump) {
 		/* Start application */
-		printf("Write 'J' ");
+		if (verbose) {
+			printf("Write 'J' ");
+			fflush(stdout);
+		}
 		n = write(fd, "J", 1);
 	} else {
 		/* Break to bootloader monitor */
-		printf("Write '#' ");
+		if (verbose) {
+			printf("Write '#' ");
+			fflush(stdout);
+		}
 		n = write(fd, "#", 1);
 	}
 
@@ -237,9 +271,13 @@ int main(int argc, char *argv[]) {
 	}
 	if (n == 0) {
 		printf("Nothing read while sending end of transmission!\n");
+		close(fd);
+		fclose(fin);
 		exit(-3);
 	} else {
-		printf("  OK\n");
+		if (verbose) {
+			printf("  OK\n");
+		}
 	}
 
 
