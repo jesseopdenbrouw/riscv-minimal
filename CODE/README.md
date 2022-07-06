@@ -13,3 +13,9 @@ variables to the RAM instead of keeping them in
 registers, for easy inspection.
 
 Programs are translated by the RISC-V GNU C/C++ compiler.
+
+Executables are in ELF format, and are converted to
+S-record format, which can be uploaded with the `upload`
+program (when the bootloader is installed). S-record
+files are converted to a VHDL-suitable ROM table for
+inclusion in the processor hardware.
