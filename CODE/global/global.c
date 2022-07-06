@@ -15,6 +15,8 @@ int main(void) {
 
 	static int jaja = -2;
 
+	buf[0] = 'A';
+
 	errno = -1;
 
 	x = x + 1;
